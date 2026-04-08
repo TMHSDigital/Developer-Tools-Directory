@@ -6,6 +6,7 @@ mcp-tools.json from a tool repository and renders a single-page site.
 """
 
 import argparse
+import datetime
 import json
 import re
 import shutil
@@ -195,6 +196,7 @@ def main():
         "mcp_tools": mcp_tools,
         "mcp_tool_count": len(mcp_tools),
         "mcp_grouped": mcp_grouped,
+        "build_date": datetime.date.today().isoformat(),
     }
 
     env = Environment(

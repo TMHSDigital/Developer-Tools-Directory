@@ -10,6 +10,9 @@
   <meta property="og:type" content="website" />
   {% if site.ogImage %}<meta property="og:image" content="{{ site.ogImage }}" />{% endif %}
   {% if site.favicon %}<link rel="icon" href="{{ site.favicon }}" />{% endif %}
+  <script>
+    (function(){var t=localStorage.getItem('theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');else if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();
+  </script>
   <style>
     @font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/inter-regular.woff2') format('woff2'); }
     @font-face { font-family: 'Inter'; font-style: normal; font-weight: 500; font-display: swap; src: url('fonts/inter-medium.woff2') format('woff2'); }
@@ -27,11 +30,41 @@
       --border: #30363d;
       --text: #e6edf3;
       --text-dim: #8b949e;
+      --nav-bg: rgba(13,17,23,0.85);
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
       --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
       --hero-from: {{ site.heroGradientFrom | default('#0d1117') }};
       --hero-to: {{ site.heroGradientTo | default('#161b22') }};
     }
+
+    /* LIGHT THEME (OS preference, no explicit data-theme) */
+    @media (prefers-color-scheme: light) {
+      html:not([data-theme="dark"]) {
+        --bg: #f6f8fa; --bg2: #ffffff; --bg3: #f0f2f5;
+        --border: #d0d7de; --text: #1f2328; --text-dim: #656d76;
+        --nav-bg: rgba(255,255,255,0.88);
+        --hero-from: #f0f2f5; --hero-to: #f6f8fa;
+      }
+      html:not([data-theme="dark"]) a { color: var(--accent); }
+      html:not([data-theme="dark"]) a:hover { color: var(--accent-light); }
+      html:not([data-theme="dark"]) .hero h1 { background: linear-gradient(135deg, var(--text), var(--accent)); -webkit-background-clip: text; background-clip: text; }
+      html:not([data-theme="dark"]) .data-table tr:hover td { background: rgba(0,0,0,0.03); }
+      html:not([data-theme="dark"]) .search-input { background: var(--bg3); }
+      html:not([data-theme="dark"]) .install-steps code { background: var(--bg3); }
+    }
+    /* LIGHT THEME (explicit toggle) */
+    [data-theme="light"] {
+      --bg: #f6f8fa; --bg2: #ffffff; --bg3: #f0f2f5;
+      --border: #d0d7de; --text: #1f2328; --text-dim: #656d76;
+      --nav-bg: rgba(255,255,255,0.88);
+      --hero-from: #f0f2f5; --hero-to: #f6f8fa;
+    }
+    [data-theme="light"] a { color: var(--accent); }
+    [data-theme="light"] a:hover { color: var(--accent-light); }
+    [data-theme="light"] .hero h1 { background: linear-gradient(135deg, var(--text), var(--accent)); -webkit-background-clip: text; background-clip: text; }
+    [data-theme="light"] .data-table tr:hover td { background: rgba(0,0,0,0.03); }
+    [data-theme="light"] .search-input { background: var(--bg3); }
+    [data-theme="light"] .install-steps code { background: var(--bg3); }
 
     html { scroll-behavior: smooth; }
     body { font-family: var(--font-sans); background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }
@@ -39,18 +72,22 @@
     a:hover { color: #fff; }
 
     /* NAV */
-    .nav { position: sticky; top: 0; z-index: 100; background: rgba(13,17,23,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 1.5rem; }
+    .nav { position: sticky; top: 0; z-index: 100; background: var(--nav-bg); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 1.5rem; }
     .nav-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 56px; }
     .nav-brand { font-weight: 700; font-size: 1rem; color: var(--text); white-space: nowrap; }
-    .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+    .nav-links { display: flex; gap: 1.5rem; list-style: none; align-items: center; }
     .nav-links a { color: var(--text-dim); font-size: 0.875rem; font-weight: 500; transition: color 0.2s; }
     .nav-links a:hover, .nav-links a.active { color: var(--accent-light); }
     .nav-toggle { display: none; background: none; border: none; color: var(--text); cursor: pointer; padding: 0.5rem; }
     .nav-toggle svg { width: 24px; height: 24px; }
+    .theme-toggle { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--text-dim); cursor: pointer; padding: 0.25rem 0.5rem; font-size: 0.8125rem; transition: color 0.2s, border-color 0.2s; display: inline-flex; align-items: center; gap: 0.3rem; font-family: var(--font-sans); }
+    .theme-toggle:hover { color: var(--accent-light); border-color: var(--accent); }
+    .theme-toggle svg { width: 14px; height: 14px; }
 
     /* HERO */
-    .hero { text-align: center; padding: 5rem 1.5rem 4.5rem; background: linear-gradient(180deg, var(--hero-from) 0%, var(--hero-to) 70%, var(--bg) 100%); position: relative; }
+    .hero { text-align: center; padding: 4rem 1.5rem 4.5rem; background: linear-gradient(180deg, var(--hero-from) 0%, var(--hero-to) 70%, var(--bg) 100%); position: relative; }
     .hero-inner { max-width: 720px; margin: 0 auto; }
+    .hero-logo { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 1.25rem; box-shadow: 0 4px 24px rgba(0,0,0,0.3); border: 2px solid var(--border); }
     .hero h1 { font-size: 2.75rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, var(--text), var(--accent-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .hero p { font-size: 1.125rem; color: var(--text-dim); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; }
     .stats { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; margin-bottom: 2rem; }
@@ -66,7 +103,7 @@
     .content-area { max-width: 1040px; margin: 0 auto; padding: 2rem 1.5rem 0; }
 
     /* SECTIONS */
-    .section { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.75rem 2rem; margin-bottom: 1.25rem; }
+    .section { background: var(--bg2); border: 1px solid var(--border); border-top: 2px solid var(--accent); border-radius: 12px; padding: 1.75rem 2rem; margin-bottom: 1.25rem; box-shadow: 0 -2px 20px color-mix(in srgb, var(--accent) 8%, transparent); }
     .section-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; padding-bottom: 0.625rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
     .section-header h2 { font-size: 1.25rem; font-weight: 700; margin: 0; }
     .count { font-size: 0.8125rem; font-weight: 500; color: var(--text-dim); background: var(--bg3); padding: 0.15rem 0.6rem; border-radius: 12px; }
@@ -92,7 +129,10 @@
     details.cat-group[open] > summary::before { transform: rotate(90deg); }
     details.cat-group > summary:hover { background: var(--bg3); }
     details.cat-group > summary .cat-count { font-weight: 400; color: var(--text-dim); font-size: 0.75rem; margin-left: auto; }
-    details.cat-group > .cat-body { padding: 0.25rem 0 0.5rem; }
+    details.cat-group > .cat-body { overflow: hidden; }
+
+    /* EXPAND ANIMATION */
+    .cat-body-anim { transition: max-height 0.25s ease, opacity 0.2s ease; overflow: hidden; }
 
     /* TABLE */
     .data-table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
@@ -122,12 +162,22 @@
     .back-to-top svg { width: 20px; height: 20px; }
 
     /* FOOTER */
-    footer { text-align: center; padding: 2.5rem 1.5rem; color: var(--text-dim); font-size: 0.8125rem; margin-top: 1rem; }
+    footer { text-align: center; padding: 2rem 1.5rem 2.5rem; color: var(--text-dim); font-size: 0.8125rem; margin-top: 1rem; }
     footer a { color: var(--accent-light); }
+    .footer-inner { max-width: 1040px; margin: 0 auto; }
+    .footer-links { display: flex; justify-content: center; gap: 1.25rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .footer-links a { display: inline-flex; align-items: center; gap: 0.35rem; color: var(--text-dim); transition: color 0.2s; }
+    .footer-links a:hover { color: var(--accent-light); }
+    .footer-links svg { width: 16px; height: 16px; }
+    .footer-divider { width: 60px; height: 2px; background: var(--accent); margin: 0 auto 1rem; border-radius: 1px; opacity: 0.4; }
+    .footer-meta { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; font-size: 0.75rem; }
+    .footer-meta span { opacity: 0.7; }
+    .footer-directory { margin-top: 0.75rem; font-size: 0.6875rem; opacity: 0.5; }
 
     /* RESPONSIVE */
     @media (max-width: 768px) {
       .hero h1 { font-size: 2rem; }
+      .hero-logo { width: 64px; height: 64px; }
       .stats { gap: 1.25rem; }
       .stat-val { font-size: 1.5rem; }
       .nav-links { gap: 0.75rem; }
@@ -136,7 +186,7 @@
     }
     @media (max-width: 640px) {
       .nav-toggle { display: block; }
-      .nav-links { display: none; position: absolute; top: 56px; left: 0; right: 0; flex-direction: column; background: rgba(13,17,23,0.97); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; gap: 0.75rem; }
+      .nav-links { display: none; position: absolute; top: 56px; left: 0; right: 0; flex-direction: column; background: var(--nav-bg); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; gap: 0.75rem; }
       .nav-links.open { display: flex; }
       .hero { padding: 3rem 1rem 2.5rem; }
       .hero h1 { font-size: 1.5rem; }
@@ -172,6 +222,11 @@
         {% if mcp_tools %}<li><a href="#mcp-tools">MCP Tools</a></li>{% endif %}
         <li><a href="#install">Install</a></li>
         <li><a href="{{ site.links.github | default(plugin.repository) }}">GitHub</a></li>
+        <li>
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+            <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </button>
+        </li>
       </ul>
     </div>
   </nav>
@@ -179,6 +234,7 @@
   <!-- Hero -->
   <section class="hero">
     <div class="hero-inner">
+      {% if plugin.logo %}<img class="hero-logo" src="{{ plugin.logo }}" alt="{{ plugin.displayName }} logo" />{% endif %}
       <h1>{{ plugin.displayName }}</h1>
       <p>{{ plugin.description }}</p>
       <div class="stats">
@@ -342,11 +398,35 @@
 
   <!-- Footer -->
   <footer>
-    <p>
-      Built by <a href="{{ plugin.author.url | default('https://github.com/TMHSDigital') }}">{{ plugin.author.name | default('TMHSDigital') }}</a>
-      &middot; {{ plugin.license | default('CC-BY-NC-ND-4.0') }}
-      &middot; v{{ plugin.version | default('0.0.0') }}
-    </p>
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="{{ site.links.github | default(plugin.repository) }}">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+        {% if site.links.npm %}
+        <a href="{{ site.links.npm }}">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 0v16h16V0H0zm13 13H8V5H5v8H3V3h10v10z"/></svg>
+          npm
+        </a>
+        {% endif %}
+        <a href="https://tmhsdigital.github.io/Developer-Tools-Directory/">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 1.75V13.5h13.05l.001-11.75H1.5zM0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v11.5A1.75 1.75 0 0114.25 15H1.75A1.75 1.75 0 010 13.25V1.75zM9.22 3.72a.75.75 0 000 1.06L10.69 6.25H6.75a.75.75 0 000 1.5h3.94l-1.47 1.47a.75.75 0 101.06 1.06l2.75-2.75a.75.75 0 000-1.06L10.28 3.72a.75.75 0 00-1.06 0z"/></svg>
+          All Tools
+        </a>
+      </div>
+      <div class="footer-divider"></div>
+      <div class="footer-meta">
+        <span>v{{ plugin.version | default('0.0.0') }}</span>
+        <span>&middot;</span>
+        <span>{{ plugin.license | default('CC-BY-NC-ND-4.0') }}</span>
+        <span>&middot;</span>
+        <span>Built {{ build_date }}</span>
+      </div>
+      <div class="footer-directory">
+        Part of <a href="https://tmhsdigital.github.io/Developer-Tools-Directory/">TMHSDigital Developer Tools</a>
+      </div>
+    </div>
   </footer>
 
   <!-- Toast -->
@@ -368,6 +448,37 @@
         toastEl.classList.add('show');
         timer = setTimeout(function () { toastEl.classList.remove('show'); }, 2000);
       };
+    })();
+
+    /* Theme toggle (dark / light / auto) */
+    (function () {
+      var btn = document.getElementById('themeToggle');
+      var icon = document.getElementById('themeIcon');
+      var sunSvg = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+      var moonSvg = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      var autoSvg = '<circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20V2z"/>';
+      var states = ['dark', 'light', 'auto'];
+      function getState() { return localStorage.getItem('theme') || 'auto'; }
+      function apply(state) {
+        if (state === 'light') { document.documentElement.setAttribute('data-theme', 'light'); }
+        else if (state === 'dark') { document.documentElement.setAttribute('data-theme', 'dark'); }
+        else { document.documentElement.removeAttribute('data-theme'); }
+        if (state === 'auto') localStorage.removeItem('theme');
+        else localStorage.setItem('theme', state);
+        updateIcon(state);
+      }
+      function updateIcon(state) {
+        if (state === 'light') icon.innerHTML = sunSvg;
+        else if (state === 'dark') icon.innerHTML = moonSvg;
+        else icon.innerHTML = autoSvg;
+        btn.title = 'Theme: ' + state;
+      }
+      btn.addEventListener('click', function () {
+        var cur = getState();
+        var next = states[(states.indexOf(cur) + 1) % states.length];
+        apply(next);
+      });
+      updateIcon(getState());
     })();
 
     /* Animated stat counters */
@@ -459,7 +570,7 @@
       });
     })();
 
-    /* Section collapse/expand toggles (Skills, Rules) */
+    /* Section collapse/expand toggles */
     (function () {
       document.querySelectorAll('.toggle-section').forEach(function (btn) {
         var targetId = btn.getAttribute('data-target');
@@ -468,6 +579,27 @@
         function updateLabel() { btn.textContent = details.open ? 'Collapse' : 'Expand'; }
         btn.addEventListener('click', function () { details.open = !details.open; updateLabel(); });
         details.addEventListener('toggle', updateLabel);
+      });
+    })();
+
+    /* Smooth expand/collapse animation */
+    (function () {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      document.querySelectorAll('details.cat-group').forEach(function (det) {
+        var body = det.querySelector('.cat-body');
+        if (!body) return;
+        det.addEventListener('toggle', function () {
+          if (det.open) {
+            body.style.maxHeight = '0';
+            body.style.opacity = '0';
+            body.classList.add('cat-body-anim');
+            requestAnimationFrame(function () {
+              body.style.maxHeight = body.scrollHeight + 'px';
+              body.style.opacity = '1';
+            });
+            setTimeout(function () { body.style.maxHeight = 'none'; body.classList.remove('cat-body-anim'); }, 260);
+          }
+        });
       });
     })();
 
