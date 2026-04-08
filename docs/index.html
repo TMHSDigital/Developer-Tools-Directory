@@ -5,16 +5,145 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Developer Tools Directory - TMHSDigital</title>
   <meta name="description" content="Centralized directory of TMHSDigital developer tools, Cursor IDE plugins, and MCP servers." />
-  <link rel="stylesheet" href="style.css" />
+  <script>(function(){var t=localStorage.getItem('theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');else if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
+  <style>
+    @font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/inter-regular.woff2') format('woff2')}
+    @font-face{font-family:'Inter';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/inter-medium.woff2') format('woff2')}
+    @font-face{font-family:'Inter';font-style:normal;font-weight:700;font-display:swap;src:url('fonts/inter-bold.woff2') format('woff2')}
+    @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/jetbrains-mono-regular.woff2') format('woff2')}
+
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+    :root{
+      --accent:#7c3aed;--accent-light:#a78bfa;--accent-glow:rgba(124,58,237,0.15);
+      --bg:#0d1117;--bg2:#161b22;--bg3:#1c2128;--bg-hover:#22272e;
+      --border:#30363d;--text:#e6edf3;--text-dim:#8b949e;--text-muted:#6e7681;
+      --nav-bg:rgba(13,17,23,0.85);
+      --green:#3fb950;--blue:#58a6ff;
+      --font-sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+      --font-mono:'JetBrains Mono','Fira Code',Consolas,monospace;
+      --radius:8px;--radius-lg:12px;
+    }
+
+    @media(prefers-color-scheme:light){
+      html:not([data-theme="dark"]){
+        --bg:#f6f8fa;--bg2:#ffffff;--bg3:#f0f2f5;--bg-hover:#e8ebef;
+        --border:#d0d7de;--text:#1f2328;--text-dim:#656d76;--text-muted:#8b949e;
+        --nav-bg:rgba(255,255,255,0.88);--accent-glow:rgba(124,58,237,0.08);
+      }
+    }
+    [data-theme="light"]{
+      --bg:#f6f8fa;--bg2:#ffffff;--bg3:#f0f2f5;--bg-hover:#e8ebef;
+      --border:#d0d7de;--text:#1f2328;--text-dim:#656d76;--text-muted:#8b949e;
+      --nav-bg:rgba(255,255,255,0.88);--accent-glow:rgba(124,58,237,0.08);
+    }
+
+    html{scroll-behavior:smooth}
+    body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+    a{color:var(--accent-light);text-decoration:none;transition:color .2s}
+    a:hover{color:#c4b5fd}
+    [data-theme="light"] a{color:var(--accent)}
+    @media(prefers-color-scheme:light){html:not([data-theme="dark"]) a{color:var(--accent)}}
+
+    .site-header{border-bottom:1px solid var(--border);background:var(--nav-bg);backdrop-filter:blur(12px);padding:0 1.5rem;position:sticky;top:0;z-index:100}
+    .header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .header-brand{display:flex;align-items:center;gap:.75rem;font-size:1.125rem;font-weight:600;color:var(--text)}
+    .header-brand svg{width:28px;height:28px;color:var(--accent-light)}
+    .header-nav{display:flex;gap:1.5rem;list-style:none;align-items:center}
+    .header-nav a{color:var(--text-dim);font-size:.875rem;font-weight:500;transition:color .2s}
+    .header-nav a:hover{color:var(--text)}
+    .theme-toggle{background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-dim);cursor:pointer;padding:.25rem .5rem;font-size:.8125rem;transition:color .2s,border-color .2s;display:inline-flex;align-items:center;gap:.3rem;font-family:var(--font-sans)}
+    .theme-toggle:hover{color:var(--accent-light);border-color:var(--accent)}
+    .theme-toggle svg{width:14px;height:14px}
+
+    .hero{text-align:center;padding:4rem 1.5rem 3rem;max-width:800px;margin:0 auto}
+    .hero-logo{width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:1.25rem;box-shadow:0 4px 24px rgba(0,0,0,.3);border:2px solid var(--border)}
+    .hero h1{font-size:2.5rem;font-weight:700;margin-bottom:1rem;background:linear-gradient(135deg,var(--text),var(--accent-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero p{font-size:1.125rem;color:var(--text-dim);margin-bottom:2rem;max-width:600px;margin-left:auto;margin-right:auto}
+
+    .stats-bar{display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;margin-bottom:1rem}
+    .stat-item{text-align:center}
+    .stat-value{font-size:1.75rem;font-weight:700;color:var(--accent-light);font-family:var(--font-mono)}
+    .stat-label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+
+    .search-bar{max-width:480px;margin:0 auto 1.5rem;padding:0 1.5rem;position:relative}
+    .search-input{width:100%;padding:.6rem .75rem .6rem 2.25rem;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.875rem;font-family:var(--font-sans);outline:none;transition:border-color .2s}
+    .search-input:focus{border-color:var(--accent)}
+    .search-input::placeholder{color:var(--text-dim)}
+    .search-icon{position:absolute;left:calc(50% - 228px);top:50%;transform:translateY(-50%);color:var(--text-dim);pointer-events:none}
+    .search-icon svg{width:16px;height:16px}
+
+    .filters{max-width:1200px;margin:0 auto 2rem;padding:0 1.5rem;display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}
+    .filter-btn{background:var(--bg2);border:1px solid var(--border);color:var(--text-dim);padding:.375rem .875rem;border-radius:100px;font-size:.8125rem;font-family:var(--font-sans);cursor:pointer;transition:all .2s}
+    .filter-btn:hover{border-color:var(--accent);color:var(--text)}
+    .filter-btn.active{background:var(--accent);border-color:var(--accent);color:white}
+
+    .card-grid{max-width:1200px;margin:0 auto;padding:0 1.5rem 4rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.25rem}
+    .tool-card{background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:var(--radius-lg);padding:1.5rem;transition:all .25s;display:flex;flex-direction:column;box-shadow:0 -2px 20px color-mix(in srgb,var(--accent) 8%,transparent)}
+    .tool-card:hover{border-color:var(--accent);background:var(--bg-hover);box-shadow:0 0 20px var(--accent-glow);transform:translateY(-2px)}
+    .tool-card.hidden-card{display:none}
+
+    .card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.75rem}
+    .card-title{font-size:1.125rem;font-weight:600}
+    .card-badge{font-size:.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding:.2rem .5rem;border-radius:4px;white-space:nowrap;flex-shrink:0}
+    .badge-plugin{background:rgba(124,58,237,.2);color:var(--accent-light)}
+    .badge-mcp{background:rgba(63,185,80,.2);color:var(--green)}
+    .card-description{color:var(--text-dim);font-size:.875rem;margin-bottom:1rem;flex-grow:1}
+    .card-stats{display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+    .card-stat{font-size:.8125rem;color:var(--text-muted);display:flex;align-items:center;gap:.25rem}
+    .card-stat strong{color:var(--text);font-family:var(--font-mono);font-size:.875rem}
+    .card-topics{display:flex;gap:.375rem;flex-wrap:wrap;margin-bottom:1rem}
+    .topic-tag{font-size:.6875rem;background:var(--bg3);border:1px solid var(--border);color:var(--text-muted);padding:.125rem .5rem;border-radius:100px}
+    .card-links{display:flex;gap:.75rem;padding-top:.75rem;border-top:1px solid var(--border)}
+    .card-link{font-size:.8125rem;font-weight:500;display:flex;align-items:center;gap:.3rem}
+    .card-link svg{width:14px;height:14px}
+
+    .section{max-width:1200px;margin:0 auto;padding:3rem 1.5rem}
+    .section-title{font-size:1.5rem;font-weight:600;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .standards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+    .standard-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;transition:border-color .2s}
+    .standard-card:hover{border-color:var(--accent)}
+    .standard-card h3{font-size:.9375rem;margin-bottom:.375rem}
+    .standard-card p{font-size:.8125rem;color:var(--text-dim)}
+
+    footer{text-align:center;padding:2rem 1.5rem 2.5rem;color:var(--text-dim);font-size:.8125rem;margin-top:1rem}
+    footer a{color:var(--accent-light)}
+    .footer-inner{max-width:1040px;margin:0 auto}
+    .footer-links{display:flex;justify-content:center;gap:1.25rem;margin-bottom:1rem;flex-wrap:wrap}
+    .footer-links a{display:inline-flex;align-items:center;gap:.35rem;color:var(--text-dim);transition:color .2s}
+    .footer-links a:hover{color:var(--accent-light)}
+    .footer-links svg{width:16px;height:16px}
+    .footer-divider{width:60px;height:2px;background:var(--accent);margin:0 auto 1rem;border-radius:1px;opacity:.4}
+    .footer-meta{display:flex;justify-content:center;gap:.5rem;flex-wrap:wrap;font-size:.75rem}
+    .footer-meta span{opacity:.7}
+
+    .back-to-top{position:fixed;bottom:1.5rem;right:1.5rem;width:40px;height:40px;border-radius:50%;background:var(--accent);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;z-index:150;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+    .back-to-top.visible{opacity:1;pointer-events:auto}
+    .back-to-top svg{width:20px;height:20px}
+
+    @media(max-width:768px){
+      .hero h1{font-size:1.75rem}
+      .hero p{font-size:1rem}
+      .stats-bar{gap:1.25rem}
+      .stat-value{font-size:1.375rem}
+      .card-grid{grid-template-columns:1fr}
+      .header-nav{gap:1rem}
+    }
+    @media(max-width:640px){
+      .search-icon{left:2.25rem}
+    }
+    @media(prefers-reduced-motion:reduce){
+      html{scroll-behavior:auto}
+      *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
+    }
+  </style>
 </head>
 <body>
 
   <header class="site-header">
     <div class="header-inner">
       <a href="#" class="header-brand">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
         Developer Tools Directory
       </a>
       <nav>
@@ -22,33 +151,32 @@
           <li><a href="#tools">Tools</a></li>
           <li><a href="#standards">Standards</a></li>
           <li><a href="https://github.com/TMHSDigital/Developer-Tools-Directory" target="_blank" rel="noopener">GitHub</a></li>
+          <li>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+              <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+          </li>
         </ul>
       </nav>
     </div>
   </header>
 
   <section class="hero">
+    <img class="hero-logo" src="assets/logo.png" alt="Developer Tools Directory logo" />
     <h1>Developer Tools Directory</h1>
-    <p>Centralized catalog of TMHSDigital Cursor IDE plugins, MCP servers, and developer tools. Standards, scaffolding, and documentation in one place.</p>
+    <p>Centralized catalog of TMHSDigital Cursor IDE plugins, MCP servers, and developer tools.</p>
     <div class="stats-bar">
-      <div class="stat-item">
-        <div class="stat-value" id="stat-repos">0</div>
-        <div class="stat-label">Repos</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value" id="stat-skills">0</div>
-        <div class="stat-label">Skills</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value" id="stat-rules">0</div>
-        <div class="stat-label">Rules</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value" id="stat-mcp">0</div>
-        <div class="stat-label">MCP Tools</div>
-      </div>
+      <div class="stat-item"><div class="stat-value" id="stat-repos">0</div><div class="stat-label">Repos</div></div>
+      <div class="stat-item"><div class="stat-value" id="stat-skills">0</div><div class="stat-label">Skills</div></div>
+      <div class="stat-item"><div class="stat-value" id="stat-rules">0</div><div class="stat-label">Rules</div></div>
+      <div class="stat-item"><div class="stat-value" id="stat-mcp">0</div><div class="stat-label">MCP Tools</div></div>
     </div>
   </section>
+
+  <div class="search-bar">
+    <span class="search-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.5 7a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0zm-.82 4.74a6 6 0 1 1 1.06-1.06l3.04 3.04a.75.75 0 1 1-1.06 1.06l-3.04-3.04z"/></svg></span>
+    <input class="search-input" id="toolSearch" type="text" placeholder="Search tools..." autocomplete="off" />
+  </div>
 
   <div id="filters" class="filters">
     <button class="filter-btn active" data-filter="all">All</button>
@@ -69,180 +197,158 @@
   <section id="standards" class="section">
     <h2 class="section-title">Standards</h2>
     <div class="standards-grid">
-      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/folder-structure.md" class="standard-card" target="_blank" rel="noopener">
-        <h3>Folder Structure</h3>
-        <p>Canonical repository layout for plugins and MCP servers</p>
-      </a>
-      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/plugin-manifest.md" class="standard-card" target="_blank" rel="noopener">
-        <h3>Plugin Manifest</h3>
-        <p>plugin.json specification and required fields</p>
-      </a>
-      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/ci-cd.md" class="standard-card" target="_blank" rel="noopener">
-        <h3>CI/CD</h3>
-        <p>GitHub Actions workflows every repo must have</p>
-      </a>
-      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/github-pages.md" class="standard-card" target="_blank" rel="noopener">
-        <h3>GitHub Pages</h3>
-        <p>Documentation site setup and deployment</p>
-      </a>
-      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/commit-conventions.md" class="standard-card" target="_blank" rel="noopener">
-        <h3>Commit Conventions</h3>
-        <p>Conventional commits and version bumping rules</p>
-      </a>
-      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/versioning.md" class="standard-card" target="_blank" rel="noopener">
-        <h3>Versioning</h3>
-        <p>Semver management and automated release flow</p>
-      </a>
-      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/readme-template.md" class="standard-card" target="_blank" rel="noopener">
-        <h3>README Template</h3>
-        <p>Standard README structure and required sections</p>
-      </a>
-      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/agents-template.md" class="standard-card" target="_blank" rel="noopener">
-        <h3>AGENTS.md Template</h3>
-        <p>AI agent guidance file structure</p>
-      </a>
+      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/folder-structure.md" class="standard-card" target="_blank" rel="noopener"><h3>Folder Structure</h3><p>Canonical repository layout for plugins and MCP servers</p></a>
+      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/plugin-manifest.md" class="standard-card" target="_blank" rel="noopener"><h3>Plugin Manifest</h3><p>plugin.json specification and required fields</p></a>
+      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/ci-cd.md" class="standard-card" target="_blank" rel="noopener"><h3>CI/CD</h3><p>GitHub Actions workflows every repo must have</p></a>
+      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/github-pages.md" class="standard-card" target="_blank" rel="noopener"><h3>GitHub Pages</h3><p>Documentation site setup and deployment</p></a>
+      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/commit-conventions.md" class="standard-card" target="_blank" rel="noopener"><h3>Commit Conventions</h3><p>Conventional commits and version bumping rules</p></a>
+      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/versioning.md" class="standard-card" target="_blank" rel="noopener"><h3>Versioning</h3><p>Semver management and automated release flow</p></a>
+      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/readme-template.md" class="standard-card" target="_blank" rel="noopener"><h3>README Template</h3><p>Standard README structure and required sections</p></a>
+      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/agents-template.md" class="standard-card" target="_blank" rel="noopener"><h3>AGENTS.md Template</h3><p>AI agent guidance file structure</p></a>
     </div>
   </section>
 
   <section class="section">
     <h2 class="section-title">Create a New Tool</h2>
-    <div class="standard-card" style="max-width: 640px;">
+    <div class="standard-card" style="max-width:640px;">
       <h3>Scaffold Generator</h3>
       <p>Generate a fully standards-compliant repository from the command line. Includes all workflows, manifests, docs site template, and skeleton files.</p>
-      <p style="margin-top: 0.75rem;">
-        <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/tree/main/scaffold" target="_blank" rel="noopener">View scaffold documentation &rarr;</a>
-      </p>
+      <p style="margin-top:.75rem;"><a href="https://github.com/TMHSDigital/Developer-Tools-Directory/tree/main/scaffold" target="_blank" rel="noopener">View scaffold documentation &rarr;</a></p>
     </div>
   </section>
 
-  <footer class="site-footer">
-    <p>Built by <a href="https://github.com/TMHSDigital" target="_blank" rel="noopener">TMHSDigital</a> &middot; <a href="https://github.com/TMHSDigital/Developer-Tools-Directory" target="_blank" rel="noopener">Source</a></p>
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="https://github.com/TMHSDigital/Developer-Tools-Directory"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub</a>
+        <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/tree/main/scaffold"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 1.75V13.5h13.05l.001-11.75H1.5zM0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v11.5A1.75 1.75 0 0114.25 15H1.75A1.75 1.75 0 010 13.25V1.75zM9.22 3.72a.75.75 0 000 1.06L10.69 6.25H6.75a.75.75 0 000 1.5h3.94l-1.47 1.47a.75.75 0 101.06 1.06l2.75-2.75a.75.75 0 000-1.06L10.28 3.72a.75.75 0 00-1.06 0z"/></svg>Scaffold</a>
+      </div>
+      <div class="footer-divider"></div>
+      <div class="footer-meta">
+        <span>CC-BY-NC-ND-4.0</span>
+        <span>&middot;</span>
+        <span>Built by <a href="https://github.com/TMHSDigital">TMHSDigital</a></span>
+      </div>
+    </div>
   </footer>
+
+  <button class="back-to-top" id="backToTop" aria-label="Back to top">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
 
   <script id="registry-data" type="application/json">
 [
-  {
-    "name": "CFX Developer Tools",
-    "repo": "TMHSDigital/CFX-Developer-Tools",
-    "slug": "cfx-developer-tools",
-    "description": "AI-powered Cursor IDE plugin for FiveM and RedM resource development",
-    "type": "cursor-plugin",
-    "homepage": "https://tmhsdigital.github.io/CFX-Developer-Tools/",
-    "skills": 9, "rules": 6, "mcpTools": 6,
-    "extras": { "snippets": 24, "templates": 11, "natives": 12000, "events": 101 },
-    "topics": ["fivem", "redm", "cfx", "lua", "game-development"],
-    "status": "active", "version": "0.7.2", "language": "Python",
-    "license": "CC-BY-NC-ND-4.0", "pagesType": "mkdocs", "hasCI": true
-  },
-  {
-    "name": "Unity Developer Tools",
-    "repo": "TMHSDigital/Unity-Developer-Tools",
-    "slug": "unity-developer-tools",
-    "description": "Cursor IDE plugin for Unity game development with URP, HDRP, and Built-in render pipeline support",
-    "type": "cursor-plugin",
-    "homepage": "",
-    "skills": 18, "rules": 8, "mcpTools": 4,
-    "extras": { "snippets": 20, "templates": 5 },
-    "topics": ["unity", "game-development", "csharp", "urp", "hdrp"],
-    "status": "active", "version": "1.2.1", "language": "Python",
-    "license": "CC-BY-NC-ND-4.0", "pagesType": "none", "hasCI": true
-  },
-  {
-    "name": "Docker Developer Tools",
-    "repo": "TMHSDigital/Docker-Developer-Tools",
-    "slug": "docker-developer-tools",
-    "description": "Cursor IDE plugin for Docker workflows with container management, Compose, and Dockerfile support",
-    "type": "cursor-plugin",
-    "homepage": "https://tmhsdigital.github.io/Docker-Developer-Tools/",
-    "skills": 17, "rules": 10, "mcpTools": 150,
-    "extras": {},
-    "npm": "@tmhs/docker-mcp",
-    "topics": ["docker", "containers", "devops", "docker-compose", "dockerfile"],
-    "status": "active", "version": "1.0.0", "language": "Python",
-    "license": "CC-BY-NC-ND-4.0", "pagesType": "static", "hasCI": true
-  },
-  {
-    "name": "Home Lab Developer Tools",
-    "repo": "TMHSDigital/Home-Lab-Developer-Tools",
-    "slug": "home-lab-developer-tools",
-    "description": "Home lab and Raspberry Pi workflows for Cursor with Docker Compose, monitoring, DNS, networking, and security",
-    "type": "cursor-plugin",
-    "homepage": "https://tmhsdigital.github.io/Home-Lab-Developer-Tools/",
-    "skills": 22, "rules": 11, "mcpTools": 50,
-    "extras": {},
-    "npm": "@tmhs/homelab-mcp",
-    "topics": ["homelab", "raspberry-pi", "infrastructure", "docker-compose", "monitoring"],
-    "status": "active", "version": "1.0.0", "language": "Python",
-    "license": "CC-BY-NC-ND-4.0", "pagesType": "static", "hasCI": true
-  },
-  {
-    "name": "Mobile App Developer Tools",
-    "repo": "TMHSDigital/Mobile-App-Developer-Tools",
-    "slug": "mobile-app-developer-tools",
-    "description": "Cursor plugin for mobile app development with React Native, Expo, and Flutter support",
-    "type": "cursor-plugin",
-    "homepage": "",
-    "skills": 43, "rules": 12, "mcpTools": 36,
-    "extras": {},
-    "npm": "@tmhs/mobile-mcp",
-    "topics": ["react-native", "expo", "flutter", "mobile-development", "typescript"],
-    "status": "active", "version": "1.0.0", "language": "TypeScript",
-    "license": "CC-BY-NC-ND-4.0", "pagesType": "none", "hasCI": true
-  },
-  {
-    "name": "Plaid Developer Tools",
-    "repo": "TMHSDigital/Plaid-Developer-Tools",
-    "slug": "plaid-developer-tools",
-    "description": "Cursor plugin and MCP companion for building on the Plaid API",
-    "type": "cursor-plugin",
-    "homepage": "",
-    "skills": 17, "rules": 7, "mcpTools": 30,
-    "extras": {},
-    "topics": ["plaid", "fintech", "banking", "open-banking", "plaid-api"],
-    "status": "active", "version": "1.0.0", "language": "Python",
-    "license": "CC-BY-NC-ND-4.0", "pagesType": "none", "hasCI": true
-  },
-  {
-    "name": "Monday Cursor Plugin",
-    "repo": "TMHSDigital/Monday-Cursor-Plugin",
-    "slug": "monday-cursor-plugin",
-    "description": "Cursor IDE plugin for Monday.com with boards, items, sprints, docs, dashboards, and GraphQL",
-    "type": "cursor-plugin",
-    "homepage": "https://tmhsdigital.github.io/Monday-Cursor-Plugin/",
-    "skills": 21, "rules": 8, "mcpTools": 45,
-    "extras": {},
-    "topics": ["monday", "project-management", "graphql", "productivity", "work-management"],
-    "status": "active", "version": "1.0.0", "language": "TypeScript",
-    "license": "CC-BY-NC-ND-4.0", "pagesType": "static", "hasCI": true
-  },
-  {
-    "name": "Steam Cursor Plugin",
-    "repo": "TMHSDigital/Steam-Cursor-Plugin",
-    "slug": "steam-cursor-plugin",
-    "description": "Steam and Steamworks integration for Cursor IDE for game developers, modders, and power users",
-    "type": "cursor-plugin",
-    "homepage": "https://tmhsdigital.github.io/Steam-Cursor-Plugin/",
-    "skills": 30, "rules": 9, "mcpTools": 25,
-    "extras": {},
-    "topics": ["steam", "steamworks", "game-development", "modding", "steam-workshop"],
-    "status": "active", "version": "1.0.0", "language": "TypeScript",
-    "license": "CC-BY-NC-ND-4.0", "pagesType": "static", "hasCI": true
-  },
-  {
-    "name": "Steam MCP Server",
-    "repo": "TMHSDigital/steam-mcp",
-    "slug": "steam-mcp",
-    "description": "MCP server for Steam and Steamworks APIs with store data, player stats, reviews, achievements, and workshop tools",
-    "type": "mcp-server",
-    "homepage": "https://www.npmjs.com/package/@tmhs/steam-mcp",
-    "skills": 0, "rules": 0, "mcpTools": 25,
-    "extras": {},
-    "topics": ["steam", "mcp-server", "steamworks", "game-development", "npm"],
-    "status": "active", "version": "1.0.0", "language": "TypeScript",
-    "license": "CC-BY-NC-ND-4.0", "pagesType": "none", "hasCI": true
-  }
+  {"name":"CFX Developer Tools","repo":"TMHSDigital/CFX-Developer-Tools","slug":"cfx-developer-tools","description":"AI-powered Cursor IDE plugin for FiveM and RedM resource development","type":"cursor-plugin","homepage":"https://tmhsdigital.github.io/CFX-Developer-Tools/","skills":9,"rules":6,"mcpTools":6,"extras":{"snippets":24,"templates":11,"natives":12000,"events":101},"topics":["fivem","redm","cfx","lua","game-development"],"status":"active","version":"0.7.2","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"mkdocs","hasCI":true},
+  {"name":"Unity Developer Tools","repo":"TMHSDigital/Unity-Developer-Tools","slug":"unity-developer-tools","description":"Cursor IDE plugin for Unity game development with URP, HDRP, and Built-in render pipeline support","type":"cursor-plugin","homepage":"","skills":18,"rules":8,"mcpTools":4,"extras":{"snippets":20,"templates":5},"topics":["unity","game-development","csharp","urp","hdrp"],"status":"active","version":"1.2.1","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"none","hasCI":true},
+  {"name":"Docker Developer Tools","repo":"TMHSDigital/Docker-Developer-Tools","slug":"docker-developer-tools","description":"Cursor IDE plugin for Docker workflows with container management, Compose, and Dockerfile support","type":"cursor-plugin","homepage":"https://tmhsdigital.github.io/Docker-Developer-Tools/","skills":17,"rules":10,"mcpTools":150,"extras":{},"npm":"@tmhs/docker-mcp","topics":["docker","containers","devops","docker-compose","dockerfile"],"status":"active","version":"1.0.0","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},
+  {"name":"Home Lab Developer Tools","repo":"TMHSDigital/Home-Lab-Developer-Tools","slug":"home-lab-developer-tools","description":"Home lab and Raspberry Pi workflows for Cursor with Docker Compose, monitoring, DNS, networking, and security","type":"cursor-plugin","homepage":"https://tmhsdigital.github.io/Home-Lab-Developer-Tools/","skills":22,"rules":11,"mcpTools":50,"extras":{},"npm":"@tmhs/homelab-mcp","topics":["homelab","raspberry-pi","infrastructure","docker-compose","monitoring"],"status":"active","version":"1.0.0","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},
+  {"name":"Mobile App Developer Tools","repo":"TMHSDigital/Mobile-App-Developer-Tools","slug":"mobile-app-developer-tools","description":"Cursor plugin for mobile app development with React Native, Expo, and Flutter support","type":"cursor-plugin","homepage":"","skills":43,"rules":12,"mcpTools":36,"extras":{},"npm":"@tmhs/mobile-mcp","topics":["react-native","expo","flutter","mobile-development","typescript"],"status":"active","version":"1.0.0","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"none","hasCI":true},
+  {"name":"Plaid Developer Tools","repo":"TMHSDigital/Plaid-Developer-Tools","slug":"plaid-developer-tools","description":"Cursor plugin and MCP companion for building on the Plaid API","type":"cursor-plugin","homepage":"","skills":17,"rules":7,"mcpTools":30,"extras":{},"topics":["plaid","fintech","banking","open-banking","plaid-api"],"status":"active","version":"1.0.0","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"none","hasCI":true},
+  {"name":"Monday Cursor Plugin","repo":"TMHSDigital/Monday-Cursor-Plugin","slug":"monday-cursor-plugin","description":"Cursor IDE plugin for Monday.com with boards, items, sprints, docs, dashboards, and GraphQL","type":"cursor-plugin","homepage":"https://tmhsdigital.github.io/Monday-Cursor-Plugin/","skills":21,"rules":8,"mcpTools":45,"extras":{},"topics":["monday","project-management","graphql","productivity","work-management"],"status":"active","version":"1.0.0","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},
+  {"name":"Steam Cursor Plugin","repo":"TMHSDigital/Steam-Cursor-Plugin","slug":"steam-cursor-plugin","description":"Steam and Steamworks integration for Cursor IDE for game developers, modders, and power users","type":"cursor-plugin","homepage":"https://tmhsdigital.github.io/Steam-Cursor-Plugin/","skills":30,"rules":9,"mcpTools":25,"extras":{},"topics":["steam","steamworks","game-development","modding","steam-workshop"],"status":"active","version":"1.0.0","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},
+  {"name":"Steam MCP Server","repo":"TMHSDigital/steam-mcp","slug":"steam-mcp","description":"MCP server for Steam and Steamworks APIs with store data, player stats, reviews, achievements, and workshop tools","type":"mcp-server","homepage":"https://www.npmjs.com/package/@tmhs/steam-mcp","skills":0,"rules":0,"mcpTools":25,"extras":{},"topics":["steam","mcp-server","steamworks","game-development","npm"],"status":"active","version":"1.0.0","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"none","hasCI":true}
 ]
   </script>
-  <script src="script.js"></script>
+
+  <script>
+    /* Theme toggle */
+    (function(){
+      var btn=document.getElementById('themeToggle'),icon=document.getElementById('themeIcon');
+      var sunSvg='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+      var moonSvg='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      var autoSvg='<circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20V2z"/>';
+      var states=['dark','light','auto'];
+      function getState(){return localStorage.getItem('theme')||'auto'}
+      function apply(s){
+        if(s==='light')document.documentElement.setAttribute('data-theme','light');
+        else if(s==='dark')document.documentElement.setAttribute('data-theme','dark');
+        else document.documentElement.removeAttribute('data-theme');
+        if(s==='auto')localStorage.removeItem('theme');else localStorage.setItem('theme',s);
+        updateIcon(s);
+      }
+      function updateIcon(s){
+        if(s==='light')icon.innerHTML=sunSvg;else if(s==='dark')icon.innerHTML=moonSvg;else icon.innerHTML=autoSvg;
+        btn.title='Theme: '+s;
+      }
+      btn.addEventListener('click',function(){var c=getState();apply(states[(states.indexOf(c)+1)%states.length])});
+      updateIcon(getState());
+    })();
+
+    /* Data loading */
+    document.addEventListener('DOMContentLoaded',function(){
+      fetch('registry.json').then(function(r){if(!r.ok)return fetch('../registry.json');return r}).then(function(r){return r.json()}).then(boot).catch(function(){boot(getEmbeddedRegistry())});
+    });
+    function getEmbeddedRegistry(){var el=document.getElementById('registry-data');if(el){try{return JSON.parse(el.textContent)}catch(e){}}return[]}
+    function boot(tools){renderStats(tools);renderCards(tools);setupFilters(tools);setupSearch(tools)}
+
+    /* Animated stat counters */
+    function renderStats(tools){
+      var t=tools.reduce(function(a,x){a.skills+=x.skills||0;a.rules+=x.rules||0;a.mcp+=x.mcpTools||0;a.repos++;return a},{skills:0,rules:0,mcp:0,repos:0});
+      var targets={repos:t.repos,skills:t.skills,rules:t.rules,mcp:t.mcp};
+      var prefersReduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      ['repos','skills','rules','mcp'].forEach(function(k){
+        var el=document.getElementById('stat-'+k);
+        var target=targets[k];
+        if(prefersReduce){el.textContent=target;return}
+        var duration=1200,start=performance.now();
+        function tick(now){var p=Math.min((now-start)/duration,1);el.textContent=Math.round((1-Math.pow(1-p,3))*target);if(p<1)requestAnimationFrame(tick)}
+        requestAnimationFrame(tick);
+      });
+    }
+
+    /* Render cards */
+    function renderCards(tools){
+      var grid=document.getElementById('card-grid');grid.innerHTML='';
+      tools.forEach(function(tool){
+        var card=document.createElement('div');card.className='tool-card';card.dataset.type=tool.type;card.dataset.topics=(tool.topics||[]).join(',');card.dataset.name=(tool.name+' '+tool.description).toLowerCase();
+        var bc=tool.type==='mcp-server'?'badge-mcp':'badge-plugin';
+        var bl=tool.type==='mcp-server'?'MCP Server':'Plugin';
+        var sh=[];
+        if(tool.skills>0)sh.push('<span class="card-stat"><strong>'+tool.skills+'</strong> skills</span>');
+        if(tool.rules>0)sh.push('<span class="card-stat"><strong>'+tool.rules+'</strong> rules</span>');
+        if(tool.mcpTools>0)sh.push('<span class="card-stat"><strong>'+tool.mcpTools+'</strong> MCP tools</span>');
+        var ex=tool.extras||{};Object.keys(ex).forEach(function(k){if(ex[k]>0)sh.push('<span class="card-stat"><strong>'+ex[k].toLocaleString()+'</strong> '+k+'</span>')});
+        var th=(tool.topics||[]).slice(0,5).map(function(t){return'<span class="topic-tag">'+t+'</span>'}).join('');
+        var lh=['<a href="https://github.com/'+tool.repo+'" class="card-link" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Repository</a>'];
+        if(tool.homepage)lh.push('<a href="'+tool.homepage+'" class="card-link" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.72 3.22a.75.75 0 011.06 0l3.75 3.75a.75.75 0 010 1.06l-3.75 3.75a.75.75 0 01-1.06-1.06L7.94 8 4.72 4.78a.75.75 0 010-1.06z"/><path d="M10.72 3.22a.75.75 0 011.06 0l3.75 3.75a.75.75 0 010 1.06l-3.75 3.75a.75.75 0 11-1.06-1.06L13.94 8l-3.22-3.22a.75.75 0 010-1.06z"/></svg>Docs</a>');
+        if(tool.npm){var np=Array.isArray(tool.npm)?tool.npm[0]:tool.npm;lh.push('<a href="https://www.npmjs.com/package/'+np+'" class="card-link" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 0v16h16V0H0zm13 13H8V5h2.5v5.5H13V3H3v10h10V0z"/></svg>npm</a>')}
+        card.innerHTML='<div class="card-header"><span class="card-title">'+tool.name+'</span><span class="card-badge '+bc+'">'+bl+'</span></div><p class="card-description">'+tool.description+'</p><div class="card-stats">'+sh.join('')+'</div><div class="card-topics">'+th+'</div><div class="card-links">'+lh.join('')+'</div>';
+        grid.appendChild(card);
+      });
+    }
+
+    /* Filters */
+    function setupFilters(tools){
+      var btns=document.querySelectorAll('.filter-btn');
+      btns.forEach(function(btn){btn.addEventListener('click',function(){
+        btns.forEach(function(b){b.classList.remove('active')});btn.classList.add('active');
+        var f=btn.dataset.filter;var cards=document.querySelectorAll('.tool-card');
+        cards.forEach(function(c){
+          if(f==='all')c.classList.remove('hidden-card');
+          else if(f==='cursor-plugin'||f==='mcp-server')c.classList.toggle('hidden-card',c.dataset.type!==f);
+          else c.classList.toggle('hidden-card',c.dataset.topics.split(',').indexOf(f)===-1);
+        });
+      })});
+    }
+
+    /* Search */
+    function setupSearch(){
+      var input=document.getElementById('toolSearch');
+      input.addEventListener('input',function(){
+        var q=input.value.toLowerCase().trim();
+        document.querySelectorAll('.tool-card').forEach(function(c){c.classList.toggle('hidden-card',q&&c.dataset.name.indexOf(q)===-1)});
+        document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active')});
+        if(!q)document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+      });
+    }
+
+    /* Back to top */
+    (function(){
+      var btn=document.getElementById('backToTop');
+      window.addEventListener('scroll',function(){btn.classList.toggle('visible',window.scrollY>400)},{passive:true});
+      btn.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'})});
+    })();
+  </script>
+
 </body>
 </html>
