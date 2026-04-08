@@ -13,6 +13,9 @@
  <a href="LICENSE"><img src="https://img.shields.io/badge/license-CC--BY--NC--ND--4.0-green" alt="License: CC BY-NC-ND 4.0" /></a>
  <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/stargazers"><img src="https://img.shields.io/github/stars/TMHSDigital/Developer-Tools-Directory?style=flat" alt="GitHub stars" /></a>
  <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/actions/workflows/validate.yml"><img src="https://github.com/TMHSDigital/Developer-Tools-Directory/actions/workflows/validate.yml/badge.svg" alt="Validate" /></a>
+ <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/actions/workflows/pages.yml"><img src="https://github.com/TMHSDigital/Developer-Tools-Directory/actions/workflows/pages.yml/badge.svg" alt="Pages" /></a>
+ <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/actions/workflows/codeql.yml"><img src="https://github.com/TMHSDigital/Developer-Tools-Directory/actions/workflows/codeql.yml/badge.svg" alt="CodeQL" /></a>
+ <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.12+-3776ab?logo=python&logoColor=white" alt="Python 3.12+" /></a>
  <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs Welcome" /></a>
 </p>
 
@@ -45,15 +48,15 @@ flowchart LR
 
 | Tool | Type | Skills | Rules | MCP&nbsp;Tools | Links |
 |:-----|:-----|-------:|------:|------:|:------|
-| **CFX Developer Tools** | Plugin | 9 | 6 | 6 | [Repo](https://github.com/TMHSDigital/CFX-Developer-Tools) &bull; [Docs](https://tmhsdigital.github.io/CFX-Developer-Tools/) |
-| **Unity Developer Tools** | Plugin | 18 | 8 | 4 | [Repo](https://github.com/TMHSDigital/Unity-Developer-Tools) |
-| **Docker Developer Tools** | Plugin | 17 | 10 | 150 | [Repo](https://github.com/TMHSDigital/Docker-Developer-Tools) &bull; [Docs](https://tmhsdigital.github.io/Docker-Developer-Tools/) |
-| **Home Lab Developer Tools** | Plugin | 22 | 11 | 50 | [Repo](https://github.com/TMHSDigital/Home-Lab-Developer-Tools) &bull; [Docs](https://tmhsdigital.github.io/Home-Lab-Developer-Tools/) |
-| **Mobile App Developer Tools** | Plugin | 43 | 12 | 36 | [Repo](https://github.com/TMHSDigital/Mobile-App-Developer-Tools) |
-| **Plaid Developer Tools** | Plugin | 17 | 7 | 30 | [Repo](https://github.com/TMHSDigital/Plaid-Developer-Tools) |
-| **Monday Cursor Plugin** | Plugin | 21 | 8 | 45 | [Repo](https://github.com/TMHSDigital/Monday-Cursor-Plugin) &bull; [Docs](https://tmhsdigital.github.io/Monday-Cursor-Plugin/) |
-| **Steam Cursor Plugin** | Plugin | 30 | 9 | 25 | [Repo](https://github.com/TMHSDigital/Steam-Cursor-Plugin) &bull; [Docs](https://tmhsdigital.github.io/Steam-Cursor-Plugin/) |
-| **Steam MCP Server** | MCP Server | -- | -- | 25 | [Repo](https://github.com/TMHSDigital/steam-mcp) &bull; [npm](https://www.npmjs.com/package/@tmhs/steam-mcp) |
+| **CFX Developer Tools** | Plugin | 9 | 6 | 6 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/CFX-Developer-Tools) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/CFX-Developer-Tools/) |
+| **Unity Developer Tools** | Plugin | 18 | 8 | 4 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Unity-Developer-Tools) |
+| **Docker Developer Tools** | Plugin | 17 | 10 | 150 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Docker-Developer-Tools) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Docker-Developer-Tools/) |
+| **Home Lab Developer Tools** | Plugin | 22 | 11 | 50 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Home-Lab-Developer-Tools) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Home-Lab-Developer-Tools/) |
+| **Mobile App Developer Tools** | Plugin | 43 | 12 | 36 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Mobile-App-Developer-Tools) |
+| **Plaid Developer Tools** | Plugin | 17 | 7 | 30 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Plaid-Developer-Tools) |
+| **Monday Cursor Plugin** | Plugin | 21 | 8 | 45 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Monday-Cursor-Plugin) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Monday-Cursor-Plugin/) |
+| **Steam Cursor Plugin** | Plugin | 30 | 9 | 25 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Steam-Cursor-Plugin) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Steam-Cursor-Plugin/) |
+| **Steam MCP Server** | MCP Server | -- | -- | 25 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/steam-mcp) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/steam-mcp) |
 
 <details>
 <summary>Tool descriptions</summary>
@@ -106,7 +109,13 @@ Documented conventions for building new developer tools. All docs in [`standards
 
 Generate a fully standards-compliant repository from the command line.
 
-**Prerequisites:** `pip install Jinja2`
+**Prerequisites:**
+
+<a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.12+-3776ab?logo=python&logoColor=white" alt="Python 3.12+" /></a> <a href="https://pypi.org/project/Jinja2/"><img src="https://img.shields.io/badge/Jinja2-3.1+-b41717?logo=jinja&logoColor=white" alt="Jinja2 3.1+" /></a>
+
+```bash
+pip install Jinja2
+```
 
 ```bash
 python scaffold/create-tool.py \
