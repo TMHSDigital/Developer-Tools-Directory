@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ plugin.displayName }}</title>
+  <meta name="description" content="{{ plugin.description }}" />
+  <meta property="og:title" content="{{ plugin.displayName }}" />
+  <meta property="og:description" content="{{ plugin.description }}" />
+  <meta property="og:type" content="website" />
+  {% if site.ogImage %}<meta property="og:image" content="{{ site.ogImage }}" />{% endif %}
+  {% if site.favicon %}<link rel="icon" href="{{ site.favicon }}" />{% endif %}
+  <style>
+    @font-face {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('fonts/inter-regular.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('fonts/inter-medium.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src: url('fonts/inter-bold.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('fonts/jetbrains-mono-regular.woff2') format('woff2');
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: {{ site.accent | default('#7c3aed') }};
+      --accent-light: {{ site.accentLight | default('#a78bfa') }};
+      --bg: {{ site.heroGradientFrom | default('#0d1117') }};
+      --bg2: #161b22;
+      --bg3: #1c2128;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-dim: #8b949e;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      --hero-from: {{ site.heroGradientFrom | default('#0d1117') }};
+      --hero-to: {{ site.heroGradientTo | default('#161b22') }};
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a { color: var(--accent-light); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: #fff; }
+
+    /* --- NAV --- */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13, 17, 23, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+    }
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .nav-brand {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--text-dim);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover,
+    .nav-links a.active { color: var(--accent-light); }
+
+    /* --- HERO --- */
+    .hero {
+      text-align: center;
+      padding: 5rem 1.5rem 3.5rem;
+      background: linear-gradient(180deg, var(--hero-from), var(--hero-to));
+    }
+    .hero-inner { max-width: 720px; margin: 0 auto; }
+    .hero h1 {
+      font-size: 2.75rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--text), var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 1.125rem;
+      color: var(--text-dim);
+      margin-bottom: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    .stat { text-align: center; }
+    .stat-val {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent-light);
+      font-family: var(--font-mono);
+    }
+    .stat-lbl {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 0.25rem;
+    }
+
+    .hero-badges {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .badge:hover {
+      border-color: var(--accent);
+      background: var(--bg3);
+      color: var(--text);
+    }
+    .badge svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    /* --- SECTIONS --- */
+    .section {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
+    .section h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section h2 .count {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      background: var(--bg2);
+      padding: 0.15rem 0.6rem;
+      border-radius: 12px;
+    }
+
+    .category-label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent-light);
+      margin: 1.5rem 0 0.75rem;
+    }
+
+    /* --- TABLE --- */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9375rem;
+    }
+    .data-table th {
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      padding: 0.625rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .data-table td {
+      padding: 0.625rem 0.75rem;
+      border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+      color: var(--text-dim);
+      vertical-align: top;
+    }
+    .data-table tr:hover td {
+      background: rgba(22, 27, 34, 0.5);
+    }
+    .data-table .name-cell {
+      color: var(--text);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .data-table .scope-cell {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      color: var(--accent-light);
+    }
+
+    /* --- INSTALL --- */
+    .install-steps {
+      list-style: none;
+      counter-reset: step;
+    }
+    .install-steps li {
+      counter-increment: step;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(48, 54, 61, 0.4);
+    }
+    .install-steps li::before {
+      content: counter(step);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.8125rem;
+    }
+    .install-steps code {
+      background: var(--bg2);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+    }
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-left: 0.5rem;
+      padding: 0.15rem 0.5rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .copy-btn:hover { color: var(--accent-light); border-color: var(--accent); }
+
+    /* --- FOOTER --- */
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      color: var(--text-dim);
+      font-size: 0.8125rem;
+    }
+    footer a { color: var(--accent-light); }
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2rem; }
+      .stats { gap: 1.25rem; }
+      .stat-val { font-size: 1.5rem; }
+      .nav-links { gap: 0.75rem; }
+      .nav-links a { font-size: 0.8rem; }
+      .data-table { font-size: 0.875rem; }
+    }
+    @media (max-width: 480px) {
+      .hero { padding: 3rem 1rem 2rem; }
+      .hero h1 { font-size: 1.5rem; }
+      .nav-brand { font-size: 0.875rem; }
+      .nav-links { gap: 0.5rem; }
+      .hero-badges { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <span class="nav-brand">{{ plugin.displayName }}</span>
+      <ul class="nav-links">
+        {% if skills %}<li><a href="#skills">Skills</a></li>{% endif %}
+        {% if rules %}<li><a href="#rules">Rules</a></li>{% endif %}
+        {% if mcp_tools %}<li><a href="#mcp-tools">MCP Tools</a></li>{% endif %}
+        <li><a href="#install">Install</a></li>
+        <li><a href="{{ site.links.github | default(plugin.repository) }}">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <h1>{{ plugin.displayName }}</h1>
+      <p>{{ plugin.description }}</p>
+
+      <div class="stats">
+        {% if skill_count %}<div class="stat"><div class="stat-val" data-target="{{ skill_count }}">0</div><div class="stat-lbl">Skills</div></div>{% endif %}
+        {% if rule_count %}<div class="stat"><div class="stat-val" data-target="{{ rule_count }}">0</div><div class="stat-lbl">Rules</div></div>{% endif %}
+        {% if mcp_tool_count %}<div class="stat"><div class="stat-val" data-target="{{ mcp_tool_count }}">0</div><div class="stat-lbl">MCP Tools</div></div>{% endif %}
+      </div>
+
+      <div class="hero-badges">
+        <a class="badge" href="{{ site.links.github | default(plugin.repository) }}">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+        {% if site.links.npm %}
+        <a class="badge" href="{{ site.links.npm }}">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 0v16h16V0H0zm13 13H8V5H5v8H3V3h10v10z"/></svg>
+          npm
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  {% if skills %}
+  <section class="section" id="skills">
+    <h2>Skills <span class="count">{{ skill_count }}</span></h2>
+    <table class="data-table">
+      <thead><tr><th>Name</th><th>Description</th></tr></thead>
+      <tbody>
+        {% for skill in skills %}
+        <tr>
+          <td class="name-cell">{{ skill.name }}</td>
+          <td>{{ skill.description }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  {% endif %}
+
+  <!-- Rules -->
+  {% if rules %}
+  <section class="section" id="rules">
+    <h2>Rules <span class="count">{{ rule_count }}</span></h2>
+    <table class="data-table">
+      <thead><tr><th>Name</th><th>Scope</th><th>Description</th></tr></thead>
+      <tbody>
+        {% for rule in rules %}
+        <tr>
+          <td class="name-cell">{{ rule.name }}</td>
+          <td class="scope-cell">{{ rule.scope }}</td>
+          <td>{{ rule.description }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  {% endif %}
+
+  <!-- MCP Tools -->
+  {% if mcp_tools %}
+  <section class="section" id="mcp-tools">
+    <h2>MCP Tools <span class="count">{{ mcp_tool_count }}</span></h2>
+    {% for category, tools in mcp_grouped.items() %}
+    {% if mcp_grouped | length > 1 %}
+    <div class="category-label">{{ category }}</div>
+    {% endif %}
+    <table class="data-table">
+      <thead><tr><th>Name</th><th>Description</th></tr></thead>
+      <tbody>
+        {% for tool in tools %}
+        <tr>
+          <td class="name-cell">{{ tool.name }}</td>
+          <td>{{ tool.description }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  <!-- Install -->
+  {% if site.installSteps %}
+  <section class="section" id="install">
+    <h2>Installation</h2>
+    <ol class="install-steps">
+      {% for step in site.installSteps %}
+      <li><span>{{ step }}</span></li>
+      {% endfor %}
+    </ol>
+  </section>
+  {% endif %}
+
+  <!-- Footer -->
+  <footer>
+    <p>
+      Built by <a href="{{ plugin.author.url | default('https://github.com/TMHSDigital') }}">{{ plugin.author.name | default('TMHSDigital') }}</a>
+      &middot; {{ plugin.license | default('CC-BY-NC-ND-4.0') }}
+      &middot; v{{ plugin.version | default('0.0.0') }}
+    </p>
+  </footer>
+
+  <script>
+    // Animated stat counters
+    (function () {
+      const observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          const el = entry.target;
+          const target = parseInt(el.getAttribute('data-target'), 10);
+          if (isNaN(target)) return;
+          observer.unobserve(el);
+          const duration = 1200;
+          const start = performance.now();
+          function tick(now) {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(eased * target);
+            if (progress < 1) requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
+        });
+      }, { threshold: 0.3 });
+      document.querySelectorAll('.stat-val[data-target]').forEach(function (el) {
+        observer.observe(el);
+      });
+    })();
+
+    // Copy to clipboard
+    document.querySelectorAll('.copy-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var text = btn.getAttribute('data-copy');
+        if (!text) return;
+        navigator.clipboard.writeText(text).then(function () {
+          var orig = btn.textContent;
+          btn.textContent = 'Copied!';
+          setTimeout(function () { btn.textContent = orig; }, 1500);
+        });
+      });
+    });
+
+    // Scroll spy
+    (function () {
+      var links = document.querySelectorAll('.nav-links a[href^="#"]');
+      if (!links.length) return;
+      var sections = [];
+      links.forEach(function (link) {
+        var id = link.getAttribute('href').slice(1);
+        var el = document.getElementById(id);
+        if (el) sections.push({ el: el, link: link });
+      });
+      function onScroll() {
+        var scrollY = window.scrollY + 80;
+        var current = null;
+        sections.forEach(function (s) {
+          if (s.el.offsetTop <= scrollY) current = s;
+        });
+        links.forEach(function (l) { l.classList.remove('active'); });
+        if (current) current.link.classList.add('active');
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+  </script>
+
+</body>
+</html>
