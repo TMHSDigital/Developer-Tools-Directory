@@ -203,10 +203,10 @@
       <h2>Skills</h2>
       <span class="count">{{ skill_count }}</span>
       <div class="section-actions">
-        <button class="btn-sm toggle-section" data-target="skills-body">Collapse</button>
+        <button class="btn-sm toggle-section" data-target="skills-body">Expand</button>
       </div>
     </div>
-    <details class="cat-group" id="skills-body" open>
+    <details class="cat-group" id="skills-body">
       <summary class="sr-only">Skills list</summary>
       <div class="cat-body">
         <table class="data-table">
@@ -232,10 +232,10 @@
       <h2>Rules</h2>
       <span class="count">{{ rule_count }}</span>
       <div class="section-actions">
-        <button class="btn-sm toggle-section" data-target="rules-body">Collapse</button>
+        <button class="btn-sm toggle-section" data-target="rules-body">Expand</button>
       </div>
     </div>
-    <details class="cat-group" id="rules-body" open>
+    <details class="cat-group" id="rules-body">
       <summary class="sr-only">Rules list</summary>
       <div class="cat-body">
         <table class="data-table">
@@ -275,7 +275,7 @@
     </div>
     {% if mcp_grouped | length > 1 %}
       {% for category, tools in mcp_grouped.items() %}
-      <details class="cat-group"{% if loop.first %} open{% endif %} data-cat="{{ category }}">
+      <details class="cat-group" data-cat="{{ category }}">
         <summary>{{ category }} <span class="cat-count">{{ tools | length }}</span></summary>
         <div class="cat-body">
           <table class="data-table">
@@ -314,10 +314,10 @@
     <div class="section-header">
       <h2>Installation</h2>
       <div class="section-actions">
-        <button class="btn-sm toggle-section" data-target="install-body">Collapse</button>
+        <button class="btn-sm toggle-section" data-target="install-body">Expand</button>
       </div>
     </div>
-    <details class="cat-group" id="install-body" open>
+    <details class="cat-group" id="install-body">
       <summary class="sr-only">Installation steps</summary>
       <div class="cat-body">
         <ol class="install-steps">
