@@ -155,17 +155,26 @@ python scaffold/create-tool.py \
 
 ```
 Developer-Tools-Directory/
-  .github/workflows/     CI/CD (validate, pages)
-  assets/                Logo
-  docs/                  GitHub Pages catalog site
-  scaffold/              Repo generator + Jinja2 templates
-  standards/             Convention documentation (9 docs)
-  registry.json          Tool registry (source of truth)
+  .github/
+    workflows/             CI/CD (validate, pages, release, stale, codeql, dep-review, label-sync)
+    release-drafter.yml    Release notes category config
+  assets/                  Logo
+  docs/                    GitHub Pages catalog site
+  scaffold/                Repo generator + Jinja2 templates
+  standards/               Convention documentation (9 docs)
+  registry.json            Tool registry (source of truth)
+  AGENTS.md                AI agent guidance
+  CLAUDE.md                Claude Code project docs
+  .cursorrules             Cursor IDE agent rules
 ```
 
 ## Contributing
 
-Pull requests welcome. See the [standards](standards/) for conventions.
+Pull requests welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, how-to guides, and PR process.
+
+This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
+
+For security issues, see [SECURITY.md](SECURITY.md).
 
 ## License
 

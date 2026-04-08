@@ -1,0 +1,78 @@
+You are working on Developer Tools Directory, a meta-repository that catalogs, standardizes, and scaffolds TMHSDigital Cursor IDE plugins and MCP servers.
+
+## Repo structure
+
+- `registry.json` -- single source of truth for all 9 tool repos (name, type, counts, links, status)
+- `standards/` -- 9 Markdown docs defining conventions (folder structure, CI/CD, manifests, pages, commits, README, AGENTS.md, versioning)
+- `scaffold/create-tool.py` -- Python repo generator using Jinja2 templates
+- `scaffold/templates/` -- 18 Jinja2 templates producing a standards-compliant repo
+- `docs/` -- static GitHub Pages catalog site (index.html, style.css, script.js)
+- `assets/` -- logo image
+- `.github/workflows/` -- CI/CD for this repo (validate, pages, stale, codeql, dependency-review, release, release-drafter, label-sync)
+- `AGENTS.md` -- AI agent guidance for this repo
+- `CLAUDE.md` -- Claude Code project documentation
+
+## Commit conventions
+
+Use conventional commits. Prefix determines changelog category:
+- `feat:` -- new tool in registry, new standard doc, new scaffold template
+- `fix:` -- corrections to existing content
+- `chore:` -- dependency updates, CI changes, maintenance
+- `docs:` -- documentation-only changes
+
+## Hard rules
+
+- No em dashes or en dashes anywhere. Use hyphens or rewrite.
+- No hardcoded credentials, tokens, API keys, or passwords.
+- No binary files except images in `assets/`.
+- `registry.json` must be valid JSON at all times -- CI enforces schema.
+- The catalog site uses no external CDN dependencies -- everything is self-contained.
+- Standards docs are written for public readership -- no internal references.
+- All content is CC-BY-NC-ND-4.0 licensed.
+
+## When editing registry.json
+
+- Every entry needs all required fields: name, repo, slug, description, type, homepage, skills, rules, mcpTools, extras, topics, status, version, language, license, pagesType, hasCI.
+- `type` must be `cursor-plugin` or `mcp-server`.
+- `skills`, `rules`, `mcpTools` must be integers.
+- After editing registry.json, also update:
+  1. The embedded registry in `docs/index.html` (inside `<script type="application/json" id="registry-data">`)
+  2. The tools table and aggregate stats line in `README.md`
+
+## When editing standards/
+
+- Standards are pure Markdown documentation -- no executable code.
+- If adding a new standard, also add a row to `standards/README.md` and the standards table in `README.md`.
+- If the standard changes scaffold output expectations, update the corresponding `.j2` template in `scaffold/templates/`.
+- Use `docs:` commit prefix for edits, `feat:` for new standards.
+
+## When editing scaffold/
+
+- Templates are Jinja2 (`.j2` extension) in `scaffold/templates/`.
+- The generator script is `scaffold/create-tool.py`. It accepts CLI args: --name, --slug, --description, --type, --mcp-server, --skills, --rules, --license, --output, --author-name, --author-email.
+- If adding a new template file, update `create-tool.py` to render it.
+- Test locally: `python scaffold/create-tool.py --name "Test" --description "Test" --mcp-server --skills 2 --rules 1 --output /tmp/test`
+- CI runs a dry-run test on every push.
+
+## When editing docs/
+
+- `docs/index.html` is the catalog site entry point.
+- `docs/script.js` fetches `registry.json` at runtime and renders tool cards. It also has an embedded fallback copy.
+- `docs/style.css` is the full stylesheet -- dark theme, responsive, card layout.
+- No external dependencies (CDNs, frameworks). Vanilla HTML/CSS/JS only.
+- The `pages.yml` workflow copies `registry.json` and `assets/` into `docs/` at deploy time.
+
+## When editing workflows
+
+- `validate.yml` runs on PR and push to main. Keep checks fast.
+- `pages.yml` deploys to GitHub Pages. It copies registry.json into docs/ during build.
+- `release.yml` auto-creates releases on push to main.
+- `release-drafter.yml` auto-drafts release notes from merged PR titles and labels.
+- `stale.yml` runs weekly. Issues: 60-day stale / 14-day close. PRs: 30-day stale / 14-day close.
+- `codeql.yml` scans Python code for security issues weekly and on push/PR.
+- `dependency-review.yml` audits new dependencies in PRs.
+- `label-sync.yml` auto-labels PRs based on changed file paths.
+
+## Dependencies
+
+One Python dependency: `Jinja2` (in `requirements.txt`). The docs site has zero dependencies.
