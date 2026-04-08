@@ -71,3 +71,18 @@ jobs:
             --generate-notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sync repo About section
+        run: |
+          TOOLS=$(python3 -c "import json; data=json.load(open('registry.json')); print(len(data))")
+          SKILLS=$(python3 -c "import json; data=json.load(open('registry.json')); print(sum(t.get('skills',0) for t in data))")
+          RULES=$(python3 -c "import json; data=json.load(open('registry.json')); print(sum(t.get('rules',0) for t in data))")
+          MCP=$(python3 -c "import json; data=json.load(open('registry.json')); print(sum(t.get('mcpTools',0) for t in data))")
+
+          DESC="Centralized catalog, standards, and scaffolding for ${TOOLS} TMHSDigital developer tools - ${SKILLS} skills, ${RULES} rules, ${MCP} MCP tools"
+
+          gh repo edit "${{ github.repository }}" \
+            --description "$DESC" \
+            --homepage "https://tmhsdigital.github.io/Developer-Tools-Directory/"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
