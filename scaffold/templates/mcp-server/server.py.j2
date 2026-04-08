@@ -1,0 +1,24 @@
+"""
+{{ name }} MCP Server
+
+Entry point for the Model Context Protocol server.
+"""
+
+import json
+import logging
+from mcp.server.fastmcp import FastMCP
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("{{ slug }}-mcp")
+
+mcp = FastMCP("{{ name }}")
+
+
+@mcp.tool()
+def hello(name: str = "world") -> str:
+    """A placeholder tool. Replace this with real tools."""
+    return f"Hello, {name}! The {{ name }} MCP server is running."
+
+
+if __name__ == "__main__":
+    mcp.run(transport="stdio")

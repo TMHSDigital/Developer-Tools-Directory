@@ -1,0 +1,24 @@
+# Changelog
+
+All notable changes to {{ name }} will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/).
+
+## [0.1.0] - Unreleased
+
+### Added
+
+- Initial project scaffold
+{% if type == 'cursor-plugin' %}
+{% for skill in skills %}
+- {{ skill | replace('-', ' ') | title }} skill
+{% endfor %}
+{% for rule in rules %}
+- {{ rule | replace('-', ' ') | title }} rule
+{% endfor %}
+{% if has_mcp %}
+- MCP server scaffold
+{% endif %}
+{% endif %}
+- CI/CD workflows (validate, release, pages, stale)
+- GitHub Pages documentation site

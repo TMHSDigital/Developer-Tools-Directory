@@ -1,0 +1,98 @@
+name: Validate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-registry:
+    name: Validate registry.json
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate JSON syntax
+        run: python3 -c "import json; json.load(open('registry.json'))"
+
+      - name: Validate registry schema
+        run: python3 << 'EOF'
+        import json, sys
+
+        data = json.load(open("registry.json"))
+        assert isinstance(data, list), "registry.json must be an array"
+
+        required = ["name", "repo", "slug", "description", "type", "skills", "rules", "mcpTools", "status"]
+        valid_types = ["cursor-plugin", "mcp-server"]
+        errors = []
+
+        for i, tool in enumerate(data):
+            for field in required:
+                if field not in tool:
+                    errors.append(f"Entry {i} ({tool.get('name', '?')}): missing '{field}'")
+            if tool.get("type") not in valid_types:
+                errors.append(f"Entry {i} ({tool.get('name', '?')}): invalid type '{tool.get('type')}'")
+            if not isinstance(tool.get("skills", 0), int):
+                errors.append(f"Entry {i} ({tool.get('name', '?')}): skills must be int")
+            if not isinstance(tool.get("rules", 0), int):
+                errors.append(f"Entry {i} ({tool.get('name', '?')}): rules must be int")
+            if not isinstance(tool.get("mcpTools", 0), int):
+                errors.append(f"Entry {i} ({tool.get('name', '?')}): mcpTools must be int")
+
+        if errors:
+            for e in errors:
+                print(f"::error::{e}", file=sys.stderr)
+            sys.exit(1)
+
+        print(f"Registry valid: {len(data)} tools")
+        EOF
+
+  validate-docs:
+    name: Validate docs site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check docs/index.html exists
+        run: test -f docs/index.html
+
+      - name: Check docs/style.css exists
+        run: test -f docs/style.css
+
+      - name: Check docs/script.js exists
+        run: test -f docs/script.js
+
+  validate-scaffold:
+    name: Validate scaffold
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install Jinja2
+
+      - name: Check scaffold syntax
+        run: python3 -m py_compile scaffold/create-tool.py
+
+      - name: Test scaffold dry run
+        run: |
+          python3 scaffold/create-tool.py \
+            --name "CI Test Plugin" \
+            --description "Automated test" \
+            --mcp-server \
+            --skills 2 \
+            --rules 1 \
+            --output /tmp/scaffold-test
+
+          test -f /tmp/scaffold-test/ci-test-plugin/.cursor-plugin/plugin.json
+          test -f /tmp/scaffold-test/ci-test-plugin/.github/workflows/validate.yml
+          test -f /tmp/scaffold-test/ci-test-plugin/mcp-server/server.py
+          echo "Scaffold test passed"

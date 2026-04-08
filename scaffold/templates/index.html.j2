@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ name }}</title>
+  <meta name="description" content="{{ description }}" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #1c2128;
+      --border: #30363d; --text: #e6edf3; --text2: #8b949e;
+      --accent: #7c3aed; --accent-l: #a78bfa;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Noto Sans, Helvetica, Arial, sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }
+    a { color: var(--accent-l); text-decoration: none; }
+    a:hover { color: #c4b5fd; }
+
+    .hero {
+      text-align: center; padding: 6rem 1.5rem 4rem;
+      max-width: 700px; margin: 0 auto;
+    }
+    .hero h1 {
+      font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--text), var(--accent-l));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero p { font-size: 1.125rem; color: var(--text2); margin-bottom: 2rem; }
+
+    .stats {
+      display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+    .stat-val { font-size: 1.75rem; font-weight: 700; color: var(--accent-l); font-family: var(--mono); }
+    .stat-lbl { font-size: 0.75rem; color: #6e7681; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .section {
+      max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem;
+    }
+    .section h2 {
+      font-size: 1.375rem; margin-bottom: 1rem; padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .section p, .section li { color: var(--text2); font-size: 0.9375rem; }
+    .section ul { padding-left: 1.25rem; margin-bottom: 1rem; }
+    .section li { margin-bottom: 0.375rem; }
+
+    code {
+      background: var(--bg2); padding: 0.15rem 0.4rem; border-radius: 4px;
+      font-family: var(--mono); font-size: 0.85em;
+    }
+    pre {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 1rem; overflow-x: auto; margin: 1rem 0;
+    }
+    pre code { background: none; padding: 0; }
+
+    .cta {
+      display: inline-block; background: var(--accent); color: white;
+      padding: 0.625rem 1.5rem; border-radius: 8px; font-weight: 600;
+      margin-top: 0.5rem; transition: background 0.2s;
+    }
+    .cta:hover { background: #6d28d9; color: white; }
+
+    footer {
+      border-top: 1px solid var(--border); text-align: center;
+      padding: 2rem; color: #6e7681; font-size: 0.8125rem; margin-top: 3rem;
+    }
+
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.75rem; }
+      .stats { gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <h1>{{ name }}</h1>
+    <p>{{ description }}</p>
+{% if type == 'cursor-plugin' %}
+    <div class="stats">
+      <div><div class="stat-val">{{ skill_count }}</div><div class="stat-lbl">Skills</div></div>
+      <div><div class="stat-val">{{ rule_count }}</div><div class="stat-lbl">Rules</div></div>
+{% if has_mcp %}
+      <div><div class="stat-val">0</div><div class="stat-lbl">MCP Tools</div></div>
+{% endif %}
+    </div>
+{% endif %}
+    <a href="https://github.com/{{ repo_owner }}/{{ repo_name }}" class="cta">View on GitHub</a>
+  </section>
+
+  <section class="section">
+    <h2>Quick Start</h2>
+    <ol>
+      <li>Clone the repository</li>
+      <li>Open the folder in Cursor IDE</li>
+{% if has_mcp %}
+      <li>Install MCP dependencies: <code>cd mcp-server && pip install -r requirements.txt</code></li>
+{% endif %}
+      <li>Start using the AI skills and rules</li>
+    </ol>
+  </section>
+
+  <section class="section">
+    <h2>Links</h2>
+    <ul>
+      <li><a href="https://github.com/{{ repo_owner }}/{{ repo_name }}">GitHub Repository</a></li>
+      <li><a href="https://github.com/{{ repo_owner }}/{{ repo_name }}/blob/main/CONTRIBUTING.md">Contributing Guide</a></li>
+      <li><a href="https://github.com/{{ repo_owner }}/{{ repo_name }}/blob/main/CHANGELOG.md">Changelog</a></li>
+    </ul>
+  </section>
+
+  <footer>
+    <p>Built by <a href="https://github.com/{{ repo_owner }}">{{ author_name }}</a></p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,45 @@
+# CLAUDE.md
+
+This file provides guidance for Claude Code when working in this repository.
+
+## Project
+
+{{ name }} -- {{ description }}
+
+## Key paths
+
+{% if type == 'cursor-plugin' %}
+- Plugin manifest: `.cursor-plugin/plugin.json`
+- Skills: `skills/*/SKILL.md`
+- Rules: `rules/*.mdc`
+{% if has_mcp %}
+- MCP server: `mcp-server/server.py`
+- MCP tools: `mcp-server/tools/`
+{% endif %}
+{% else %}
+- Source: `src/`
+- Package manifest: `package.json`
+{% endif %}
+- Docs site: `docs/`
+- CI workflows: `.github/workflows/`
+
+## Conventions
+
+- Use conventional commits (`feat:`, `fix:`, `chore:`, `docs:`)
+- Never manually edit the version in {% if type == 'cursor-plugin' %}plugin.json{% else %}package.json{% endif %} -- CI handles it
+- All skills need YAML frontmatter with title, description, globs
+- All rules need frontmatter with description, globs, alwaysApply
+
+## Testing
+
+{% if has_mcp %}
+```bash
+cd mcp-server && pip install -r requirements.txt
+python3 -m py_compile server.py
+```
+{% else %}
+```bash
+# Run validation
+python3 -c "import json; json.load(open('.cursor-plugin/plugin.json'))"
+```
+{% endif %}

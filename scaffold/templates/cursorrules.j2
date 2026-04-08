@@ -1,0 +1,25 @@
+# {{ name }}
+
+This is a {{ type }} repository for {{ name | replace(' Developer Tools', '') | replace(' Cursor Plugin', '') }} development.
+
+## Project structure
+
+{% if type == 'cursor-plugin' %}
+- `.cursor-plugin/plugin.json` -- plugin manifest (version source of truth)
+- `skills/` -- AI skill definitions (SKILL.md with YAML frontmatter)
+- `rules/` -- coding convention rules (.mdc with frontmatter)
+{% if has_mcp %}
+- `mcp-server/` -- Python MCP server
+{% endif %}
+- `docs/` -- GitHub Pages site
+{% else %}
+- `src/` -- TypeScript source
+- `package.json` -- npm package manifest
+{% endif %}
+
+## Conventions
+
+- Use conventional commits (feat:, fix:, chore:, docs:)
+- Never manually edit the version -- CI handles it
+- Skills need YAML frontmatter: title, description, globs
+- Rules need frontmatter: description, globs, alwaysApply

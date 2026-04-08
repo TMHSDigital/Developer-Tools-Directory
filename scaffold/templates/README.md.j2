@@ -1,0 +1,96 @@
+# {{ name }}
+
+**{{ description }}**
+
+![License: {{ license_spdx }}](https://img.shields.io/badge/license-{{ license_spdx | replace('-', '--') }}-green)
+![Version](https://img.shields.io/badge/version-0.1.0-blue)
+
+---
+
+{% if type == 'cursor-plugin' %}
+> {{ skill_count }} skills - {{ rule_count }} rules{% if has_mcp %} - MCP tools{% endif %}
+
+{{ description }}
+
+## Quick Start
+
+1. Clone this repository
+2. Open the folder in Cursor IDE (File > Open Folder)
+{% if has_mcp %}
+3. Install MCP server dependencies: `cd mcp-server && pip install -r requirements.txt`
+{% endif %}
+4. Start asking the AI agent questions about {{ name | replace(' Developer Tools', '') | replace(' Cursor Plugin', '') }}
+
+## Skills ({{ skill_count }})
+
+| Skill | What it does |
+| --- | --- |
+{% for skill in skills %}
+| **{{ skill | replace('-', ' ') | title }}** | TODO |
+{% endfor %}
+
+## Rules ({{ rule_count }})
+
+| Rule | What it does |
+| --- | --- |
+{% for rule in rules %}
+| **{{ rule | replace('-', ' ') | title }}** | TODO |
+{% endfor %}
+{% if has_mcp %}
+
+## MCP Server
+
+The companion MCP server provides programmatic tools that Cursor's AI agent can call directly. Configuration lives in `.cursor/mcp.json`.
+
+**Prerequisites:** Python 3.10+
+
+```bash
+cd mcp-server
+pip install -r requirements.txt
+```
+{% endif %}
+{% else %}
+{{ description }}
+
+## Installation
+
+```bash
+npm install {{ slug }}
+```
+{% endif %}
+
+## Project Structure
+
+```
+{{ slug }}/
+{% if type == 'cursor-plugin' %}
+  .cursor-plugin/     Plugin manifest
+  skills/             AI skill files
+  rules/              Coding convention rules
+{% if has_mcp %}
+  mcp-server/         Python MCP server and data files
+{% endif %}
+  docs/               Documentation site
+  assets/             Logo and images
+  .github/            CI/CD workflows
+{% else %}
+  src/                Source code
+  .github/            CI/CD workflows
+{% endif %}
+```
+
+## Roadmap
+
+See [ROADMAP.md](ROADMAP.md) for the full project roadmap.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## License
+
+{{ license_spdx }} -- see [LICENSE](LICENSE) for details.
+
+---
+
+**Built by {{ author_name }}**
