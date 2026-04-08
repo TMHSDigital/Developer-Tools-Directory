@@ -46,6 +46,40 @@ def parse_frontmatter(text: str) -> tuple[dict[str, str], str]:
     return meta, body
 
 
+def _extract_tools_from_frontmatter(lines: list[str]) -> list[str]:
+    """Parse a YAML list of tools from frontmatter lines (handles ``tools:`` key)."""
+    tools: list[str] = []
+    in_tools = False
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("tools:"):
+            in_tools = True
+            continue
+        if in_tools:
+            if stripped.startswith("- "):
+                tools.append(stripped[2:].strip())
+            else:
+                break
+    return tools
+
+
+def _extract_trigger_section(body: str) -> list[str]:
+    """Pull bullet items from the ``## Trigger`` section of a SKILL.md body."""
+    triggers: list[str] = []
+    in_trigger = False
+    for line in body.splitlines():
+        stripped = line.strip()
+        if re.match(r"^##\s+Trigger", stripped, re.IGNORECASE):
+            in_trigger = True
+            continue
+        if in_trigger:
+            if stripped.startswith("##"):
+                break
+            if stripped.startswith("- "):
+                triggers.append(stripped[2:].strip())
+    return triggers
+
+
 def parse_skills(repo_root: Path) -> list[dict]:
     skills_dir = repo_root / "skills"
     if not skills_dir.is_dir():
@@ -80,10 +114,16 @@ def parse_skills(repo_root: Path) -> list[dict]:
                     name = re.sub(r"^#+\s*", "", stripped)
                     break
 
+        fm_lines = text.splitlines()
+        tools = _extract_tools_from_frontmatter(fm_lines)
+        triggers = _extract_trigger_section(body)
+
         results.append({
             "name": name,
             "description": description,
             "category": skill_dir.name,
+            "tools": tools,
+            "triggers": triggers,
         })
 
     return results
@@ -128,6 +168,60 @@ def parse_rules(repo_root: Path) -> list[dict]:
         })
 
     return results
+
+
+def parse_changelog(repo_root: Path, max_entries: int = 2) -> list[dict]:
+    """Parse a Keep-a-Changelog formatted CHANGELOG.md.
+
+    Returns up to *max_entries* release entries (skipping ``[Unreleased]``),
+    each as ``{ version, date, sections: [{ heading, items }] }``.
+    """
+    changelog_path = repo_root / "CHANGELOG.md"
+    if not changelog_path.is_file():
+        return []
+
+    text = changelog_path.read_text(encoding="utf-8", errors="replace")
+    entries: list[dict] = []
+    current_entry: dict | None = None
+    current_section: dict | None = None
+
+    for line in text.splitlines():
+        heading_match = re.match(r"^##\s+\[(.+?)\](?:\s*-\s*(.+))?", line)
+        if heading_match:
+            version = heading_match.group(1)
+            date = (heading_match.group(2) or "").strip()
+            if version.lower() == "unreleased":
+                continue
+            if current_entry is not None:
+                if current_section:
+                    current_entry["sections"].append(current_section)
+                entries.append(current_entry)
+                if len(entries) >= max_entries:
+                    break
+            current_entry = {"version": version, "date": date, "sections": []}
+            current_section = None
+            continue
+
+        if current_entry is None:
+            continue
+
+        sub_match = re.match(r"^###\s+(.+)", line)
+        if sub_match:
+            if current_section:
+                current_entry["sections"].append(current_section)
+            current_section = {"heading": sub_match.group(1).strip(), "entries": []}
+            continue
+
+        if current_section is not None and line.strip().startswith("- "):
+            current_section["entries"].append(line.strip()[2:].strip())
+
+    if current_entry is not None:
+        if current_section:
+            current_entry["sections"].append(current_section)
+        if len(entries) < max_entries:
+            entries.append(current_entry)
+
+    return entries
 
 
 def load_mcp_tools(repo_root: Path) -> list[dict]:
@@ -185,6 +279,7 @@ def main():
     rules = parse_rules(repo_root)
     mcp_tools = load_mcp_tools(repo_root)
     mcp_grouped = group_by_category(mcp_tools)
+    changelog = parse_changelog(repo_root)
 
     context = {
         "plugin": plugin,
@@ -196,6 +291,8 @@ def main():
         "mcp_tools": mcp_tools,
         "mcp_tool_count": len(mcp_tools),
         "mcp_grouped": mcp_grouped,
+        "changelog": changelog,
+        "has_changelog": len(changelog) > 0,
         "build_date": datetime.date.today().isoformat(),
     }
 

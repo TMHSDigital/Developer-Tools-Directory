@@ -4,7 +4,7 @@
 
 ## Current Status
 
-**v1.1.0** - Centralized directory with 10 registered tools, scaffold generator, unified site template, and GitHub Pages catalog.
+**v1.3.0** - Content-rich pages with skill detail expansion, changelog, quick-start snippets, compatibility badges, and related tools cross-links.
 
 ## Release Plan
 
@@ -12,9 +12,9 @@
 |---------|-------|--------|
 | v1.0.0 | Foundation | Released |
 | v1.1.0 | Unified Site Template | Released |
-| v1.2.0 | Cross-Repo Consistency | Next |
-| v1.3.0 | Content-Rich Pages | Planned |
-| v1.4.0 | Discovery and Performance | Planned |
+| v1.2.0 | Cross-Repo Consistency | Released |
+| v1.3.0 | Content-Rich Pages | Released |
+| v1.4.0 | Discovery and Performance | Next |
 | v1.5.0 | Infrastructure and Documentation | Planned |
 
 ---
@@ -160,6 +160,14 @@ Maintenance, documentation, and packaging consistency.
 - [x] `AGENTS.md` created in all 4 tool repos
 - [x] Monday CI workflow and dependency-review workflow added
 - [x] Monday README badges made clickable
+- [x] README style audit across all 4 tool repos (clickable badges, consistent structure)
+- [x] CI gaps filled: `label-sync.yml`, `release.yml`, `links.yml` added to all tool repos
+- [x] Directory catalog site polished (inline CSS/JS, dark/light mode, search, animations)
+- [x] Skill detail expansion (click-to-expand rows with triggers and MCP tools)
+- [x] Changelog section parsed from `CHANGELOG.md` (latest 2 releases, collapsible)
+- [x] Quick-start snippet with copy button (`quickStart` in `site.json`)
+- [x] Compatibility badges as pills in hero (`compatibility` in `site.json`)
+- [x] Related tools cross-links as card grid (`relatedTools` in `site.json`)
 
 ---
 
