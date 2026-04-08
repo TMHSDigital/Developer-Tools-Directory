@@ -1,53 +1,110 @@
-# Developer Tools Directory
+<div align="center">
+ <img src="assets/logo.png" alt="Developer Tools Directory" width="120" />
+</div>
 
-**Centralized catalog, standards, and scaffolding for TMHSDigital Cursor IDE plugins, MCP servers, and developer tools.**
+<h1 align="center">Developer Tools Directory</h1>
 
-![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/license-CC--BY--NC--ND--4.0-green)
+<p align="center">
+ <strong>Centralized catalog, standards, and scaffolding for TMHSDigital Cursor IDE plugins, MCP servers, and developer tools.</strong>
+</p>
+
+<p align="center">
+ <a href="https://tmhsdigital.github.io/Developer-Tools-Directory/"><img src="https://img.shields.io/badge/catalog-live-7c3aed" alt="Catalog" /></a>
+ <img src="https://img.shields.io/badge/license-CC--BY--NC--ND--4.0-green" alt="License: CC BY-NC-ND 4.0" />
+ <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/stargazers"><img src="https://img.shields.io/github/stars/TMHSDigital/Developer-Tools-Directory?style=flat" alt="GitHub stars" /></a>
+</p>
+
+<p align="center">
+ <a href="#tools">Tools</a> &bull;
+ <a href="#standards">Standards</a> &bull;
+ <a href="#scaffold-generator">Scaffold</a> &bull;
+ <a href="https://tmhsdigital.github.io/Developer-Tools-Directory/">Catalog Site</a>
+</p>
 
 ---
 
-> 9 repos -- 186 skills -- 77 rules -- 377 MCP tools
+<p align="center">
+ 9 repos &nbsp;&bull;&nbsp; 186 skills &nbsp;&bull;&nbsp; 77 rules &nbsp;&bull;&nbsp; 377 MCP tools
+</p>
+
+## How It Works
+
+```mermaid
+flowchart LR
+    A["registry.json\n(source of truth)"] --> B["GitHub Pages\ncatalog site"]
+    A --> C["README tables\n(below)"]
+    D["scaffold/\ncreate-tool.py"] --> E["New repo with\nall standards"]
+    F["standards/\n(conventions)"] --> D
+```
+
+**Registry** tracks every tool repo. **Standards** document conventions for CI/CD, folder structure, manifests, and versioning. **Scaffold** generates new repos that follow those standards automatically.
 
 ## Tools
 
-| Tool | Type | Skills | Rules | MCP Tools | Links |
-| --- | --- | ---: | ---: | ---: | --- |
-| **CFX Developer Tools** | Plugin | 9 | 6 | 6 | [Repo](https://github.com/TMHSDigital/CFX-Developer-Tools) - [Docs](https://tmhsdigital.github.io/CFX-Developer-Tools/) |
+| Tool | Type | Skills | Rules | MCP&nbsp;Tools | Links |
+|:-----|:-----|-------:|------:|------:|:------|
+| **CFX Developer Tools** | Plugin | 9 | 6 | 6 | [Repo](https://github.com/TMHSDigital/CFX-Developer-Tools) &bull; [Docs](https://tmhsdigital.github.io/CFX-Developer-Tools/) |
 | **Unity Developer Tools** | Plugin | 18 | 8 | 4 | [Repo](https://github.com/TMHSDigital/Unity-Developer-Tools) |
-| **Docker Developer Tools** | Plugin | 17 | 10 | 150 | [Repo](https://github.com/TMHSDigital/Docker-Developer-Tools) - [Docs](https://tmhsdigital.github.io/Docker-Developer-Tools/) |
-| **Home Lab Developer Tools** | Plugin | 22 | 11 | 50 | [Repo](https://github.com/TMHSDigital/Home-Lab-Developer-Tools) - [Docs](https://tmhsdigital.github.io/Home-Lab-Developer-Tools/) |
+| **Docker Developer Tools** | Plugin | 17 | 10 | 150 | [Repo](https://github.com/TMHSDigital/Docker-Developer-Tools) &bull; [Docs](https://tmhsdigital.github.io/Docker-Developer-Tools/) |
+| **Home Lab Developer Tools** | Plugin | 22 | 11 | 50 | [Repo](https://github.com/TMHSDigital/Home-Lab-Developer-Tools) &bull; [Docs](https://tmhsdigital.github.io/Home-Lab-Developer-Tools/) |
 | **Mobile App Developer Tools** | Plugin | 43 | 12 | 36 | [Repo](https://github.com/TMHSDigital/Mobile-App-Developer-Tools) |
 | **Plaid Developer Tools** | Plugin | 17 | 7 | 30 | [Repo](https://github.com/TMHSDigital/Plaid-Developer-Tools) |
-| **Monday Cursor Plugin** | Plugin | 21 | 8 | 45 | [Repo](https://github.com/TMHSDigital/Monday-Cursor-Plugin) - [Docs](https://tmhsdigital.github.io/Monday-Cursor-Plugin/) |
-| **Steam Cursor Plugin** | Plugin | 30 | 9 | 25 | [Repo](https://github.com/TMHSDigital/Steam-Cursor-Plugin) - [Docs](https://tmhsdigital.github.io/Steam-Cursor-Plugin/) |
-| **Steam MCP Server** | MCP Server | 0 | 0 | 25 | [Repo](https://github.com/TMHSDigital/steam-mcp) - [npm](https://www.npmjs.com/package/@tmhs/steam-mcp) |
+| **Monday Cursor Plugin** | Plugin | 21 | 8 | 45 | [Repo](https://github.com/TMHSDigital/Monday-Cursor-Plugin) &bull; [Docs](https://tmhsdigital.github.io/Monday-Cursor-Plugin/) |
+| **Steam Cursor Plugin** | Plugin | 30 | 9 | 25 | [Repo](https://github.com/TMHSDigital/Steam-Cursor-Plugin) &bull; [Docs](https://tmhsdigital.github.io/Steam-Cursor-Plugin/) |
+| **Steam MCP Server** | MCP Server | -- | -- | 25 | [Repo](https://github.com/TMHSDigital/steam-mcp) &bull; [npm](https://www.npmjs.com/package/@tmhs/steam-mcp) |
+
+<details>
+<summary>Tool descriptions</summary>
+
+&nbsp;
+
+| Tool | Description |
+|:-----|:------------|
+| **CFX Developer Tools** | AI-powered Cursor IDE plugin for FiveM and RedM resource development. Scaffold resources, look up 12,000+ natives, generate manifests, and write optimized scripts in Lua, JavaScript, and C#. |
+| **Unity Developer Tools** | Cursor plugin for Unity game development with URP, HDRP, and Built-in render pipeline support. 20 snippets and 5 starter templates. |
+| **Docker Developer Tools** | Expert Docker workflows for Cursor, Claude Code, and any MCP-compatible editor. Container management, Compose, and Dockerfile best practices. |
+| **Home Lab Developer Tools** | Home lab and Raspberry Pi workflows with Docker Compose, monitoring, DNS, networking, backups, security, and administration via SSH. |
+| **Mobile App Developer Tools** | Full mobile development lifecycle for React Native, Expo, and Flutter -- from project setup to app store submission. |
+| **Plaid Developer Tools** | Cursor plugin and MCP companion for building on the Plaid API. Banking, fintech, and open-banking integrations. |
+| **Monday Cursor Plugin** | Monday.com integration with boards, items, sprints, docs, dashboards, and GraphQL queries. |
+| **Steam Cursor Plugin** | Steam and Steamworks integration for game developers, modders, and power users. Store data, achievements, Workshop, multiplayer, and cloud saves. |
+| **Steam MCP Server** | Standalone MCP server for Steam and Steamworks APIs. 18 read-only + 7 write tools. Published on npm as `@tmhs/steam-mcp`. |
+
+</details>
 
 ## Standards
 
-Documented conventions for building new developer tools. See the full standards in [`standards/`](standards/).
+Documented conventions for building new developer tools. All docs in [`standards/`](standards/).
 
 | Standard | Summary |
-| --- | --- |
+|:---------|:--------|
 | [Folder Structure](standards/folder-structure.md) | Canonical repo layout for plugins and MCP servers |
-| [Plugin Manifest](standards/plugin-manifest.md) | `.cursor-plugin/plugin.json` specification |
-| [CI/CD](standards/ci-cd.md) | GitHub Actions workflows every repo must have |
-| [GitHub Pages](standards/github-pages.md) | Documentation site setup (static HTML or MkDocs) |
+| [Plugin Manifest](standards/plugin-manifest.md) | `.cursor-plugin/plugin.json` specification and required fields |
+| [CI/CD](standards/ci-cd.md) | GitHub Actions workflows every repo must have (validate, release, pages, stale) |
+| [GitHub Pages](standards/github-pages.md) | Documentation site setup -- static HTML or MkDocs Material |
 | [Commit Conventions](standards/commit-conventions.md) | Conventional commits and version bumping rules |
-| [README Template](standards/readme-template.md) | Standard README structure |
+| [README Template](standards/readme-template.md) | Standard README structure and required sections |
 | [AGENTS.md Template](standards/agents-template.md) | AI agent guidance file structure |
-| [Versioning](standards/versioning.md) | Semver management and release flow |
+| [Versioning](standards/versioning.md) | Semver management and automated release flow |
+
+<details>
+<summary>Core principles</summary>
+
+&nbsp;
+
+1. **Automation first** -- CI handles versioning, releases, badge updates, and repo metadata. Manual edits to managed fields will be overwritten.
+2. **Single branch** -- All repos use `main` only. No develop, staging, or release branches.
+3. **Conventional commits** -- Every commit follows the conventional format. The release workflow parses them to determine version bumps.
+4. **AI-agent friendly** -- Every repo includes `AGENTS.md` and `.cursorrules` so AI coding agents understand the project.
+5. **Public by default** -- Standards, docs, and tooling are written for public consumption.
+
+</details>
 
 ## Scaffold Generator
 
 Generate a fully standards-compliant repository from the command line.
 
-### Prerequisites
-
-```bash
-pip install Jinja2
-```
-
-### Usage
+**Prerequisites:** `pip install Jinja2`
 
 ```bash
 python scaffold/create-tool.py \
@@ -58,10 +115,13 @@ python scaffold/create-tool.py \
   --rules 3
 ```
 
-### Options
+<details>
+<summary>All options</summary>
+
+&nbsp;
 
 | Flag | Required | Default | Description |
-| --- | --- | --- | --- |
+|:-----|:---------|:--------|:------------|
 | `--name` | Yes | -- | Display name (e.g., "Unreal Developer Tools") |
 | `--description` | Yes | -- | One-line description |
 | `--slug` | No | auto | Kebab-case identifier (derived from name) |
@@ -74,36 +134,45 @@ python scaffold/create-tool.py \
 | `--author-name` | No | TMHSDigital | Author name for manifests |
 | `--author-email` | No | contact@... | Author email |
 
-### What It Generates
+</details>
+
+<details>
+<summary>What it generates</summary>
+
+&nbsp;
 
 - Full folder structure per the [standard](standards/folder-structure.md)
 - Populated `plugin.json` with provided metadata
 - All 4 core GitHub Actions workflows (validate, release, pages, stale)
 - Skeleton docs: `AGENTS.md`, `CLAUDE.md`, `README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `ROADMAP.md`
 - GitHub Pages site template (`docs/index.html`)
-- MCP server scaffold (if `--mcp-server` flag)
+- MCP server scaffold (if `--mcp-server`): `server.py`, `tools/`, `data/`, `requirements.txt`
 - `.cursorrules`, `.gitignore`, `LICENSE`
 
-## Catalog Site
-
-Browse all tools visually at the [GitHub Pages catalog](https://tmhsdigital.github.io/Developer-Tools-Directory/).
+</details>
 
 ## Project Structure
 
 ```
 Developer-Tools-Directory/
-  .github/workflows/     CI/CD for this repo (validate, pages)
+  .github/workflows/     CI/CD (validate, pages)
+  assets/                Logo
   docs/                  GitHub Pages catalog site
-  scaffold/              Repo generator script + Jinja2 templates
-  standards/             Convention documentation
+  scaffold/              Repo generator + Jinja2 templates
+  standards/             Convention documentation (9 docs)
   registry.json          Tool registry (source of truth)
-  README.md
 ```
+
+## Contributing
+
+Pull requests welcome. See the [standards](standards/) for conventions.
 
 ## License
 
-CC-BY-NC-ND-4.0 -- see [LICENSE](LICENSE) for details.
+CC BY-NC-ND 4.0 -- see [LICENSE](LICENSE) for details.
 
 ---
 
-**Built by [TMHSDigital](https://github.com/TMHSDigital)**
+<p align="center">
+ <strong>Built by <a href="https://github.com/TMHSDigital">TMHSDigital</a></strong>
+</p>
