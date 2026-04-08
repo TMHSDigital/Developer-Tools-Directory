@@ -142,6 +142,9 @@
       .section-actions { margin-left: 0; }
     }
 
+    /* SR ONLY */
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
     /* REDUCED MOTION */
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
@@ -199,18 +202,26 @@
     <div class="section-header">
       <h2>Skills</h2>
       <span class="count">{{ skill_count }}</span>
+      <div class="section-actions">
+        <button class="btn-sm toggle-section" data-target="skills-body">Collapse</button>
+      </div>
     </div>
-    <table class="data-table">
-      <thead><tr><th>Name</th><th>Description</th></tr></thead>
-      <tbody>
-        {% for skill in skills %}
-        <tr>
-          <td class="name-cell">{{ skill.name }}</td>
-          <td>{{ skill.description }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <details class="cat-group" id="skills-body" open>
+      <summary class="sr-only">Skills list</summary>
+      <div class="cat-body">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Description</th></tr></thead>
+          <tbody>
+            {% for skill in skills %}
+            <tr>
+              <td class="name-cell">{{ skill.name }}</td>
+              <td>{{ skill.description }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </details>
   </section>
   {% endif %}
 
@@ -220,19 +231,27 @@
     <div class="section-header">
       <h2>Rules</h2>
       <span class="count">{{ rule_count }}</span>
+      <div class="section-actions">
+        <button class="btn-sm toggle-section" data-target="rules-body">Collapse</button>
+      </div>
     </div>
-    <table class="data-table">
-      <thead><tr><th>Name</th><th>Scope</th><th>Description</th></tr></thead>
-      <tbody>
-        {% for rule in rules %}
-        <tr>
-          <td class="name-cell">{{ rule.name }}</td>
-          <td class="scope-cell">{{ rule.scope }}</td>
-          <td>{{ rule.description }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <details class="cat-group" id="rules-body" open>
+      <summary class="sr-only">Rules list</summary>
+      <div class="cat-body">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Scope</th><th>Description</th></tr></thead>
+          <tbody>
+            {% for rule in rules %}
+            <tr>
+              <td class="name-cell">{{ rule.name }}</td>
+              <td class="scope-cell">{{ rule.scope }}</td>
+              <td>{{ rule.description }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </details>
   </section>
   {% endif %}
 
@@ -292,12 +311,22 @@
   <!-- Install -->
   {% if site.installSteps %}
   <section class="section" id="install">
-    <div class="section-header"><h2>Installation</h2></div>
-    <ol class="install-steps">
-      {% for step in site.installSteps %}
-      <li><span>{{ step | safe }}</span></li>
-      {% endfor %}
-    </ol>
+    <div class="section-header">
+      <h2>Installation</h2>
+      <div class="section-actions">
+        <button class="btn-sm toggle-section" data-target="install-body">Collapse</button>
+      </div>
+    </div>
+    <details class="cat-group" id="install-body" open>
+      <summary class="sr-only">Installation steps</summary>
+      <div class="cat-body">
+        <ol class="install-steps">
+          {% for step in site.installSteps %}
+          <li><span>{{ step | safe }}</span></li>
+          {% endfor %}
+        </ol>
+      </div>
+    </details>
   </section>
   {% endif %}
 
@@ -417,6 +446,18 @@
         var allOpen = Array.prototype.every.call(details, function (d) { return d.open; });
         details.forEach(function (d) { d.open = !allOpen; });
         btn.textContent = allOpen ? 'Expand all' : 'Collapse all';
+      });
+    })();
+
+    /* Section collapse/expand toggles (Skills, Rules) */
+    (function () {
+      document.querySelectorAll('.toggle-section').forEach(function (btn) {
+        var targetId = btn.getAttribute('data-target');
+        var details = document.getElementById(targetId);
+        if (!details) return;
+        function updateLabel() { btn.textContent = details.open ? 'Collapse' : 'Expand'; }
+        btn.addEventListener('click', function () { details.open = !details.open; updateLabel(); });
+        details.addEventListener('toggle', updateLabel);
       });
     })();
 
