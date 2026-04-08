@@ -51,7 +51,11 @@ Checks:
 
 Has a concurrency guard -- only one release can run at a time. Commits with `[skip ci]` are ignored.
 
-After creating the release, it syncs the GitHub repository About section (description and homepage) by reading live counts from `registry.json`. **Do not manually edit the repo description** -- the release workflow owns it.
+The repo About section (description, homepage, topics) must be updated manually after registry changes since the GITHUB_TOKEN lacks permission for `gh repo edit`. Run locally:
+
+```
+gh repo edit TMHSDigital/Developer-Tools-Directory --description "Centralized catalog, standards, and scaffolding for <N> TMHSDigital developer tools - <S> skills, <R> rules, <M> MCP tools"
+```
 
 ### `release-drafter.yml` (runs on push to main and PR activity)
 
@@ -188,7 +192,7 @@ Pure documentation -- no code. Each file documents a convention derived from ana
 
 - **`validate.yml`** runs on PR and push to main. It has three jobs: registry validation, docs existence checks, and scaffold syntax + dry-run test. Keep checks fast -- avoid installing unnecessary dependencies.
 - **`pages.yml`** deploys to GitHub Pages on push to main when `docs/`, `assets/`, or `registry.json` change. It copies `registry.json` into `docs/` and `assets/` into `docs/assets/` before uploading. Uses `actions/deploy-pages`.
-- **`release.yml`** auto-creates a GitHub release on push to main (excluding docs/md/standards changes). It determines the version bump from conventional commit prefixes since the last tag. Has a concurrency guard -- only one release can run at a time. Commits containing `[skip ci]` are ignored. After release, it syncs the repo About section (description with live tool/skill/rule/MCP counts, homepage URL) from `registry.json`. Do not manually edit the repo description.
+- **`release.yml`** auto-creates a GitHub release on push to main (excluding docs/md/standards changes). It determines the version bump from conventional commit prefixes since the last tag. Has a concurrency guard -- only one release can run at a time. Commits containing `[skip ci]` are ignored. The repo About section must be updated manually via `gh repo edit` after registry changes (the GITHUB_TOKEN lacks permission for this).
 - **`release-drafter.yml`** auto-drafts release notes from merged PR titles/labels. Config is in `.github/release-drafter.yml`. Categories: Features, Standards, Scaffold, Bug Fixes, Documentation, CI/Infrastructure. The autolabeler assigns labels based on changed file paths.
 - **`stale.yml`** runs weekly (Sunday midnight UTC). Issues: 60-day stale, 14-day close. PRs: 30-day stale, 14-day close. Labels exempt from staleness: `pinned`, `security`, `enhancement` (issues) and `pinned`, `security` (PRs).
 - **`codeql.yml`** runs Python security scanning on push/PR to main and weekly (Monday 06:00 UTC). Uses `github/codeql-action` v3.

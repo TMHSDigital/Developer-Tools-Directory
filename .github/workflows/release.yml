@@ -12,7 +12,6 @@ on:
 
 permissions:
   contents: write
-  administration: write
 
 concurrency:
   group: release
@@ -73,18 +72,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Sync repo About section
-        continue-on-error: true
-        run: |
-          TOOLS=$(python3 -c "import json; data=json.load(open('registry.json')); print(len(data))")
-          SKILLS=$(python3 -c "import json; data=json.load(open('registry.json')); print(sum(t.get('skills',0) for t in data))")
-          RULES=$(python3 -c "import json; data=json.load(open('registry.json')); print(sum(t.get('rules',0) for t in data))")
-          MCP=$(python3 -c "import json; data=json.load(open('registry.json')); print(sum(t.get('mcpTools',0) for t in data))")
-
-          DESC="Centralized catalog, standards, and scaffolding for ${TOOLS} TMHSDigital developer tools - ${SKILLS} skills, ${RULES} rules, ${MCP} MCP tools"
-
-          gh repo edit "${{ github.repository }}" \
-            --description "$DESC" \
-            --homepage "https://tmhsdigital.github.io/Developer-Tools-Directory/"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # About section sync requires a PAT with repo scope.
+      # Run manually after registry changes:
+      #   python3 -c "import json; d=json.load(open('registry.json')); t=len(d); s=sum(x['skills'] for x in d); r=sum(x['rules'] for x in d); m=sum(x['mcpTools'] for x in d); print(f'{t} tools, {s} skills, {r} rules, {m} MCP tools')"
+      #   gh repo edit TMHSDigital/Developer-Tools-Directory --description "Centralized catalog, standards, and scaffolding for <N> TMHSDigital developer tools - <S> skills, <R> rules, <M> MCP tools"
