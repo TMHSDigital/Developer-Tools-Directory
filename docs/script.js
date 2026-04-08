@@ -107,6 +107,16 @@ function renderCards(tools) {
       );
     }
 
+    if (tool.npm) {
+      const npmPkg = Array.isArray(tool.npm) ? tool.npm[0] : tool.npm;
+      linksHtml.push(
+        `<a href="https://www.npmjs.com/package/${npmPkg}" class="card-link card-link-npm" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 0v16h16V0H0zm13 13H8V5h2.5v5.5H13V3H3v10h10V0z"/></svg>
+          npm
+        </a>`
+      );
+    }
+
     card.innerHTML = `
       <div class="card-header">
         <span class="card-title">${tool.name}</span>

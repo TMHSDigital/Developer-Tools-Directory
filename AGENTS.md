@@ -89,6 +89,7 @@ Array of tool objects. Required fields per entry:
 | `rules` | int | Number of rules |
 | `mcpTools` | int | Number of MCP tools |
 | `extras` | object | Optional extra counts (snippets, templates, natives, events) |
+| `npm` | string | npm package name (empty string or omit if none) |
 | `topics` | string[] | Discovery tags |
 | `status` | string | `active`, `beta`, `deprecated` |
 | `version` | string | Current semver version |
