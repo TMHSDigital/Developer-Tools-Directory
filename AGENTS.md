@@ -10,7 +10,8 @@ This is a **meta-repository** -- it does not contain a Cursor plugin or MCP serv
 
 - **`registry.json`** -- single source of truth for all tool repos (9 entries). The catalog site and README tables are derived from it.
 - **`standards/`** -- 9 Markdown docs defining conventions for folder structure, CI/CD, plugin manifests, GitHub Pages, commit conventions, README format, AGENTS.md format, and versioning.
-- **`scaffold/`** -- Python repo generator (`create-tool.py`) with 18 Jinja2 templates that produce a fully standards-compliant new tool repo.
+- **`scaffold/`** -- Python repo generator (`create-tool.py`) with Jinja2 templates that produce a fully standards-compliant new tool repo.
+- **`site-template/`** -- shared GitHub Pages build system for tool repos. `build_site.py` reads `.cursor-plugin/plugin.json`, `site.json`, `skills/`, `rules/`, and `mcp-tools.json` from a tool repo and renders `docs/index.html` via `template.html.j2`. Self-hosts Inter and JetBrains Mono fonts. Tool repos clone this directory in CI and run the build script at deploy time.
 - **`docs/`** -- static GitHub Pages catalog site (vanilla HTML/CSS/JS, no build step). Reads `registry.json` at runtime to render tool cards.
 - **`assets/`** -- logo image.
 - **`.github/workflows/`** -- CI/CD for this repo (validate, pages, release, release-drafter, stale, codeql, dependency-review, label-sync).
@@ -177,6 +178,19 @@ Pure documentation -- no code. Each file documents a convention derived from ana
   ```
 - CI runs a scaffold dry-run test on every push. If you add a new required file, add a `test -f` check to the `validate.yml` scaffold test step.
 - The `LICENSE.j2` template has conditional logic for MIT, Apache-2.0, and CC-BY-NC-ND-4.0. If adding a new license option, update both the template and the `LICENSE_FILES`/`SPDX` dicts in `create-tool.py`.
+
+## When editing site-template/
+
+- `site-template/build_site.py` is the build script that generates GitHub Pages sites for tool repos. It reads data from the tool repo and renders HTML via `template.html.j2`.
+- `site-template/template.html.j2` is a Jinja2 template producing a single-page site with: sticky nav, hero with animated stats, collapsible MCP tool categories, search/filter, back-to-top, toast copy feedback, and mobile hamburger nav.
+- `site-template/fonts/` contains self-hosted Inter (400/500/700) and JetBrains Mono (400) woff2 files.
+- `site-template/SETUP-PROMPT.md` is a copy-paste prompt for applying the template to a new tool repo.
+- Tool repos consume this template via their `pages.yml` workflow, which clones Developer-Tools-Directory with sparse checkout and runs `build_site.py --repo-root . --out docs`.
+- Data sources in each tool repo: `.cursor-plugin/plugin.json` (metadata), `site.json` (branding/colors), `skills/*/SKILL.md` (parsed for name/description via frontmatter), `rules/*.mdc` (parsed for name/scope/description), `mcp-tools.json` (manually maintained tool list).
+- Changes to the template or build script affect all tool repos on their next deploy. Test locally before pushing:
+  ```
+  python site-template/build_site.py --repo-root /path/to/tool-repo --out /path/to/tool-repo/docs
+  ```
 
 ## When editing docs/ (catalog site)
 

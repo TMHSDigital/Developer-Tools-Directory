@@ -4,7 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - "docs/**"
+      - "skills/**"
+      - "rules/**"
+      - "mcp-tools.json"
+      - "site.json"
+      - ".cursor-plugin/plugin.json"
       - "assets/**"
   workflow_dispatch:
 
@@ -17,7 +21,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  build-and-deploy:
     environment:
       name: github-pages
       url: {% raw %}${{ steps.deployment.outputs.page_url }}{% endraw %}
@@ -25,8 +29,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Copy assets into docs
-        run: cp -r assets docs/assets
+      - name: Checkout site template
+        uses: actions/checkout@v4
+        with:
+          repository: TMHSDigital/Developer-Tools-Directory
+          sparse-checkout: site-template
+          path: _template
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install Jinja2
+
+      - name: Build site
+        run: python _template/site-template/build_site.py --repo-root . --out docs
 
       - uses: actions/configure-pages@v5
 

@@ -5,7 +5,8 @@ You are working on Developer Tools Directory, a meta-repository that catalogs, s
 - `registry.json` -- single source of truth for all 9 tool repos (name, type, counts, links, status)
 - `standards/` -- 9 Markdown docs defining conventions (folder structure, CI/CD, manifests, pages, commits, README, AGENTS.md, versioning)
 - `scaffold/create-tool.py` -- Python repo generator using Jinja2 templates
-- `scaffold/templates/` -- 18 Jinja2 templates producing a standards-compliant repo
+- `scaffold/templates/` -- Jinja2 templates producing a standards-compliant repo
+- `site-template/` -- shared GitHub Pages build system for tool repos (build_site.py + template.html.j2 + fonts)
 - `docs/` -- static GitHub Pages catalog site (index.html, style.css, script.js)
 - `assets/` -- logo image
 - `.github/workflows/` -- CI/CD for this repo (validate, pages, stale, codeql, dependency-review, release, release-drafter, label-sync)
@@ -53,6 +54,13 @@ Use conventional commits. Prefix determines changelog category:
 - If adding a new template file, update `create-tool.py` to render it.
 - Test locally: `python scaffold/create-tool.py --name "Test" --description "Test" --mcp-server --skills 2 --rules 1 --output /tmp/test`
 - CI runs a dry-run test on every push.
+
+## When editing site-template/
+
+- `site-template/build_site.py` generates GitHub Pages for tool repos. It parses plugin.json, site.json, skills/, rules/, and mcp-tools.json.
+- `site-template/template.html.j2` is the Jinja2 HTML template with collapsible categories, search, mobile nav.
+- Tool repos clone this directory in CI via sparse checkout and run `build_site.py --repo-root . --out docs`.
+- Test locally: `python site-template/build_site.py --repo-root /path/to/tool-repo --out /path/to/tool-repo/docs`
 
 ## When editing docs/
 

@@ -26,21 +26,50 @@ jobs:
           import json, sys
           data = json.load(open("registry.json"))
           assert isinstance(data, list), "registry.json must be an array"
-          required = ["name", "repo", "slug", "description", "type", "skills", "rules", "mcpTools", "status"]
-          valid_types = ["cursor-plugin", "mcp-server"]
+          SCHEMA = {
+            "name": str,
+            "repo": str,
+            "slug": str,
+            "description": str,
+            "type": str,
+            "homepage": str,
+            "skills": int,
+            "rules": int,
+            "mcpTools": int,
+            "extras": dict,
+            "topics": list,
+            "status": str,
+            "version": str,
+            "language": str,
+            "license": str,
+            "pagesType": str,
+            "hasCI": bool,
+          }
+          OPTIONAL = {"npm": str}
+          VALID_TYPES = {"cursor-plugin", "mcp-server"}
+          VALID_STATUS = {"active", "beta", "deprecated"}
+          VALID_PAGES = {"static", "mkdocs", "none"}
           errors = []
           for i, tool in enumerate(data):
-            for field in required:
+            label = "Entry %d (%s)" % (i, tool.get("name", "?"))
+            for field, expected_type in SCHEMA.items():
               if field not in tool:
-                errors.append("Entry %d (%s): missing '%s'" % (i, tool.get("name", "?"), field))
-            if tool.get("type") not in valid_types:
-              errors.append("Entry %d (%s): invalid type '%s'" % (i, tool.get("name", "?"), tool.get("type")))
-            if not isinstance(tool.get("skills", 0), int):
-              errors.append("Entry %d (%s): skills must be int" % (i, tool.get("name", "?")))
-            if not isinstance(tool.get("rules", 0), int):
-              errors.append("Entry %d (%s): rules must be int" % (i, tool.get("name", "?")))
-            if not isinstance(tool.get("mcpTools", 0), int):
-              errors.append("Entry %d (%s): mcpTools must be int" % (i, tool.get("name", "?")))
+                errors.append("%s: missing required field '%s'" % (label, field))
+              elif not isinstance(tool[field], expected_type):
+                errors.append("%s: '%s' must be %s, got %s" % (label, field, expected_type.__name__, type(tool[field]).__name__))
+            for field, expected_type in OPTIONAL.items():
+              if field in tool and not isinstance(tool[field], expected_type):
+                errors.append("%s: optional '%s' must be %s" % (label, field, expected_type.__name__))
+            if tool.get("type") not in VALID_TYPES:
+              errors.append("%s: type must be one of %s" % (label, VALID_TYPES))
+            if tool.get("status") not in VALID_STATUS:
+              errors.append("%s: status must be one of %s" % (label, VALID_STATUS))
+            if tool.get("pagesType") not in VALID_PAGES:
+              errors.append("%s: pagesType must be one of %s" % (label, VALID_PAGES))
+            if not isinstance(tool.get("topics", []), list):
+              pass
+            elif not all(isinstance(t, str) for t in tool.get("topics", [])):
+              errors.append("%s: topics must be array of strings" % label)
           if errors:
             for e in errors:
               print("::error::" + e, file=sys.stderr)
@@ -91,5 +120,8 @@ jobs:
 
           test -f /tmp/scaffold-test/ci-test-plugin/.cursor-plugin/plugin.json
           test -f /tmp/scaffold-test/ci-test-plugin/.github/workflows/validate.yml
+          test -f /tmp/scaffold-test/ci-test-plugin/.github/workflows/pages.yml
+          test -f /tmp/scaffold-test/ci-test-plugin/site.json
+          test -f /tmp/scaffold-test/ci-test-plugin/mcp-tools.json
           test -f /tmp/scaffold-test/ci-test-plugin/mcp-server/server.py
           echo "Scaffold test passed"

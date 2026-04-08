@@ -27,7 +27,11 @@ Developer-Tools-Directory/
   standards/                 # Convention documentation (9 docs)
   scaffold/
     create-tool.py           # Repo generator script
-    templates/               # Jinja2 templates (18 files)
+    templates/               # Jinja2 templates for new repos
+  site-template/
+    build_site.py            # Shared GitHub Pages build for tool repos
+    template.html.j2         # HTML template with configurable branding
+    fonts/                   # Self-hosted Inter + JetBrains Mono woff2
   docs/                      # GitHub Pages catalog site
   assets/                    # Logo image
   .github/workflows/         # CI/CD automation
@@ -49,6 +53,7 @@ Developer-Tools-Directory/
   "rules": 0,
   "mcpTools": 0,
   "extras": {},
+  "npm": "",
   "topics": ["topic-1", "topic-2"],
   "status": "active",
   "version": "0.1.0",

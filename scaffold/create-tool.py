@@ -167,8 +167,9 @@ def main():
     write_file(output_dir, ".cursorrules", render_template(env, "cursorrules.j2", ctx))
     write_file(output_dir, ".gitignore", render_template(env, "gitignore.j2", ctx))
 
-    # GitHub Pages docs site
-    write_file(output_dir, "docs/index.html", render_template(env, "index.html.j2", ctx))
+    # GitHub Pages data files
+    write_file(output_dir, "site.json", render_template(env, "site.json.j2", ctx))
+    write_file(output_dir, "mcp-tools.json", render_template(env, "mcp-tools.json.j2", ctx))
 
     # Assets placeholder
     (output_dir / "assets").mkdir(parents=True, exist_ok=True)
@@ -178,7 +179,7 @@ def main():
     # Skills
     for skill in skill_names:
         skill_content = f"""---
-title: {skill.replace('-', ' ').title()}
+name: {skill}
 description: TODO - describe this skill
 globs: ["**/*"]
 alwaysApply: false

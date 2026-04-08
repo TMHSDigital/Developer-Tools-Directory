@@ -29,7 +29,7 @@
 ---
 
 <p align="center">
- 9 repos &nbsp;&bull;&nbsp; 186 skills &nbsp;&bull;&nbsp; 77 rules &nbsp;&bull;&nbsp; 377 MCP tools
+ 9 repos &nbsp;&bull;&nbsp; 177 skills &nbsp;&bull;&nbsp; 71 rules &nbsp;&bull;&nbsp; 371 MCP tools
 </p>
 
 ## How It Works
@@ -40,9 +40,10 @@ flowchart LR
     A --> C["README tables\n(below)"]
     D["scaffold/\ncreate-tool.py"] --> E["New repo with\nall standards"]
     F["standards/\n(conventions)"] --> D
+    G["site-template/\nbuild_site.py"] --> H["Tool repo\nGitHub Pages"]
 ```
 
-**Registry** tracks every tool repo. **Standards** document conventions for CI/CD, folder structure, manifests, and versioning. **Scaffold** generates new repos that follow those standards automatically.
+**Registry** tracks every tool repo. **Standards** document conventions for CI/CD, folder structure, manifests, and versioning. **Scaffold** generates new repos that follow those standards automatically. **Site template** provides a shared build system for tool repo GitHub Pages sites.
 
 ## Tools
 
@@ -172,6 +173,11 @@ Developer-Tools-Directory/
   assets/                  Logo
   docs/                    GitHub Pages catalog site
   scaffold/                Repo generator + Jinja2 templates
+  site-template/           Shared GitHub Pages build system for tool repos
+    build_site.py          Reads plugin.json, skills/, rules/, mcp-tools.json -> index.html
+    template.html.j2       Jinja2 HTML template with configurable branding
+    fonts/                 Self-hosted Inter + JetBrains Mono woff2
+    SETUP-PROMPT.md        Copy-paste prompt for applying template to a repo
   standards/               Convention documentation (9 docs)
   registry.json            Tool registry (source of truth)
   AGENTS.md                AI agent guidance

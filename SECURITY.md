@@ -23,6 +23,7 @@ This repository is a meta-repository containing:
 | registry.json | Schema poisoning via malicious PR (fake repo URLs, XSS in description fields) | CI validates schema on every PR. The catalog site renders text content via `textContent`, not `innerHTML`. |
 | GitHub Pages site | XSS via registry data rendered in the DOM | Tool descriptions are inserted via `textContent`. No `innerHTML` or `eval` is used with registry data. |
 | GitHub Actions workflows | Workflow injection via PR title/body in release-drafter | Release-drafter uses the official action with no custom script interpolation of PR content. |
+| Site template (supply chain) | Tool repos clone this repo in CI to build their Pages site. A compromised template could inject malicious HTML/JS into all tool repo sites. | Template changes are reviewed before merge. Tool repos pin to `main` branch. The build script does not execute arbitrary code from tool repos -- it only reads JSON and Markdown files. |
 
 ### Out of scope
 

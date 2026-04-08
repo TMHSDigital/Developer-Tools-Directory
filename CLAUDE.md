@@ -20,7 +20,12 @@ Developer-Tools-Directory/
   standards/                 # 9 convention docs (folder structure, CI/CD, manifests, etc.)
   scaffold/
     create-tool.py           # Python repo generator (Jinja2)
-    templates/               # 18 .j2 templates for new repos
+    templates/               # Jinja2 templates for new repos
+  site-template/
+    build_site.py            # Builds GitHub Pages for tool repos from their metadata
+    template.html.j2         # Shared HTML template with configurable branding
+    fonts/                   # Self-hosted Inter + JetBrains Mono woff2
+    SETUP-PROMPT.md          # Copy-paste prompt for applying template to a repo
   docs/
     index.html               # GitHub Pages catalog site
     style.css                # Dark theme, responsive, card layout
@@ -76,7 +81,7 @@ Static HTML/CSS/JS. No build step. No external CDN. The `pages.yml` workflow cop
 | Steam Cursor Plugin | Plugin | 30 | 9 | 25 |
 | Steam MCP Server | MCP Server | 0 | 0 | 25 |
 
-**Totals:** 186 skills, 77 rules, 377 MCP tools
+**Totals:** 177 skills, 71 rules, 371 MCP tools
 
 ## Development Workflow
 

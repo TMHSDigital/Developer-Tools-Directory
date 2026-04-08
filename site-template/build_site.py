@@ -20,6 +20,31 @@ def load_json(path: Path) -> dict | list:
         return json.load(f)
 
 
+def parse_frontmatter(text: str) -> tuple[dict[str, str], str]:
+    """Extract YAML frontmatter and return (metadata_dict, body_after_frontmatter)."""
+    lines = text.splitlines(keepends=True)
+    if not lines or lines[0].strip() != "---":
+        return {}, text
+
+    end_idx = None
+    for i, line in enumerate(lines[1:], start=1):
+        if line.strip() == "---":
+            end_idx = i
+            break
+
+    if end_idx is None:
+        return {}, text
+
+    meta: dict[str, str] = {}
+    for line in lines[1:end_idx]:
+        if ":" in line and not line.strip().startswith("-"):
+            key, _, val = line.partition(":")
+            meta[key.strip().lower()] = val.strip()
+
+    body = "".join(lines[end_idx + 1:])
+    return meta, body
+
+
 def parse_skills(repo_root: Path) -> list[dict]:
     skills_dir = repo_root / "skills"
     if not skills_dir.is_dir():
@@ -32,26 +57,27 @@ def parse_skills(repo_root: Path) -> list[dict]:
             continue
 
         text = skill_file.read_text(encoding="utf-8", errors="replace")
-        lines = text.strip().splitlines()
+        meta, body = parse_frontmatter(text)
 
-        name = skill_dir.name.replace("-", " ").replace("_", " ").title()
-        description = ""
-        category = ""
+        name = meta.get("name", "").replace("-", " ").replace("_", " ").title()
+        if not name:
+            name = skill_dir.name.replace("-", " ").replace("_", " ").title()
+        description = meta.get("description", "")[:200]
 
-        heading_seen = False
-        for line in lines:
-            stripped = line.strip()
-            if stripped.startswith("#"):
-                heading_seen = True
-                heading_text = re.sub(r"^#+\s*", "", stripped)
-                if heading_text:
-                    name = heading_text
-                continue
-            if heading_seen and stripped and not description:
+        if not description:
+            for line in body.splitlines():
+                stripped = line.strip()
+                if not stripped or stripped.startswith("#"):
+                    continue
                 description = stripped[:200]
                 break
-            if not heading_seen and stripped and not description:
-                description = stripped[:200]
+
+        if not name or name == skill_dir.name.replace("-", " ").replace("_", " ").title():
+            for line in body.splitlines():
+                stripped = line.strip()
+                if re.match(r"^#\s+\S", stripped):
+                    name = re.sub(r"^#+\s*", "", stripped)
+                    break
 
         results.append({
             "name": name,
