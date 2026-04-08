@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: write
+  administration: write
 
 concurrency:
   group: release
@@ -73,6 +74,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sync repo About section
+        continue-on-error: true
         run: |
           TOOLS=$(python3 -c "import json; data=json.load(open('registry.json')); print(len(data))")
           SKILLS=$(python3 -c "import json; data=json.load(open('registry.json')); print(sum(t.get('skills',0) for t in data))")
