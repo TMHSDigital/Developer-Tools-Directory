@@ -20,36 +20,33 @@ jobs:
         run: python3 -c "import json; json.load(open('registry.json'))"
 
       - name: Validate registry schema
-        run: python3 << 'EOF'
-        import json, sys
-
-        data = json.load(open("registry.json"))
-        assert isinstance(data, list), "registry.json must be an array"
-
-        required = ["name", "repo", "slug", "description", "type", "skills", "rules", "mcpTools", "status"]
-        valid_types = ["cursor-plugin", "mcp-server"]
-        errors = []
-
-        for i, tool in enumerate(data):
+        shell: bash
+        run: |
+          python3 << 'PYEOF'
+          import json, sys
+          data = json.load(open("registry.json"))
+          assert isinstance(data, list), "registry.json must be an array"
+          required = ["name", "repo", "slug", "description", "type", "skills", "rules", "mcpTools", "status"]
+          valid_types = ["cursor-plugin", "mcp-server"]
+          errors = []
+          for i, tool in enumerate(data):
             for field in required:
-                if field not in tool:
-                    errors.append(f"Entry {i} ({tool.get('name', '?')}): missing '{field}'")
+              if field not in tool:
+                errors.append("Entry %d (%s): missing '%s'" % (i, tool.get("name", "?"), field))
             if tool.get("type") not in valid_types:
-                errors.append(f"Entry {i} ({tool.get('name', '?')}): invalid type '{tool.get('type')}'")
+              errors.append("Entry %d (%s): invalid type '%s'" % (i, tool.get("name", "?"), tool.get("type")))
             if not isinstance(tool.get("skills", 0), int):
-                errors.append(f"Entry {i} ({tool.get('name', '?')}): skills must be int")
+              errors.append("Entry %d (%s): skills must be int" % (i, tool.get("name", "?")))
             if not isinstance(tool.get("rules", 0), int):
-                errors.append(f"Entry {i} ({tool.get('name', '?')}): rules must be int")
+              errors.append("Entry %d (%s): rules must be int" % (i, tool.get("name", "?")))
             if not isinstance(tool.get("mcpTools", 0), int):
-                errors.append(f"Entry {i} ({tool.get('name', '?')}): mcpTools must be int")
-
-        if errors:
+              errors.append("Entry %d (%s): mcpTools must be int" % (i, tool.get("name", "?")))
+          if errors:
             for e in errors:
-                print(f"::error::{e}", file=sys.stderr)
+              print("::error::" + e, file=sys.stderr)
             sys.exit(1)
-
-        print(f"Registry valid: {len(data)} tools")
-        EOF
+          print("Registry valid: %d tools" % len(data))
+          PYEOF
 
   validate-docs:
     name: Validate docs site
