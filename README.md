@@ -10,8 +10,10 @@
 
 <p align="center">
  <a href="https://tmhsdigital.github.io/Developer-Tools-Directory/"><img src="https://img.shields.io/badge/catalog-live-7c3aed" alt="Catalog" /></a>
- <img src="https://img.shields.io/badge/license-CC--BY--NC--ND--4.0-green" alt="License: CC BY-NC-ND 4.0" />
+ <a href="LICENSE"><img src="https://img.shields.io/badge/license-CC--BY--NC--ND--4.0-green" alt="License: CC BY-NC-ND 4.0" /></a>
  <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/stargazers"><img src="https://img.shields.io/github/stars/TMHSDigital/Developer-Tools-Directory?style=flat" alt="GitHub stars" /></a>
+ <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/actions/workflows/validate.yml"><img src="https://github.com/TMHSDigital/Developer-Tools-Directory/actions/workflows/validate.yml/badge.svg" alt="Validate" /></a>
+ <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs Welcome" /></a>
 </p>
 
 <p align="center">
@@ -170,15 +172,17 @@ Developer-Tools-Directory/
 
 ## Contributing
 
+<p>
+ <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/contributing-guide-blue" alt="Contributing Guide" /></a>
+ <a href="CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/code%20of%20conduct-Contributor%20Covenant%202.1-4baaaa" alt="Code of Conduct" /></a>
+ <a href="SECURITY.md"><img src="https://img.shields.io/badge/security-policy-red" alt="Security Policy" /></a>
+</p>
+
 Pull requests welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, how-to guides, and PR process.
-
-This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
-
-For security issues, see [SECURITY.md](SECURITY.md).
 
 ## License
 
-CC BY-NC-ND 4.0 -- see [LICENSE](LICENSE) for details.
+<a href="LICENSE"><img src="https://img.shields.io/badge/license-CC--BY--NC--ND--4.0-green" alt="License: CC BY-NC-ND 4.0" /></a>
 
 ---
 
