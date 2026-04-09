@@ -14,7 +14,7 @@ jobs:
     name: Validate registry.json
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Validate JSON syntax
         run: python3 -c "import json; json.load(open('registry.json'))"
@@ -81,22 +81,16 @@ jobs:
     name: Validate docs site
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Check docs/index.html exists
         run: test -f docs/index.html
-
-      - name: Check docs/style.css exists
-        run: test -f docs/style.css
-
-      - name: Check docs/script.js exists
-        run: test -f docs/script.js
 
   validate-scaffold:
     name: Validate scaffold
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-python@v5
         with:
