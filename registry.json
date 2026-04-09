@@ -29,7 +29,7 @@
     "slug": "unity-developer-tools",
     "description": "Cursor IDE plugin for Unity game development with URP, HDRP, and Built-in render pipeline support",
     "type": "cursor-plugin",
-    "homepage": "",
+    "homepage": "https://tmhsdigital.github.io/Unity-Developer-Tools/",
     "skills": 18,
     "rules": 8,
     "mcpTools": 4,
@@ -42,7 +42,7 @@
     "version": "1.2.1",
     "language": "Python",
     "license": "CC-BY-NC-ND-4.0",
-    "pagesType": "none",
+    "pagesType": "mkdocs",
     "hasCI": true
   },
   {
@@ -91,7 +91,7 @@
     "slug": "mobile-app-developer-tools",
     "description": "Cursor plugin for mobile app development with React Native, Expo, and Flutter support",
     "type": "cursor-plugin",
-    "homepage": "",
+    "homepage": "https://tmhsdigital.github.io/Mobile-App-Developer-Tools/",
     "skills": 43,
     "rules": 12,
     "mcpTools": 36,
@@ -102,7 +102,7 @@
     "version": "1.0.0",
     "language": "TypeScript",
     "license": "CC-BY-NC-ND-4.0",
-    "pagesType": "none",
+    "pagesType": "static",
     "hasCI": true
   },
   {
@@ -111,7 +111,7 @@
     "slug": "plaid-developer-tools",
     "description": "Cursor plugin and MCP companion for building on the Plaid API",
     "type": "cursor-plugin",
-    "homepage": "",
+    "homepage": "https://tmhsdigital.github.io/Plaid-Developer-Tools/",
     "skills": 17,
     "rules": 7,
     "mcpTools": 30,
@@ -121,7 +121,7 @@
     "version": "1.0.0",
     "language": "Python",
     "license": "CC-BY-NC-ND-4.0",
-    "pagesType": "none",
+    "pagesType": "static",
     "hasCI": true
   },
   {
