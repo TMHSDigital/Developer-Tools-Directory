@@ -10,6 +10,8 @@
   <meta property="og:type" content="website" />
   {% if site.ogImage %}<meta property="og:image" content="{{ site.ogImage }}" />{% endif %}
   {% if site.favicon %}<link rel="icon" href="{{ site.favicon }}" />{% endif %}
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/inter-regular.woff2" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/inter-bold.woff2" />
   <script>
     (function(){var t=localStorage.getItem('theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');else if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();
   </script>

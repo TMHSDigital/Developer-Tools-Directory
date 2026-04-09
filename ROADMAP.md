@@ -4,7 +4,7 @@
 
 ## Current Status
 
-**v1.3.0** - Content-rich pages with skill detail expansion, changelog, quick-start snippets, compatibility badges, and related tools cross-links.
+**v1.4.0** - Full-aggregate search across all tools, OG meta tags, font preloads, and Lighthouse performance audit.
 
 ## Release Plan
 
@@ -14,8 +14,8 @@
 | v1.1.0 | Unified Site Template | Released |
 | v1.2.0 | Cross-Repo Consistency | Released |
 | v1.3.0 | Content-Rich Pages | Released |
-| v1.4.0 | Discovery and Performance | Next |
-| v1.5.0 | Infrastructure and Documentation | Planned |
+| v1.4.0 | Discovery and Performance | Released |
+| v1.5.0 | Infrastructure and Documentation | Next |
 
 ---
 
@@ -168,6 +168,12 @@ Maintenance, documentation, and packaging consistency.
 - [x] Quick-start snippet with copy button (`quickStart` in `site.json`)
 - [x] Compatibility badges as pills in hero (`compatibility` in `site.json`)
 - [x] Related tools cross-links as card grid (`relatedTools` in `site.json`)
+- [x] OG meta tags (`og:title`, `og:description`, `og:type`, `og:image`) on catalog site
+- [x] Full-aggregate search index (`aggregate_search.py`) with skills, rules, MCP tools
+- [x] Global search on directory catalog with match hints (matched skill/rule/MCP tool)
+- [x] `/` keyboard shortcut to focus search on catalog site
+- [x] Font preloads (`<link rel="preload">`) on all sites
+- [x] Lighthouse performance audit documented in `PERFORMANCE.md`
 
 ---
 
