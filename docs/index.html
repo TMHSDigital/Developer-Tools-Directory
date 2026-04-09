@@ -52,18 +52,23 @@
     [data-theme="light"] a{color:var(--accent)}
     @media(prefers-color-scheme:light){html:not([data-theme="dark"]) a{color:var(--accent)}}
 
-    .site-header{border-bottom:1px solid var(--border);background:var(--nav-bg);backdrop-filter:blur(12px);padding:0 1.5rem;position:sticky;top:0;z-index:100}
-    .header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:56px}
-    .header-brand{display:flex;align-items:center;gap:.75rem;font-size:1.125rem;font-weight:600;color:var(--text)}
-    .header-brand svg{width:28px;height:28px;color:var(--accent-light)}
-    .header-nav{display:flex;gap:1.5rem;list-style:none;align-items:center}
-    .header-nav a{color:var(--text-dim);font-size:.875rem;font-weight:500;transition:color .2s}
-    .header-nav a:hover{color:var(--text)}
+    /* NAV */
+    .nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 1.5rem}
+    .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .nav-brand{display:flex;align-items:center;gap:.75rem;font-size:1.125rem;font-weight:700;color:var(--text);white-space:nowrap}
+    .nav-brand svg{width:28px;height:28px;color:var(--accent-light)}
+    .nav-toggle{display:none;background:none;border:none;color:var(--text);cursor:pointer;padding:.5rem}
+    .nav-toggle svg{width:24px;height:24px}
+    .nav-links{display:flex;gap:1.5rem;list-style:none;align-items:center}
+    .nav-links a{color:var(--text-dim);font-size:.875rem;font-weight:500;transition:color .2s}
+    .nav-links a:hover,.nav-links a.active{color:var(--accent-light)}
     .theme-toggle{background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-dim);cursor:pointer;padding:.25rem .5rem;font-size:.8125rem;transition:color .2s,border-color .2s;display:inline-flex;align-items:center;gap:.3rem;font-family:var(--font-sans)}
     .theme-toggle:hover{color:var(--accent-light);border-color:var(--accent)}
     .theme-toggle svg{width:14px;height:14px}
 
-    .hero{text-align:center;padding:4rem 1.5rem 3rem;max-width:800px;margin:0 auto}
+    /* HERO */
+    .hero{text-align:center;padding:4rem 1.5rem 3rem;background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 70%,var(--bg) 100%);position:relative}
+    .hero-inner{max-width:800px;margin:0 auto}
     .hero-logo{width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:1.25rem;box-shadow:0 4px 24px rgba(0,0,0,.3);border:2px solid var(--border)}
     .hero h1{font-size:2.5rem;font-weight:700;margin-bottom:1rem;background:linear-gradient(135deg,var(--text),var(--accent-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     .hero p{font-size:1.125rem;color:var(--text-dim);margin-bottom:2rem;max-width:600px;margin-left:auto;margin-right:auto}
@@ -108,14 +113,40 @@
     .card-link{font-size:.8125rem;font-weight:500;display:flex;align-items:center;gap:.3rem}
     .card-link svg{width:14px;height:14px}
 
-    .section{max-width:1200px;margin:0 auto;padding:3rem 1.5rem}
-    .section-title{font-size:1.5rem;font-weight:600;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    /* CONTENT AREA */
+    .content-area{max-width:1200px;margin:0 auto;padding:2rem 1.5rem 0}
+
+    /* SECTION CARDS */
+    .section{background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:var(--radius-lg);padding:1.75rem 2rem;margin-bottom:1.25rem;box-shadow:0 -2px 20px color-mix(in srgb,var(--accent) 8%,transparent)}
+    .section-header{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;padding-bottom:.625rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
+    .section-header h2{font-size:1.25rem;font-weight:700;margin:0}
+    .count{font-size:.8125rem;font-weight:500;color:var(--text-dim);background:var(--bg3);padding:.15rem .6rem;border-radius:12px}
+    .section-actions{margin-left:auto;display:flex;gap:.5rem;align-items:center}
+    .btn-sm{padding:.3rem .75rem;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-size:.75rem;font-weight:500;cursor:pointer;transition:color .2s,border-color .2s;font-family:var(--font-sans)}
+    .btn-sm:hover{color:var(--accent-light);border-color:var(--accent)}
+
     .standards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
-    .standard-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;transition:border-color .2s}
+    .standard-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;transition:border-color .2s}
     .standard-card:hover{border-color:var(--accent)}
     .standard-card h3{font-size:.9375rem;margin-bottom:.375rem}
     .standard-card p{font-size:.8125rem;color:var(--text-dim)}
 
+    /* COLLAPSIBLE */
+    details.cat-group{margin-bottom:.25rem}
+    details.cat-group>summary{display:flex;align-items:center;gap:.5rem;padding:.625rem .75rem;background:var(--bg2);border:1px solid var(--border);border-radius:6px;cursor:pointer;list-style:none;font-weight:600;font-size:.875rem;color:var(--text);transition:background .15s}
+    details.cat-group>summary::-webkit-details-marker{display:none}
+    details.cat-group>summary::before{content:'';display:inline-block;width:0;height:0;border-left:5px solid var(--accent-light);border-top:4px solid transparent;border-bottom:4px solid transparent;transition:transform .2s;flex-shrink:0}
+    details.cat-group[open]>summary::before{transform:rotate(90deg)}
+    details.cat-group>summary:hover{background:var(--bg3)}
+    details.cat-group>.cat-body{overflow:hidden}
+    .cat-body-anim{transition:max-height .25s ease,opacity .2s ease;overflow:hidden}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(100%);background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.5rem 1.25rem;border-radius:8px;font-size:.8125rem;font-weight:500;opacity:0;transition:transform .3s,opacity .3s;z-index:200;pointer-events:none}
+    .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+    /* FOOTER */
     footer{text-align:center;padding:2rem 1.5rem 2.5rem;color:var(--text-dim);font-size:.8125rem;margin-top:1rem}
     footer a{color:var(--accent-light)}
     .footer-inner{max-width:1040px;margin:0 auto}
@@ -126,6 +157,7 @@
     .footer-divider{width:60px;height:2px;background:var(--accent);margin:0 auto 1rem;border-radius:1px;opacity:.4}
     .footer-meta{display:flex;justify-content:center;gap:.5rem;flex-wrap:wrap;font-size:.75rem}
     .footer-meta span{opacity:.7}
+    .footer-directory{margin-top:.75rem;font-size:.6875rem;opacity:.5}
 
     .back-to-top{position:fixed;bottom:1.5rem;right:1.5rem;width:40px;height:40px;border-radius:50%;background:var(--accent);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;z-index:150;box-shadow:0 2px 8px rgba(0,0,0,.3)}
     .back-to-top.visible{opacity:1;pointer-events:auto}
@@ -137,10 +169,20 @@
       .stats-bar{gap:1.25rem}
       .stat-value{font-size:1.375rem}
       .card-grid{grid-template-columns:1fr}
-      .header-nav{gap:1rem}
+      .nav-links{gap:.75rem}
+      .nav-links a{font-size:.8rem}
     }
     @media(max-width:640px){
+      .nav-toggle{display:block}
+      .nav-links{display:none;position:absolute;top:56px;left:0;right:0;flex-direction:column;background:var(--nav-bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:1rem 1.5rem;gap:.75rem}
+      .nav-links.open{display:flex}
       .search-icon{left:2.25rem}
+      .hero{padding:3rem 1rem 2.5rem}
+      .hero h1{font-size:1.5rem}
+      .content-area{padding:0 .75rem}
+      .section{padding:1.25rem 1rem;border-radius:8px}
+      .section-header{flex-direction:column;align-items:flex-start;gap:.75rem}
+      .section-actions{margin-left:0}
     }
     @media(prefers-reduced-motion:reduce){
       html{scroll-behavior:auto}
@@ -150,36 +192,40 @@
 </head>
 <body>
 
-  <header class="site-header">
-    <div class="header-inner">
-      <a href="#" class="header-brand">
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-brand">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
         Developer Tools Directory
       </a>
-      <nav>
-        <ul class="header-nav">
-          <li><a href="#tools">Tools</a></li>
-          <li><a href="#standards">Standards</a></li>
-          <li><a href="https://github.com/TMHSDigital/Developer-Tools-Directory" target="_blank" rel="noopener">GitHub</a></li>
-          <li>
-            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-              <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-            </button>
-          </li>
-        </ul>
-      </nav>
+      <button class="nav-toggle" aria-label="Toggle navigation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+      <ul class="nav-links">
+        <li><a href="#tools">Tools</a></li>
+        <li><a href="#standards">Standards</a></li>
+        <li><a href="#scaffold">Scaffold</a></li>
+        <li><a href="https://github.com/TMHSDigital/Developer-Tools-Directory" target="_blank" rel="noopener">GitHub</a></li>
+        <li>
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+            <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </button>
+        </li>
+      </ul>
     </div>
-  </header>
+  </nav>
 
   <section class="hero">
-    <img class="hero-logo" src="assets/logo.png" alt="Developer Tools Directory logo" />
-    <h1>Developer Tools Directory</h1>
-    <p>Centralized catalog of TMHSDigital Cursor IDE plugins, MCP servers, and developer tools.</p>
-    <div class="stats-bar">
-      <div class="stat-item"><div class="stat-value" id="stat-repos">0</div><div class="stat-label">Repos</div></div>
-      <div class="stat-item"><div class="stat-value" id="stat-skills">0</div><div class="stat-label">Skills</div></div>
-      <div class="stat-item"><div class="stat-value" id="stat-rules">0</div><div class="stat-label">Rules</div></div>
-      <div class="stat-item"><div class="stat-value" id="stat-mcp">0</div><div class="stat-label">MCP Tools</div></div>
+    <div class="hero-inner">
+      <img class="hero-logo" src="assets/logo.png" alt="Developer Tools Directory logo" />
+      <h1>Developer Tools Directory</h1>
+      <p>Centralized catalog of TMHSDigital Cursor IDE plugins, MCP servers, and developer tools.</p>
+      <div class="stats-bar">
+        <div class="stat-item"><div class="stat-value" id="stat-repos">0</div><div class="stat-label">Repos</div></div>
+        <div class="stat-item"><div class="stat-value" id="stat-skills">0</div><div class="stat-label">Skills</div></div>
+        <div class="stat-item"><div class="stat-value" id="stat-rules">0</div><div class="stat-label">Rules</div></div>
+        <div class="stat-item"><div class="stat-value" id="stat-mcp">0</div><div class="stat-label">MCP Tools</div></div>
+      </div>
     </div>
   </section>
 
@@ -206,28 +252,53 @@
     <div class="card-grid" id="card-grid"></div>
   </section>
 
+  <div class="content-area">
+
   <section id="standards" class="section">
-    <h2 class="section-title">Standards</h2>
-    <div class="standards-grid">
-      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/folder-structure.md" class="standard-card" target="_blank" rel="noopener"><h3>Folder Structure</h3><p>Canonical repository layout for plugins and MCP servers</p></a>
-      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/plugin-manifest.md" class="standard-card" target="_blank" rel="noopener"><h3>Plugin Manifest</h3><p>plugin.json specification and required fields</p></a>
-      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/ci-cd.md" class="standard-card" target="_blank" rel="noopener"><h3>CI/CD</h3><p>GitHub Actions workflows every repo must have</p></a>
-      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/github-pages.md" class="standard-card" target="_blank" rel="noopener"><h3>GitHub Pages</h3><p>Documentation site setup and deployment</p></a>
-      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/commit-conventions.md" class="standard-card" target="_blank" rel="noopener"><h3>Commit Conventions</h3><p>Conventional commits and version bumping rules</p></a>
-      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/versioning.md" class="standard-card" target="_blank" rel="noopener"><h3>Versioning</h3><p>Semver management and automated release flow</p></a>
-      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/readme-template.md" class="standard-card" target="_blank" rel="noopener"><h3>README Template</h3><p>Standard README structure and required sections</p></a>
-      <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/agents-template.md" class="standard-card" target="_blank" rel="noopener"><h3>AGENTS.md Template</h3><p>AI agent guidance file structure</p></a>
+    <div class="section-header">
+      <h2>Standards</h2>
+      <span class="count">8</span>
+      <div class="section-actions">
+        <button class="btn-sm toggle-section" data-target="standards-body">Expand</button>
+      </div>
     </div>
+    <details class="cat-group" id="standards-body">
+      <summary class="sr-only">Standards list</summary>
+      <div class="cat-body">
+        <div class="standards-grid">
+          <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/folder-structure.md" class="standard-card" target="_blank" rel="noopener"><h3>Folder Structure</h3><p>Canonical repository layout for plugins and MCP servers</p></a>
+          <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/plugin-manifest.md" class="standard-card" target="_blank" rel="noopener"><h3>Plugin Manifest</h3><p>plugin.json specification and required fields</p></a>
+          <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/ci-cd.md" class="standard-card" target="_blank" rel="noopener"><h3>CI/CD</h3><p>GitHub Actions workflows every repo must have</p></a>
+          <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/github-pages.md" class="standard-card" target="_blank" rel="noopener"><h3>GitHub Pages</h3><p>Documentation site setup and deployment</p></a>
+          <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/commit-conventions.md" class="standard-card" target="_blank" rel="noopener"><h3>Commit Conventions</h3><p>Conventional commits and version bumping rules</p></a>
+          <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/versioning.md" class="standard-card" target="_blank" rel="noopener"><h3>Versioning</h3><p>Semver management and automated release flow</p></a>
+          <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/readme-template.md" class="standard-card" target="_blank" rel="noopener"><h3>README Template</h3><p>Standard README structure and required sections</p></a>
+          <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/agents-template.md" class="standard-card" target="_blank" rel="noopener"><h3>AGENTS.md Template</h3><p>AI agent guidance file structure</p></a>
+        </div>
+      </div>
+    </details>
   </section>
 
-  <section class="section">
-    <h2 class="section-title">Create a New Tool</h2>
-    <div class="standard-card" style="max-width:640px;">
-      <h3>Scaffold Generator</h3>
-      <p>Generate a fully standards-compliant repository from the command line. Includes all workflows, manifests, docs site template, and skeleton files.</p>
-      <p style="margin-top:.75rem;"><a href="https://github.com/TMHSDigital/Developer-Tools-Directory/tree/main/scaffold" target="_blank" rel="noopener">View scaffold documentation &rarr;</a></p>
+  <section id="scaffold" class="section">
+    <div class="section-header">
+      <h2>Create a New Tool</h2>
+      <div class="section-actions">
+        <button class="btn-sm toggle-section" data-target="scaffold-body">Expand</button>
+      </div>
     </div>
+    <details class="cat-group" id="scaffold-body">
+      <summary class="sr-only">Scaffold details</summary>
+      <div class="cat-body">
+        <div class="standard-card" style="max-width:640px;">
+          <h3>Scaffold Generator</h3>
+          <p>Generate a fully standards-compliant repository from the command line. Includes all workflows, manifests, docs site template, and skeleton files.</p>
+          <p style="margin-top:.75rem;"><a href="https://github.com/TMHSDigital/Developer-Tools-Directory/tree/main/scaffold" target="_blank" rel="noopener">View scaffold documentation &rarr;</a></p>
+        </div>
+      </div>
+    </details>
   </section>
+
+  </div>
 
   <footer>
     <div class="footer-inner">
@@ -237,12 +308,19 @@
       </div>
       <div class="footer-divider"></div>
       <div class="footer-meta">
+        <span>v1.5.0</span>
+        <span>&middot;</span>
         <span>CC-BY-NC-ND-4.0</span>
         <span>&middot;</span>
-        <span>Built by <a href="https://github.com/TMHSDigital">TMHSDigital</a></span>
+        <span id="buildDate"></span>
+      </div>
+      <div class="footer-directory">
+        Built by <a href="https://github.com/TMHSDigital">TMHSDigital</a>
       </div>
     </div>
   </footer>
+
+  <div class="toast" id="toast"></div>
 
   <button class="back-to-top" id="backToTop" aria-label="Back to top">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
@@ -258,15 +336,21 @@
   {"name":"Plaid Developer Tools","repo":"TMHSDigital/Plaid-Developer-Tools","slug":"plaid-developer-tools","description":"Cursor plugin and MCP companion for building on the Plaid API","type":"cursor-plugin","homepage":"","skills":17,"rules":7,"mcpTools":30,"extras":{},"topics":["plaid","fintech","banking","open-banking","plaid-api"],"status":"active","version":"1.0.0","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"none","hasCI":true},
   {"name":"Monday Cursor Plugin","repo":"TMHSDigital/Monday-Cursor-Plugin","slug":"monday-cursor-plugin","description":"Cursor IDE plugin for Monday.com with boards, items, sprints, docs, dashboards, and GraphQL","type":"cursor-plugin","homepage":"https://tmhsdigital.github.io/Monday-Cursor-Plugin/","skills":21,"rules":8,"mcpTools":45,"extras":{},"topics":["monday","project-management","graphql","productivity","work-management"],"status":"active","version":"1.0.0","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},
   {"name":"Steam Cursor Plugin","repo":"TMHSDigital/Steam-Cursor-Plugin","slug":"steam-cursor-plugin","description":"Steam and Steamworks integration for Cursor IDE for game developers, modders, and power users","type":"cursor-plugin","homepage":"https://tmhsdigital.github.io/Steam-Cursor-Plugin/","skills":30,"rules":9,"mcpTools":25,"extras":{},"topics":["steam","steamworks","game-development","modding","steam-workshop"],"status":"active","version":"1.0.0","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},
-  {"name":"Steam MCP Server","repo":"TMHSDigital/steam-mcp","slug":"steam-mcp","description":"MCP server for Steam and Steamworks APIs with store data, player stats, reviews, achievements, and workshop tools","type":"mcp-server","homepage":"https://www.npmjs.com/package/@tmhs/steam-mcp","skills":0,"rules":0,"mcpTools":25,"extras":{},"topics":["steam","mcp-server","steamworks","game-development","npm"],"status":"active","version":"1.0.0","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"none","hasCI":true}
+  {"name":"Steam MCP Server","repo":"TMHSDigital/steam-mcp","slug":"steam-mcp","description":"MCP server for Steam and Steamworks APIs with store data, player stats, reviews, achievements, and workshop tools","type":"mcp-server","homepage":"https://www.npmjs.com/package/@tmhs/steam-mcp","skills":0,"rules":0,"mcpTools":25,"extras":{},"npm":"@tmhs/steam-mcp","topics":["steam","mcp-server","steamworks","game-development","npm"],"status":"active","version":"1.0.0","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"none","hasCI":true}
 ]
   </script>
 
   <script id="search-index" type="application/json">
-[{"name":"CFX Developer Tools","slug":"cfx-developer-tools","description":"AI-powered Cursor IDE plugin for FiveM and RedM resource development","type":"cursor-plugin","topics":["fivem","redm","cfx","lua","game-development"],"npm":"","url":"https://github.com/TMHSDigital/CFX-Developer-Tools","homepage":"https://tmhsdigital.github.io/CFX-Developer-Tools/","skills":["Client-Server Patterns","Database Integration","Framework Detection","fxmanifest.lua Expert","Native Function Lookup","NUI Development","Performance Optimization","Resource Scaffolding","State Bags"],"rules":["Cfx Csharp Conventions","Cfx Javascript Conventions","Cfx Lua Conventions","Fxmanifest Standards","Performance Rules","Security Best Practices"],"mcpTools":[]},{"name":"Unity Developer Tools","slug":"unity-developer-tools","description":"Cursor IDE plugin for Unity game development with URP, HDRP, and Built-in render pipeline support","type":"cursor-plugin","topics":["unity","game-development","csharp","urp","hdrp"],"npm":"","url":"https://github.com/TMHSDigital/Unity-Developer-Tools","homepage":"","skills":["Addressables and Asset Management","Animation Systems","Audio Systems","ECS and DOTS","Editor Scripting","Input Systems","MonoBehaviour Patterns","Multiplayer Networking","Performance Optimization","Physics Systems (2D and 3D)","Platform Targeting","Unity Project Setup","Render Pipeline Detection","ScriptableObject Architecture","Shader Development","Unity Testing","UI Development","Visual Scripting"],"rules":["Csharp Unity Conventions","Monobehaviour Lifecycle","Naming Conventions","Performance Rules","Security And Builds","Serialization Rules","Shader Conventions","Visual Scripting Conventions"],"mcpTools":[]},{"name":"Docker Developer Tools","slug":"docker-developer-tools","description":"Cursor IDE plugin for Docker workflows with container management, Compose, and Dockerfile support","type":"cursor-plugin","topics":["docker","containers","devops","docker-compose","dockerfile"],"npm":"@tmhs/docker-mcp","url":"https://github.com/TMHSDigital/Docker-Developer-Tools","homepage":"https://tmhsdigital.github.io/Docker-Developer-Tools/","skills":["Container Debugging","Docker Advanced Workflows","Docker CI/CD","Docker Compose Helper","Docker Context Management","Docker Development Environment","Docker Content Trust and Image Signing","Docker Multi-Platform Builds","Docker Networking","Docker Registry","Docker Resource Management","Docker Security","Docker Swarm Orchestration","Docker Troubleshooting","Docker Volumes","Dockerfile Best Practices","Image Optimization"],"rules":["Buildx Best Practices","Compose Scaling","Compose Validation","Docker Image Pinning","Docker Logging","Docker Port Conflicts","Docker Resource Limits","Docker Secrets","Dockerfile Lint","Swarm Security"],"mcpTools":["docker_commit","docker_containerLogs","docker_containerPrune","docker_cp","docker_create","docker_diff","docker_events","docker_exec","docker_export","docker_inspectContainer","docker_kill","docker_listContainers","docker_pause","docker_port","docker_rename","docker_restart","docker_rm","docker_run","docker_start","docker_stats","docker_stop","docker_top","docker_unpause","docker_update","docker_wait","docker_build","docker_imageHistory","docker_imagePrune","docker_import","docker_inspectImage","docker_listImages","docker_load","docker_pull","docker_push","docker_rmi","docker_save","docker_tag","docker_login","docker_logout","docker_searchHub","docker_composeBuild","docker_composeConfig","docker_composeCp","docker_composeCreate","docker_composeDown","docker_composeEvents","docker_composeExec","docker_composeImages","docker_composeKill","docker_composeLogs","docker_composeLs","docker_composePause","docker_composePort","docker_composePs","docker_composePull","docker_composeRestart","docker_composeRm","docker_composeRun","docker_composeScale","docker_composeStart","docker_composeStop","docker_composeTop","docker_composeUnpause","docker_composeUp","docker_composeVersion","docker_composeWatch","docker_listVolumes","docker_volumeCreate","docker_volumeInspect","docker_volumePrune","docker_volumeRm","docker_listNetworks","docker_networkConnect","docker_networkCreate","docker_networkDisconnect","docker_networkInspect","docker_networkPrune","docker_networkRm","docker_diskUsage","docker_systemInfo","docker_systemPrune","docker_version","docker_builderPrune","docker_buildxBuild","docker_buildxCreate","docker_buildxImagetools","docker_buildxInspect","docker_buildxLs","docker_buildxRm","docker_buildxUse","docker_manifestAnnotate","docker_manifestCreate","docker_manifestInspect","docker_manifestPush","docker_manifestRm","docker_contextCreate","docker_contextInspect","docker_contextLs","docker_contextRm","docker_contextShow","docker_contextUse","docker_swarmCa","docker_swarmInit","docker_swarmJoin","docker_swarmJoinToken","docker_swarmLeave","docker_swarmUnlock","docker_swarmUnlockKey","docker_swarmUpdate","docker_serviceCreate","docker_serviceInspect","docker_serviceLogs","docker_serviceLs","docker_servicePs","docker_serviceRm","docker_serviceRollback","docker_serviceScale","docker_serviceUpdate","docker_nodeDemote","docker_nodeInspect","docker_nodeLs","docker_nodePromote","docker_nodePs","docker_nodeRm","docker_nodeUpdate","docker_stackConfig","docker_stackDeploy","docker_stackLs","docker_stackPs","docker_stackRm","docker_stackServices","docker_configCreate","docker_configInspect","docker_configLs","docker_configRm","docker_secretCreate","docker_secretInspect","docker_secretLs","docker_secretRm","docker_trustInspect","docker_trustKey","docker_trustRevoke","docker_trustSign","docker_scoutCves","docker_scoutQuickview","docker_scoutRecommendations","docker_pluginEnable","docker_pluginInstall","docker_pluginLs","docker_pluginRm"]},{"name":"Home Lab Developer Tools","slug":"home-lab-developer-tools","description":"Home lab and Raspberry Pi workflows for Cursor with Docker Compose, monitoring, DNS, networking, and security","type":"cursor-plugin","topics":["homelab","raspberry-pi","infrastructure","docker-compose","monitoring"],"npm":"@tmhs/homelab-mcp","url":"https://github.com/TMHSDigital/Home-Lab-Developer-Tools","homepage":"https://tmhsdigital.github.io/Home-Lab-Developer-Tools/","skills":["Alerting Rules","Ansible Workflows","Backup and Recovery","Certificate Management","Disaster Recovery","DNS Management","Docker Compose Stacks","Grafana Dashboards","Log Analysis","Multi-Node Management","Network Configuration","Notification Workflows","OS Update Management","Performance Tuning","Pi System Management","Reverse Proxy Management","Secrets Management","Security Hardening","Service Monitoring","SSH Management","Storage Management","Troubleshooting"],"rules":["Ansible Best Practices","Backup Coverage","Compose Arm64","Exposed Ports","Homelab Secrets","Inventory Consistency","Privileged Containers","Resource Limits","Ssh Safety","Weak Credentials","Yaml Conventions"],"mcpTools":["homelab_inventorySync","homelab_nodeList","homelab_nodeStatus","homelab_nodeExec","homelab_sshTest","homelab_healthCheck","homelab_diagnostics","homelab_piStatus","homelab_piReboot","homelab_diskUsage","homelab_kernelInfo","homelab_systemdServices","homelab_aptUpdate","homelab_aptUpgradable","homelab_aptHistory","homelab_networkInfo","homelab_openPorts","homelab_ufwStatus","homelab_fail2banStatus","homelab_composeUp","homelab_composeDown","homelab_composePull","homelab_composePs","homelab_serviceHealth","homelab_serviceLogs","homelab_serviceRestart","homelab_containerScan","homelab_logSearch","homelab_journalLogs","homelab_backupStatus","homelab_backupRun","homelab_backupList","homelab_backupRestore","homelab_backupDiff","homelab_volumeBackup","homelab_certCheck","homelab_certRenew","homelab_certList","homelab_npmCerts","homelab_npmProxyHosts","homelab_prometheusQuery","homelab_grafanaSnapshot","homelab_uptimeKumaStatus","homelab_alertList","homelab_speedtestResults","homelab_adguardStats","homelab_adguardFilters","homelab_adguardQueryLog","homelab_ntfySend","homelab_ntfyTopics"]},{"name":"Mobile App Developer Tools","slug":"mobile-app-developer-tools","description":"Cursor plugin for mobile app development with React Native, Expo, and Flutter support","type":"cursor-plugin","topics":["react-native","expo","flutter","mobile-development","typescript"],"npm":"@tmhs/mobile-mcp","url":"https://github.com/TMHSDigital/Mobile-App-Developer-Tools","homepage":"","skills":["Mobile Accessibility Testing","Mobile AI Features","Mobile Analytics","Google Play Store Submission","Mobile Animations","Mobile API Integration","Mobile App Monitoring","App Store Prep","Mobile Auth Setup","Mobile Background Tasks","Mobile Camera Integration","Mobile CI/CD","Mobile Component Patterns","Mobile Config Plugins","Mobile Debugging","Mobile Deep Links","Mobile Dev Environment","Mobile E2E Testing","Mobile Feature Flags","Flutter Navigation","Flutter Project Setup","Flutter Run on Device","Flutter State Management","Mobile Forms and Validation","Mobile Internationalization","iOS App Store Submission","Mobile Local Storage","Mobile Maps and Location","Mobile Monetization","Mobile Native Modules","Mobile Navigation Setup","Mobile Offline Sync","Mobile OTA Updates","Mobile Permissions","Mobile Project Setup","Mobile Push Notifications","Mobile Real-Time","Mobile Run on Device","Mobile SDK Upgrade","Mobile Security","Mobile State Management","Mobile Testing","Mobile Theming & Dark Mode"],"rules":["Mobile Accessibility","Mobile Bundle Size","Mobile Color Contrast","Mobile Env Safety","Mobile I18N Strings","Mobile Image Assets","Mobile Native Compat","Mobile Performance","Mobile Platform Check","Mobile Secrets","Mobile Security Audit","Mobile Test Coverage"],"mcpTools":[]},{"name":"Plaid Developer Tools","slug":"plaid-developer-tools","description":"Cursor plugin and MCP companion for building on the Plaid API","type":"cursor-plugin","topics":["plaid","fintech","banking","open-banking","plaid-api"],"npm":"","url":"https://github.com/TMHSDigital/Plaid-Developer-Tools","homepage":"","skills":["Plaid Account Verification","Plaid API Reference","Plaid Category Mapping","Plaid Error Handling","Plaid Identity Verification","Plaid Institution Search","Plaid Investment Tracking","Plaid Link Setup","Plaid Migration Guide","Plaid Next.js Integration","Plaid Production Readiness","Plaid React Integration","Plaid Recurring Detection","Plaid Sandbox Testing","Plaid Security Best Practices","Plaid Transaction Sync","Plaid Webhook Handling"],"rules":["Plaid Env Safety","Plaid Error Handling","Plaid Link Best Practices","Plaid Secrets","Plaid Sync Cursor","Plaid Token Storage","Plaid Webhook Security"],"mcpTools":[]},{"name":"Monday Cursor Plugin","slug":"monday-cursor-plugin","description":"Cursor IDE plugin for Monday.com with boards, items, sprints, docs, dashboards, and GraphQL","type":"cursor-plugin","topics":["monday","project-management","graphql","productivity","work-management"],"npm":"","url":"https://github.com/TMHSDigital/Monday-Cursor-Plugin","homepage":"https://tmhsdigital.github.io/Monday-Cursor-Plugin/","skills":["Monday API Reference","Monday Board Insights","Monday Board Management","Monday Chart Visualization","Monday Column Types Guide","Monday Dashboard Builder","Monday Docs Management","Monday Form Builder","Monday Item Operations","Monday Notetaker Meetings","Monday Notifications","Monday Project Tracking","Monday Resource Management","Monday Sprint Planning","Monday Sprint Review","Monday Tags and Assets","Monday Updates and Communication","Monday User and Team Management","Monday Webhook Management","Monday Workflow Automation","Monday Workspace Organizer"],"rules":["Monday Api Token Safety","Monday Board Structure","Monday Column Value Format","Monday Error Handling","Monday Graphql Best Practices","Monday Mcp Tool Preference","Monday Rate Limit Awareness","Monday Webhook Validation"],"mcpTools":["get_user_context","search","list_users_and_teams","get_board_info","get_board_items_page","board_insights","create_board","create_group","create_column","create_item","change_item_column_values","get_updates","create_update","get_board_activity","list_workspaces","workspace_info","create_workspace","update_workspace","create_folder","update_folder","move_object","read_docs","create_doc","add_content_to_doc","create_dashboard","create_widget","all_widgets_schema","create_form","get_form","update_form","form_questions_editor","get_monday_dev_sprints_boards","get_sprints_metadata","get_sprint_summary","get_notetaker_meetings","get_graphql_schema","get_type_details","get_column_type_info","all_monday_api","show-chart","show-battery","show-table","show-assign","create_notification"]},{"name":"Steam Cursor Plugin","slug":"steam-cursor-plugin","description":"Steam and Steamworks integration for Cursor IDE for game developers, modders, and power users","type":"cursor-plugin","topics":["steam","steamworks","game-development","modding","steam-workshop"],"npm":"","url":"https://github.com/TMHSDigital/Steam-Cursor-Plugin","homepage":"https://tmhsdigital.github.io/Steam-Cursor-Plugin/","skills":["Steam Achievement Designer","Steam Anti-Cheat Integration","Steam API Reference","Steam Bug Report Template","Steam Build Automation","Steam Cloud Saves","Steam Community Management","Steam DLC & Expansion Planning","Steam Friends & Social","Steam Game Comparison","Steam Input / Controller Support","Steam Inventory & Economy","Steam Leaderboards","Steam Market Research","Steam Migration Guide","Steam Multiplayer Networking","Steam Player Stats","Steam Playtest Setup","Steam Price History","Steam Pricing Strategy","Steam Profile Lookup","Steam Release Checklist","Steam Review Analysis","Steam SteamCMD Helper","Steam Store Lookup","Steam Store Page Optimizer","Steam Testing Sandbox","Steam Wishlist Estimates","Steam Workshop Helper","Steamworks App Config"],"rules":["Steam Api Error Handling","Steam Api Key Usage","Steam Appid Validation","Steam Build Config Validation","Steam Deck Compat","Steam Launch Options Check","Steam Network Security","Steam Save Compat","Steamworks Secrets"],"mcpTools":["steam_getAppDetails","steam_searchApps","steam_getPlayerCount","steam_getAchievementStats","steam_getWorkshopItem","steam_getReviews","steam_getPriceOverview","steam_getAppReviewSummary","steam_getRegionalPricing","steam_getNewsForApp","steam_getPlayerSummary","steam_getOwnedGames","steam_queryWorkshop","steam_getLeaderboardEntries","steam_resolveVanityURL","steam_getSchemaForGame","steam_getPlayerAchievements","steam_getLeaderboardsForGame","steam_createLobby","steam_uploadWorkshopItem","steam_updateWorkshopItem","steam_setAchievement","steam_clearAchievement","steam_uploadLeaderboardScore","steam_grantInventoryItem"]},{"name":"Steam MCP Server","slug":"steam-mcp","description":"MCP server for Steam and Steamworks APIs with store data, player stats, reviews, achievements, and workshop tools","type":"mcp-server","topics":["steam","mcp-server","steamworks","game-development","npm"],"npm":"","url":"https://github.com/TMHSDigital/steam-mcp","homepage":"https://www.npmjs.com/package/@tmhs/steam-mcp","skills":[],"rules":[],"mcpTools":[]}]
+[{"name":"CFX Developer Tools","slug":"cfx-developer-tools","description":"AI-powered Cursor IDE plugin for FiveM and RedM resource development","type":"cursor-plugin","topics":["fivem","redm","cfx","lua","game-development"],"npm":"","url":"https://github.com/TMHSDigital/CFX-Developer-Tools","homepage":"https://tmhsdigital.github.io/CFX-Developer-Tools/","skills":["Client-Server Patterns","Database Integration","Framework Detection","fxmanifest.lua Expert","Native Function Lookup","NUI Development","Performance Optimization","Resource Scaffolding","State Bags"],"rules":["Cfx Csharp Conventions","Cfx Javascript Conventions","Cfx Lua Conventions","Fxmanifest Standards","Performance Rules","Security Best Practices"],"mcpTools":[]},{"name":"Unity Developer Tools","slug":"unity-developer-tools","description":"Cursor IDE plugin for Unity game development with URP, HDRP, and Built-in render pipeline support","type":"cursor-plugin","topics":["unity","game-development","csharp","urp","hdrp"],"npm":"","url":"https://github.com/TMHSDigital/Unity-Developer-Tools","homepage":"","skills":["Addressables and Asset Management","Animation Systems","Audio Systems","ECS and DOTS","Editor Scripting","Input Systems","MonoBehaviour Patterns","Multiplayer Networking","Performance Optimization","Physics Systems (2D and 3D)","Platform Targeting","Unity Project Setup","Render Pipeline Detection","ScriptableObject Architecture","Shader Development","Unity Testing","UI Development","Visual Scripting"],"rules":["Csharp Unity Conventions","Monobehaviour Lifecycle","Naming Conventions","Performance Rules","Security And Builds","Serialization Rules","Shader Conventions","Visual Scripting Conventions"],"mcpTools":[]},{"name":"Docker Developer Tools","slug":"docker-developer-tools","description":"Cursor IDE plugin for Docker workflows with container management, Compose, and Dockerfile support","type":"cursor-plugin","topics":["docker","containers","devops","docker-compose","dockerfile"],"npm":"@tmhs/docker-mcp","url":"https://github.com/TMHSDigital/Docker-Developer-Tools","homepage":"https://tmhsdigital.github.io/Docker-Developer-Tools/","skills":["Container Debugging","Docker Advanced Workflows","Docker CI/CD","Docker Compose Helper","Docker Context Management","Docker Development Environment","Docker Content Trust and Image Signing","Docker Multi-Platform Builds","Docker Networking","Docker Registry","Docker Resource Management","Docker Security","Docker Swarm Orchestration","Docker Troubleshooting","Docker Volumes","Dockerfile Best Practices","Image Optimization"],"rules":["Buildx Best Practices","Compose Scaling","Compose Validation","Docker Image Pinning","Docker Logging","Docker Port Conflicts","Docker Resource Limits","Docker Secrets","Dockerfile Lint","Swarm Security"],"mcpTools":["docker_commit","docker_containerLogs","docker_containerPrune","docker_cp","docker_create","docker_diff","docker_events","docker_exec","docker_export","docker_inspectContainer","docker_kill","docker_listContainers","docker_pause","docker_port","docker_rename","docker_restart","docker_rm","docker_run","docker_start","docker_stats","docker_stop","docker_top","docker_unpause","docker_update","docker_wait","docker_build","docker_imageHistory","docker_imagePrune","docker_import","docker_inspectImage","docker_listImages","docker_load","docker_pull","docker_push","docker_rmi","docker_save","docker_tag","docker_login","docker_logout","docker_searchHub","docker_composeBuild","docker_composeConfig","docker_composeCp","docker_composeCreate","docker_composeDown","docker_composeEvents","docker_composeExec","docker_composeImages","docker_composeKill","docker_composeLogs","docker_composeLs","docker_composePause","docker_composePort","docker_composePs","docker_composePull","docker_composeRestart","docker_composeRm","docker_composeRun","docker_composeScale","docker_composeStart","docker_composeStop","docker_composeTop","docker_composeUnpause","docker_composeUp","docker_composeVersion","docker_composeWatch","docker_listVolumes","docker_volumeCreate","docker_volumeInspect","docker_volumePrune","docker_volumeRm","docker_listNetworks","docker_networkConnect","docker_networkCreate","docker_networkDisconnect","docker_networkInspect","docker_networkPrune","docker_networkRm","docker_diskUsage","docker_systemInfo","docker_systemPrune","docker_version","docker_builderPrune","docker_buildxBuild","docker_buildxCreate","docker_buildxImagetools","docker_buildxInspect","docker_buildxLs","docker_buildxRm","docker_buildxUse","docker_manifestAnnotate","docker_manifestCreate","docker_manifestInspect","docker_manifestPush","docker_manifestRm","docker_contextCreate","docker_contextInspect","docker_contextLs","docker_contextRm","docker_contextShow","docker_contextUse","docker_swarmCa","docker_swarmInit","docker_swarmJoin","docker_swarmJoinToken","docker_swarmLeave","docker_swarmUnlock","docker_swarmUnlockKey","docker_swarmUpdate","docker_serviceCreate","docker_serviceInspect","docker_serviceLogs","docker_serviceLs","docker_servicePs","docker_serviceRm","docker_serviceRollback","docker_serviceScale","docker_serviceUpdate","docker_nodeDemote","docker_nodeInspect","docker_nodeLs","docker_nodePromote","docker_nodePs","docker_nodeRm","docker_nodeUpdate","docker_stackConfig","docker_stackDeploy","docker_stackLs","docker_stackPs","docker_stackRm","docker_stackServices","docker_configCreate","docker_configInspect","docker_configLs","docker_configRm","docker_secretCreate","docker_secretInspect","docker_secretLs","docker_secretRm","docker_trustInspect","docker_trustKey","docker_trustRevoke","docker_trustSign","docker_scoutCves","docker_scoutQuickview","docker_scoutRecommendations","docker_pluginEnable","docker_pluginInstall","docker_pluginLs","docker_pluginRm"]},{"name":"Home Lab Developer Tools","slug":"home-lab-developer-tools","description":"Home lab and Raspberry Pi workflows for Cursor with Docker Compose, monitoring, DNS, networking, and security","type":"cursor-plugin","topics":["homelab","raspberry-pi","infrastructure","docker-compose","monitoring"],"npm":"@tmhs/homelab-mcp","url":"https://github.com/TMHSDigital/Home-Lab-Developer-Tools","homepage":"https://tmhsdigital.github.io/Home-Lab-Developer-Tools/","skills":["Alerting Rules","Ansible Workflows","Backup and Recovery","Certificate Management","Disaster Recovery","DNS Management","Docker Compose Stacks","Grafana Dashboards","Log Analysis","Multi-Node Management","Network Configuration","Notification Workflows","OS Update Management","Performance Tuning","Pi System Management","Reverse Proxy Management","Secrets Management","Security Hardening","Service Monitoring","SSH Management","Storage Management","Troubleshooting"],"rules":["Ansible Best Practices","Backup Coverage","Compose Arm64","Exposed Ports","Homelab Secrets","Inventory Consistency","Privileged Containers","Resource Limits","Ssh Safety","Weak Credentials","Yaml Conventions"],"mcpTools":["homelab_inventorySync","homelab_nodeList","homelab_nodeStatus","homelab_nodeExec","homelab_sshTest","homelab_healthCheck","homelab_diagnostics","homelab_piStatus","homelab_piReboot","homelab_diskUsage","homelab_kernelInfo","homelab_systemdServices","homelab_aptUpdate","homelab_aptUpgradable","homelab_aptHistory","homelab_networkInfo","homelab_openPorts","homelab_ufwStatus","homelab_fail2banStatus","homelab_composeUp","homelab_composeDown","homelab_composePull","homelab_composePs","homelab_serviceHealth","homelab_serviceLogs","homelab_serviceRestart","homelab_containerScan","homelab_logSearch","homelab_journalLogs","homelab_backupStatus","homelab_backupRun","homelab_backupList","homelab_backupRestore","homelab_backupDiff","homelab_volumeBackup","homelab_certCheck","homelab_certRenew","homelab_certList","homelab_npmCerts","homelab_npmProxyHosts","homelab_prometheusQuery","homelab_grafanaSnapshot","homelab_uptimeKumaStatus","homelab_alertList","homelab_speedtestResults","homelab_adguardStats","homelab_adguardFilters","homelab_adguardQueryLog","homelab_ntfySend","homelab_ntfyTopics"]},{"name":"Mobile App Developer Tools","slug":"mobile-app-developer-tools","description":"Cursor plugin for mobile app development with React Native, Expo, and Flutter support","type":"cursor-plugin","topics":["react-native","expo","flutter","mobile-development","typescript"],"npm":"@tmhs/mobile-mcp","url":"https://github.com/TMHSDigital/Mobile-App-Developer-Tools","homepage":"","skills":["Mobile Accessibility Testing","Mobile AI Features","Mobile Analytics","Google Play Store Submission","Mobile Animations","Mobile API Integration","Mobile App Monitoring","App Store Prep","Mobile Auth Setup","Mobile Background Tasks","Mobile Camera Integration","Mobile CI/CD","Mobile Component Patterns","Mobile Config Plugins","Mobile Debugging","Mobile Deep Links","Mobile Dev Environment","Mobile E2E Testing","Mobile Feature Flags","Flutter Navigation","Flutter Project Setup","Flutter Run on Device","Flutter State Management","Mobile Forms and Validation","Mobile Internationalization","iOS App Store Submission","Mobile Local Storage","Mobile Maps and Location","Mobile Monetization","Mobile Native Modules","Mobile Navigation Setup","Mobile Offline Sync","Mobile OTA Updates","Mobile Permissions","Mobile Project Setup","Mobile Push Notifications","Mobile Real-Time","Mobile Run on Device","Mobile SDK Upgrade","Mobile Security","Mobile State Management","Mobile Testing","Mobile Theming & Dark Mode"],"rules":["Mobile Accessibility","Mobile Bundle Size","Mobile Color Contrast","Mobile Env Safety","Mobile I18N Strings","Mobile Image Assets","Mobile Native Compat","Mobile Performance","Mobile Platform Check","Mobile Secrets","Mobile Security Audit","Mobile Test Coverage"],"mcpTools":[]},{"name":"Plaid Developer Tools","slug":"plaid-developer-tools","description":"Cursor plugin and MCP companion for building on the Plaid API","type":"cursor-plugin","topics":["plaid","fintech","banking","open-banking","plaid-api"],"npm":"","url":"https://github.com/TMHSDigital/Plaid-Developer-Tools","homepage":"","skills":["Plaid Account Verification","Plaid API Reference","Plaid Category Mapping","Plaid Error Handling","Plaid Identity Verification","Plaid Institution Search","Plaid Investment Tracking","Plaid Link Setup","Plaid Migration Guide","Plaid Next.js Integration","Plaid Production Readiness","Plaid React Integration","Plaid Recurring Detection","Plaid Sandbox Testing","Plaid Security Best Practices","Plaid Transaction Sync","Plaid Webhook Handling"],"rules":["Plaid Env Safety","Plaid Error Handling","Plaid Link Best Practices","Plaid Secrets","Plaid Sync Cursor","Plaid Token Storage","Plaid Webhook Security"],"mcpTools":[]},{"name":"Monday Cursor Plugin","slug":"monday-cursor-plugin","description":"Cursor IDE plugin for Monday.com with boards, items, sprints, docs, dashboards, and GraphQL","type":"cursor-plugin","topics":["monday","project-management","graphql","productivity","work-management"],"npm":"","url":"https://github.com/TMHSDigital/Monday-Cursor-Plugin","homepage":"https://tmhsdigital.github.io/Monday-Cursor-Plugin/","skills":["Monday API Reference","Monday Board Insights","Monday Board Management","Monday Chart Visualization","Monday Column Types Guide","Monday Dashboard Builder","Monday Docs Management","Monday Form Builder","Monday Item Operations","Monday Notetaker Meetings","Monday Notifications","Monday Project Tracking","Monday Resource Management","Monday Sprint Planning","Monday Sprint Review","Monday Tags and Assets","Monday Updates and Communication","Monday User and Team Management","Monday Webhook Management","Monday Workflow Automation","Monday Workspace Organizer"],"rules":["Monday Api Token Safety","Monday Board Structure","Monday Column Value Format","Monday Error Handling","Monday Graphql Best Practices","Monday Mcp Tool Preference","Monday Rate Limit Awareness","Monday Webhook Validation"],"mcpTools":["get_user_context","search","list_users_and_teams","get_board_info","get_board_items_page","board_insights","create_board","create_group","create_column","create_item","change_item_column_values","get_updates","create_update","get_board_activity","list_workspaces","workspace_info","create_workspace","update_workspace","create_folder","update_folder","move_object","read_docs","create_doc","add_content_to_doc","create_dashboard","create_widget","all_widgets_schema","create_form","get_form","update_form","form_questions_editor","get_monday_dev_sprints_boards","get_sprints_metadata","get_sprint_summary","get_notetaker_meetings","get_graphql_schema","get_type_details","get_column_type_info","all_monday_api","show-chart","show-battery","show-table","show-assign","create_notification"]},{"name":"Steam Cursor Plugin","slug":"steam-cursor-plugin","description":"Steam and Steamworks integration for Cursor IDE for game developers, modders, and power users","type":"cursor-plugin","topics":["steam","steamworks","game-development","modding","steam-workshop"],"npm":"","url":"https://github.com/TMHSDigital/Steam-Cursor-Plugin","homepage":"https://tmhsdigital.github.io/Steam-Cursor-Plugin/","skills":["Steam Achievement Designer","Steam Anti-Cheat Integration","Steam API Reference","Steam Bug Report Template","Steam Build Automation","Steam Cloud Saves","Steam Community Management","Steam DLC & Expansion Planning","Steam Friends & Social","Steam Game Comparison","Steam Input / Controller Support","Steam Inventory & Economy","Steam Leaderboards","Steam Market Research","Steam Migration Guide","Steam Multiplayer Networking","Steam Player Stats","Steam Playtest Setup","Steam Price History","Steam Pricing Strategy","Steam Profile Lookup","Steam Release Checklist","Steam Review Analysis","Steam SteamCMD Helper","Steam Store Lookup","Steam Store Page Optimizer","Steam Testing Sandbox","Steam Wishlist Estimates","Steam Workshop Helper","Steamworks App Config"],"rules":["Steam Api Error Handling","Steam Api Key Usage","Steam Appid Validation","Steam Build Config Validation","Steam Deck Compat","Steam Launch Options Check","Steam Network Security","Steam Save Compat","Steamworks Secrets"],"mcpTools":["steam_getAppDetails","steam_searchApps","steam_getPlayerCount","steam_getAchievementStats","steam_getWorkshopItem","steam_getReviews","steam_getPriceOverview","steam_getAppReviewSummary","steam_getRegionalPricing","steam_getNewsForApp","steam_getPlayerSummary","steam_getOwnedGames","steam_queryWorkshop","steam_getLeaderboardEntries","steam_resolveVanityURL","steam_getSchemaForGame","steam_getPlayerAchievements","steam_getLeaderboardsForGame","steam_createLobby","steam_uploadWorkshopItem","steam_updateWorkshopItem","steam_setAchievement","steam_clearAchievement","steam_uploadLeaderboardScore","steam_grantInventoryItem"]},{"name":"Steam MCP Server","slug":"steam-mcp","description":"MCP server for Steam and Steamworks APIs with store data, player stats, reviews, achievements, and workshop tools","type":"mcp-server","topics":["steam","mcp-server","steamworks","game-development","npm"],"npm":"@tmhs/steam-mcp","url":"https://github.com/TMHSDigital/steam-mcp","homepage":"https://www.npmjs.com/package/@tmhs/steam-mcp","skills":[],"rules":[],"mcpTools":[]}]
   </script>
 
   <script>
+    /* Toast */
+    (function(){
+      var toastEl=document.getElementById('toast');var timer;
+      window.showToast=function(msg){clearTimeout(timer);toastEl.textContent=msg;toastEl.classList.add('show');timer=setTimeout(function(){toastEl.classList.remove('show')},2000)};
+    })();
+
     /* Theme toggle */
     (function(){
       var btn=document.getElementById('themeToggle'),icon=document.getElementById('themeIcon');
@@ -288,6 +372,12 @@
       }
       btn.addEventListener('click',function(){var c=getState();apply(states[(states.indexOf(c)+1)%states.length])});
       updateIcon(getState());
+    })();
+
+    /* Build date in footer */
+    (function(){
+      var el=document.getElementById('buildDate');
+      if(el)el.textContent='Built '+new Date().toISOString().slice(0,10);
     })();
 
     /* Data loading */
@@ -347,81 +437,116 @@
       })});
     }
 
-    /* Search (full-aggregate: name, description, topics, npm, skills, rules, MCP tools) */
+    /* Search (full-aggregate) */
     function setupSearch(tools){
       var input=document.getElementById('toolSearch');
       var meta=document.getElementById('searchMeta');
       var idxEl=document.getElementById('search-index');
       var searchIdx=[];
       if(idxEl){try{searchIdx=JSON.parse(idxEl.textContent)}catch(e){}}
-
       var indexMap={};
       searchIdx.forEach(function(entry){
         indexMap[entry.slug]={
           text:(entry.name+' '+entry.description+' '+(entry.topics||[]).join(' ')+' '+(entry.npm||'')+' '+(entry.skills||[]).join(' ')+' '+(entry.rules||[]).join(' ')+' '+(entry.mcpTools||[]).join(' ')).toLowerCase(),
-          skills:(entry.skills||[]),
-          rules:(entry.rules||[]),
-          mcpTools:(entry.mcpTools||[])
+          skills:(entry.skills||[]),rules:(entry.rules||[]),mcpTools:(entry.mcpTools||[])
         };
       });
-
       if(!Object.keys(indexMap).length){
         tools.forEach(function(t){
-          indexMap[t.slug]={
-            text:(t.name+' '+t.description+' '+(t.topics||[]).join(' ')+' '+(t.npm||'')).toLowerCase(),
-            skills:[],rules:[],mcpTools:[]
-          };
+          indexMap[t.slug]={text:(t.name+' '+t.description+' '+(t.topics||[]).join(' ')+' '+(t.npm||'')).toLowerCase(),skills:[],rules:[],mcpTools:[]};
         });
       }
-
       function findMatchSource(idx,q){
-        var sk=idx.skills||[];
-        for(var i=0;i<sk.length;i++){if(sk[i].toLowerCase().indexOf(q)!==-1)return'skill: '+sk[i]}
-        var ru=idx.rules||[];
-        for(var i=0;i<ru.length;i++){if(ru[i].toLowerCase().indexOf(q)!==-1)return'rule: '+ru[i]}
-        var mt=idx.mcpTools||[];
-        for(var i=0;i<mt.length;i++){if(mt[i].toLowerCase().indexOf(q)!==-1)return'MCP tool: '+mt[i]}
+        var sk=idx.skills||[];for(var i=0;i<sk.length;i++){if(sk[i].toLowerCase().indexOf(q)!==-1)return'skill: '+sk[i]}
+        var ru=idx.rules||[];for(var i=0;i<ru.length;i++){if(ru[i].toLowerCase().indexOf(q)!==-1)return'rule: '+ru[i]}
+        var mt=idx.mcpTools||[];for(var i=0;i<mt.length;i++){if(mt[i].toLowerCase().indexOf(q)!==-1)return'MCP tool: '+mt[i]}
         return'';
       }
-
       input.addEventListener('input',function(){
-        var q=input.value.toLowerCase().trim();
-        var cards=document.querySelectorAll('.tool-card');
-        var shown=0;
+        var q=input.value.toLowerCase().trim();var cards=document.querySelectorAll('.tool-card');var shown=0;
         cards.forEach(function(c){
-          var hint=c.querySelector('.match-hint');
-          if(hint)hint.remove();
+          var hint=c.querySelector('.match-hint');if(hint)hint.remove();
           if(!q){c.classList.remove('hidden-card');shown++;return}
-          var slug=c.dataset.slug;
-          var idx=indexMap[slug];
+          var slug=c.dataset.slug;var idx=indexMap[slug];
           if(idx&&idx.text.indexOf(q)!==-1){
             c.classList.remove('hidden-card');shown++;
             var src=findMatchSource(idx,q);
-            if(src){
-              var el=document.createElement('div');el.className='match-hint';el.textContent='Matched: '+src;
-              c.appendChild(el);
-            }
-          }else{
-            c.classList.add('hidden-card');
-          }
+            if(src){var el=document.createElement('div');el.className='match-hint';el.textContent='Matched: '+src;c.appendChild(el)}
+          }else{c.classList.add('hidden-card')}
         });
         document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active')});
         if(!q){document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');meta.textContent=''}
         else{meta.textContent=shown+' of '+cards.length+' tools'}
       });
-
       document.addEventListener('keydown',function(e){
-        if(e.key==='/'&&!e.ctrlKey&&!e.metaKey&&document.activeElement.tagName!=='INPUT'&&document.activeElement.tagName!=='TEXTAREA'){
-          e.preventDefault();input.focus();
-        }
+        if(e.key==='/'&&!e.ctrlKey&&!e.metaKey&&document.activeElement.tagName!=='INPUT'&&document.activeElement.tagName!=='TEXTAREA'){e.preventDefault();input.focus()}
       });
     }
+
+    /* Section collapse/expand toggles */
+    (function(){
+      document.querySelectorAll('.toggle-section').forEach(function(btn){
+        var targetId=btn.getAttribute('data-target');
+        var details=document.getElementById(targetId);
+        if(!details)return;
+        function updateLabel(){btn.textContent=details.open?'Collapse':'Expand'}
+        btn.addEventListener('click',function(){details.open=!details.open;updateLabel()});
+        details.addEventListener('toggle',updateLabel);
+      });
+    })();
+
+    /* Smooth expand/collapse animation */
+    (function(){
+      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+      document.querySelectorAll('details.cat-group').forEach(function(det){
+        var body=det.querySelector('.cat-body');
+        if(!body)return;
+        det.addEventListener('toggle',function(){
+          if(det.open){
+            body.style.maxHeight='0';body.style.opacity='0';body.classList.add('cat-body-anim');
+            requestAnimationFrame(function(){body.style.maxHeight=body.scrollHeight+'px';body.style.opacity='1'});
+            setTimeout(function(){body.style.maxHeight='none';body.classList.remove('cat-body-anim')},260);
+          }
+        });
+      });
+    })();
+
+    /* Scroll spy */
+    (function(){
+      var links=document.querySelectorAll('.nav-links a[href^="#"]');
+      if(!links.length)return;
+      var sections=[];
+      links.forEach(function(link){
+        var id=link.getAttribute('href').slice(1);
+        var el=document.getElementById(id);
+        if(el)sections.push({el:el,link:link});
+      });
+      function onScroll(){
+        var scrollY=window.scrollY+80;var current=null;
+        sections.forEach(function(s){if(s.el.offsetTop<=scrollY)current=s});
+        links.forEach(function(l){l.classList.remove('active')});
+        if(current)current.link.classList.add('active');
+      }
+      window.addEventListener('scroll',onScroll,{passive:true});
+      onScroll();
+    })();
 
     /* Back to top */
     (function(){
       var btn=document.getElementById('backToTop');
       window.addEventListener('scroll',function(){btn.classList.toggle('visible',window.scrollY>400)},{passive:true});
       btn.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'})});
+    })();
+
+    /* Mobile nav toggle */
+    (function(){
+      var toggle=document.querySelector('.nav-toggle');
+      var links=document.querySelector('.nav-links');
+      if(!toggle||!links)return;
+      toggle.addEventListener('click',function(){links.classList.toggle('open')});
+      links.querySelectorAll('a').forEach(function(a){
+        a.addEventListener('click',function(){links.classList.remove('open')});
+      });
     })();
   </script>
 

@@ -173,6 +173,7 @@
     "rules": 0,
     "mcpTools": 25,
     "extras": {},
+    "npm": "@tmhs/steam-mcp",
     "topics": ["steam", "mcp-server", "steamworks", "game-development", "npm"],
     "status": "active",
     "version": "1.0.0",

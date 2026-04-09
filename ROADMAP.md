@@ -4,7 +4,7 @@
 
 ## Current Status
 
-**v1.4.0** - Full-aggregate search across all tools, OG meta tags, font preloads, and Lighthouse performance audit.
+**v1.5.0** - Catalog site parity with tool template, full template documentation, npm publish standardization.
 
 ## Release Plan
 
@@ -15,7 +15,7 @@
 | v1.2.0 | Cross-Repo Consistency | Released |
 | v1.3.0 | Content-Rich Pages | Released |
 | v1.4.0 | Discovery and Performance | Released |
-| v1.5.0 | Infrastructure and Documentation | Next |
+| v1.5.0 | Infrastructure and Documentation | Released |
 
 ---
 
@@ -174,6 +174,12 @@ Maintenance, documentation, and packaging consistency.
 - [x] `/` keyboard shortcut to focus search on catalog site
 - [x] Font preloads (`<link rel="preload">`) on all sites
 - [x] Lighthouse performance audit documented in `PERFORMANCE.md`
+- [x] Catalog site: hero gradient, section cards, toast, mobile nav, scroll spy, collapsible sections, expand animations, rich footer
+- [x] `SETUP-PROMPT.md` expanded with full `site.json` schema, `mcp-tools.json` format, `build_site.py` data flow, customization guide, troubleshooting
+- [x] `CONTRIBUTING.md`: added "How to Update the Site Template" section
+- [x] Home Lab `publish.yml` standardized to pure OIDC (removed `NPM_TOKEN`)
+- [x] steam-mcp `publish.yml` action versions bumped to v6
+- [x] `registry.json`: steam-mcp `npm` field set to `@tmhs/steam-mcp`
 
 ---
 

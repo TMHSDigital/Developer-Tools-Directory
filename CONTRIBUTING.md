@@ -177,6 +177,48 @@ The `pages.yml` workflow copies `registry.json` and `assets/` into `docs/` at de
 
 To test locally, open `docs/index.html` in a browser. The script falls back to the embedded registry data.
 
+## How to Update the Site Template
+
+The unified site template (`site-template/`) powers GitHub Pages for all tool repos. Changes to the template affect every site at next deploy.
+
+### Files
+
+| File | Purpose |
+|------|---------|
+| `site-template/template.html.j2` | Jinja2 HTML template rendered by each tool repo |
+| `site-template/build_site.py` | Build script that reads repo data and renders the template |
+| `site-template/fonts/` | Self-hosted Inter and JetBrains Mono woff2 files |
+| `site-template/SETUP-PROMPT.md` | Full schema reference for `site.json`, `mcp-tools.json`, data flow |
+
+### Testing locally
+
+```bash
+python site-template/build_site.py --repo-root E:\Docker-Developer-Tools --out /tmp/docker-test
+```
+
+Open the generated `index.html` in a browser to verify. Repeat for at least one other tool repo to confirm the template works across different data shapes.
+
+### Rebuilding all tool repos after a template change
+
+After modifying `template.html.j2` or `build_site.py`, rebuild all 4 tool repos locally:
+
+```bash
+for repo in Docker-Developer-Tools Home-Lab-Developer-Tools Steam-Cursor-Plugin Monday-Cursor-Plugin; do
+  python site-template/build_site.py --repo-root "E:\$repo" --out "E:\$repo\docs"
+done
+```
+
+Then commit the updated `docs/index.html` in each repo.
+
+### Adding a new site.json field
+
+1. Add the field to `build_site.py` - load it from `site.json` and pass it in the template context
+2. Use the field in `template.html.j2` with a Jinja2 conditional so existing repos without the field still render correctly
+3. Document the field in `site-template/SETUP-PROMPT.md` (schema table, example, and customization guide)
+4. Add a default value to the scaffold's `site.json.j2` template if applicable
+5. Test with a repo that uses the field and one that doesn't
+6. Commit with `feat: add <field-name> support to site template`
+
 ## Pull Request Process
 
 ### Branch naming
