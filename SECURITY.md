@@ -45,8 +45,16 @@ This repository is a meta-repository containing:
 
 ## Security Best Practices for Contributors
 
-- Never commit credentials, tokens, API keys, or passwords
-- Do not add external CDN dependencies to the catalog site
-- Do not use `innerHTML` or `eval` with user-supplied or registry data in `docs/script.js`
-- Review scaffold template changes for potential injection vectors
-- Keep the Jinja2 dependency updated
+- Never commit credentials, tokens, API keys, business emails, or local filesystem paths. The `safety-scan` CI job blocks these.
+- Do not add external CDN dependencies to the catalog site.
+- Do not use `innerHTML`, `outerHTML`, `eval`, or `new Function` with registry or user data. The `safety-scan` job greps for these.
+- Review scaffold template changes for potential injection vectors.
+- Keep Jinja2 and other dependencies current; address Dependabot PRs within 7 days.
+- Pin third-party GitHub Actions by full commit SHA. See [`.github/workflows/README.md`](.github/workflows/README.md).
+- Sign off every commit under the DCO. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+## Related standards
+
+- [`standards/security.md`](standards/security.md) - the ecosystem-wide security standard that applies to every tool repo.
+- [`standards/licensing.md`](standards/licensing.md) - inbound/outbound licensing model.
+- [`docs/.well-known/security.txt`](docs/.well-known/security.txt) - RFC 9116 machine-readable contact.

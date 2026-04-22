@@ -6,8 +6,7 @@ Project documentation for Claude Code and AI assistants working on this reposito
 
 Developer Tools Directory is a **meta-repository** that catalogs, standardizes, and scaffolds all TMHSDigital Cursor IDE plugins and MCP servers. It does not contain a plugin or MCP server itself.
 
-**Version:** 1.0.0
-**License:** CC-BY-NC-ND-4.0
+**License:** CC-BY-NC-ND-4.0 outbound, DCO + broader inbound grant (see [`CONTRIBUTING.md`](CONTRIBUTING.md))
 **Author:** TMHSDigital
 
 **Catalog site:** https://tmhsdigital.github.io/Developer-Tools-Directory/
@@ -16,11 +15,13 @@ Developer Tools Directory is a **meta-repository** that catalogs, standardizes, 
 
 ```
 Developer-Tools-Directory/
-  registry.json              # Source of truth for all 9 tool repos
-  standards/                 # 9 convention docs (folder structure, CI/CD, manifests, etc.)
+  registry.json              # Source of truth for all tool repos
+  standards/                 # 17 convention docs (structure, CI/CD, testing, MCP, security, licensing, etc.)
   scaffold/
     create-tool.py           # Python repo generator (Jinja2)
     templates/               # Jinja2 templates for new repos
+  scripts/
+    sync_from_registry.py    # Regenerates README, CLAUDE.md, and docs embedded registry
   site-template/
     build_site.py            # Builds GitHub Pages for tool repos from their metadata
     template.html.j2         # Shared HTML template with configurable branding
@@ -30,45 +31,47 @@ Developer-Tools-Directory/
     index.html               # GitHub Pages catalog site
     style.css                # Dark theme, responsive, card layout
     script.js                # Fetches registry.json, renders cards, filters
+    .well-known/security.txt # RFC 9116 security contact
+    contributors/            # Worked examples for new contributors
   assets/
     logo.png                 # Directory logo
-  .github/workflows/
-    validate.yml             # Registry schema, docs existence, scaffold dry-run
-    pages.yml                # Deploy catalog site to GitHub Pages
-    stale.yml                # Mark/close inactive issues and PRs
-    codeql.yml               # Python security scanning
-    dependency-review.yml    # Audit PR dependencies
-    release.yml              # Auto-create releases on push to main
-    release-drafter.yml      # Auto-draft release notes from PRs
-    label-sync.yml           # Auto-label PRs by changed paths
+  .github/
+    CODEOWNERS               # Review routing
+    PULL_REQUEST_TEMPLATE.md
+    ISSUE_TEMPLATE/          # Bug report, feature request, config
+    workflows/               # Validate, sync, pages, release, stale, codeql, etc.
+      README.md              # Action-pinning convention
 ```
 
 ## Key Files
 
 ### registry.json
 
-Array of 9 tool objects. Each entry has: `name`, `repo`, `slug`, `description`, `type` (cursor-plugin | mcp-server), `homepage`, `skills`, `rules`, `mcpTools`, `extras`, `topics`, `status`, `version`, `language`, `license`, `pagesType`, `hasCI`.
+Array of tool objects. Each entry has: `name`, `repo`, `slug`, `description`, `type` (cursor-plugin | mcp-server), `homepage`, `skills`, `rules`, `mcpTools`, `extras`, `topics`, `status`, `version`, `language`, `license`, `pagesType`, `hasCI`. `status` is one of `experimental`, `beta`, `active`, `maintenance`, `deprecated`, or `archived` (see [`standards/lifecycle.md`](standards/lifecycle.md)).
 
-When updating, also sync:
-1. Embedded registry in `docs/index.html` (`<script type="application/json" id="registry-data">`)
-2. Tools table and stats line in `README.md`
+When updating, run `python scripts/sync_from_registry.py` to regenerate every derived artifact. The `sync-check` CI job blocks PRs that drift.
+
+### scripts/sync_from_registry.py
+
+Pure-stdlib Python script that regenerates README tables and stats, CLAUDE.md cataloged tools and totals, and the embedded registry JSON in `docs/index.html`. Modes: no flag (write), `--check` (CI drift detection), `--about` (print the `gh repo edit` command for the GitHub About section, run locally).
 
 ### scaffold/create-tool.py
 
 CLI args: `--name`, `--slug`, `--description`, `--type`, `--mcp-server`, `--skills N`, `--rules N`, `--license`, `--output`, `--author-name`, `--author-email`.
 
-Templates in `scaffold/templates/` produce: plugin.json, 4 GitHub Actions workflows, README.md, AGENTS.md, CLAUDE.md, CONTRIBUTING.md, CHANGELOG.md, CODE_OF_CONDUCT.md, SECURITY.md, ROADMAP.md, LICENSE, .cursorrules, .gitignore, docs/index.html, and optional mcp-server/ scaffold.
+Templates in `scaffold/templates/` produce: plugin.json, GitHub Actions workflows, README.md, AGENTS.md, CLAUDE.md, CONTRIBUTING.md, CHANGELOG.md, CODE_OF_CONDUCT.md, SECURITY.md, ROADMAP.md, LICENSE, .cursorrules, .gitignore, docs/index.html, and optional mcp-server/ scaffold.
 
 ### docs/ (catalog site)
 
-Static HTML/CSS/JS. No build step. No external CDN. The `pages.yml` workflow copies `registry.json` and `assets/` into `docs/` at deploy time. `script.js` fetches `registry.json` at runtime and falls back to an embedded copy.
+Static HTML/CSS/JS. No build step. No external CDN. The `pages.yml` workflow copies `registry.json` and `assets/` into `docs/` at deploy time. `script.js` fetches `registry.json` at runtime and falls back to an embedded copy. Never use `innerHTML`/`eval` with registry data - the safety-scan CI job blocks reintroduction.
 
 ### standards/
 
-9 Markdown documents defining conventions derived from analyzing existing TMHSDigital tool repos: folder-structure, plugin-manifest, ci-cd, github-pages, commit-conventions, readme-template, agents-template, versioning, and a standards README index.
+17 Markdown documents defining conventions for every tool repo. Index in [`standards/README.md`](standards/README.md).
 
-## Cataloged Tools (9)
+## Cataloged Tools
 
+<!-- registry:tools:start -->
 | Tool | Type | Skills | Rules | MCP Tools |
 |------|------|-------:|------:|----------:|
 | CFX Developer Tools | Plugin | 9 | 6 | 6 |
@@ -80,8 +83,11 @@ Static HTML/CSS/JS. No build step. No external CDN. The `pages.yml` workflow cop
 | Monday Cursor Plugin | Plugin | 21 | 8 | 45 |
 | Steam Cursor Plugin | Plugin | 30 | 9 | 25 |
 | Steam MCP Server | MCP Server | 0 | 0 | 25 |
+<!-- registry:tools:end -->
 
-**Totals:** 177 skills, 71 rules, 371 MCP tools
+<!-- registry:stats:start -->
+**Totals:** 177 skills, 71 rules, 371 MCP tools across 9 repos
+<!-- registry:stats:end -->
 
 ## Development Workflow
 
@@ -113,17 +119,19 @@ Open `docs/index.html` in a browser. The script falls back to embedded registry 
 - Registry JSON syntax and schema validation
 - Docs file existence checks
 - Scaffold Python syntax check
-- Scaffold dry-run test (generates repo, verifies key files exist)
+- Scaffold dry-run test (generates repo, verifies key files exist, scans for leaked business email)
+- `sync-check` job: runs `python scripts/sync_from_registry.py --check` and fails on drift
+- `safety-scan` job: blocks leaked business emails, drive-letter paths, unsafe DOM sinks (`innerHTML`/`eval` in `docs/`), and committed credential files
 
 ## Conventions
 
-- **Conventional commits**: `feat:`, `fix:`, `chore:`, `docs:`
-- **No em dashes or en dashes** - use hyphens or rewrite
-- **No hardcoded credentials** anywhere
-- **Public readership** - all standards docs written for external consumption
-- **Single branch** - `main` only, no develop/release branches
-- **Self-contained docs site** - no CDN dependencies
-- **registry.json is the source of truth** - README tables and catalog site derive from it
+- **Conventional commits** with DCO sign-off (`git commit -s`)
+- **No em dashes, en dashes, or emoji** - see [`standards/writing-style.md`](standards/writing-style.md)
+- **No hardcoded credentials, business emails, or local filesystem paths** anywhere
+- **Public readership** - all docs written for external consumption
+- **Single branch** - `main` only
+- **Self-contained docs site** - no CDN, no unsafe DOM sinks
+- **`registry.json` is the single source of truth** - README, CLAUDE.md, and `docs/index.html` embedded data are generated
 
 ## Dependencies
 
@@ -131,4 +139,4 @@ Open `docs/index.html` in a browser. The script falls back to embedded registry 
 |------------|---------|-------|
 | Jinja2 >=3.1,<4.0 | Scaffold template rendering | `requirements.txt` |
 
-The docs site has zero runtime dependencies.
+The docs site has zero runtime dependencies. The sync script is pure stdlib.

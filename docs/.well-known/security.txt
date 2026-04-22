@@ -1,0 +1,5 @@
+Contact: https://github.com/TMHSDigital/Developer-Tools-Directory/security/advisories/new
+Policy: https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/SECURITY.md
+Preferred-Languages: en
+Canonical: https://tmhsdigital.github.io/Developer-Tools-Directory/.well-known/security.txt
+Expires: 2027-12-31T23:59:59.000Z

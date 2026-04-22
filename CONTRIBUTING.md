@@ -64,14 +64,21 @@ Developer-Tools-Directory/
 }
 ```
 
-2. Update the embedded registry copy in `docs/index.html` - find the `<script type="application/json" id="registry-data">` tag and add the same entry there.
+2. Run the sync script - it regenerates every derived artifact (README tables and stats, CLAUDE.md, embedded registry in `docs/index.html`):
 
-3. Update `README.md`:
-   - Add a row to the Tools table
-   - Add a row to the Tool descriptions table (inside the `<details>` block)
-   - Update the aggregate stats line (total repos, skills, rules, MCP tools)
+   ```bash
+   python scripts/sync_from_registry.py
+   ```
 
-4. Commit with `feat: add <tool-name> to registry`
+3. Verify the sync is clean:
+
+   ```bash
+   python scripts/sync_from_registry.py --check
+   ```
+
+4. Commit with `feat: add <tool-name> to registry`. Remember to sign off your commit (see DCO section below).
+
+For a full end-to-end walkthrough including scaffolding the tool repo, see [`docs/contributors/adding-a-tool.md`](docs/contributors/adding-a-tool.md).
 
 ### Required fields
 
@@ -193,22 +200,22 @@ The unified site template (`site-template/`) powers GitHub Pages for all tool re
 ### Testing locally
 
 ```bash
-python site-template/build_site.py --repo-root E:\Docker-Developer-Tools --out /tmp/docker-test
+python site-template/build_site.py --repo-root /path/to/tool-repo --out /tmp/tool-test
 ```
 
 Open the generated `index.html` in a browser to verify. Repeat for at least one other tool repo to confirm the template works across different data shapes.
 
 ### Rebuilding all tool repos after a template change
 
-After modifying `template.html.j2` or `build_site.py`, rebuild all 4 tool repos locally:
+After modifying `template.html.j2` or `build_site.py`, rebuild each affected tool repo locally:
 
 ```bash
 for repo in Docker-Developer-Tools Home-Lab-Developer-Tools Steam-Cursor-Plugin Monday-Cursor-Plugin; do
-  python site-template/build_site.py --repo-root "E:\$repo" --out "E:\$repo\docs"
+  python site-template/build_site.py --repo-root "$TOOLS_ROOT/$repo" --out "$TOOLS_ROOT/$repo/docs"
 done
 ```
 
-Then commit the updated `docs/index.html` in each repo.
+Where `$TOOLS_ROOT` is the parent directory containing your checkouts of each tool repo. Then commit the updated `docs/index.html` in each repo.
 
 ### Adding a new site.json field
 
@@ -245,13 +252,13 @@ chore: bump Jinja2 to 3.1.5
 Before submitting a PR, verify:
 
 - [ ] `registry.json` is valid JSON (run `python -c "import json; json.load(open('registry.json'))"`)
-- [ ] No em dashes or en dashes in any content
-- [ ] No hardcoded credentials or tokens
-- [ ] If registry changed: embedded copy in `docs/index.html` is updated
-- [ ] If registry changed: README.md tools table and stats are updated
+- [ ] No em dashes or en dashes in any content (see [`standards/writing-style.md`](standards/writing-style.md))
+- [ ] No hardcoded credentials, tokens, business emails, or local filesystem paths
+- [ ] If registry changed: run `python scripts/sync_from_registry.py` and commit the result
+- [ ] `python scripts/sync_from_registry.py --check` exits 0
 - [ ] If standard added: both `standards/README.md` and `README.md` tables are updated
 - [ ] If scaffold changed: dry-run test passes
-- [ ] Commit messages follow conventional format
+- [ ] Commit messages follow conventional format and are `Signed-off-by:` (see DCO section)
 
 ### CI checks
 
@@ -269,6 +276,39 @@ All PRs must pass:
 - **Concise descriptions.** No filler text or marketing language.
 - **Public readership.** All content should make sense to external contributors.
 - **Consistent formatting.** Use existing files as reference for Markdown structure.
+
+## Developer Certificate of Origin (DCO)
+
+All contributions must be signed off under the [Developer Certificate of Origin 1.1](https://developercertificate.org/). This is a lightweight way to certify that you wrote the contribution or have the right to submit it.
+
+### How to sign off
+
+Add `Signed-off-by: Your Name <your-email>` to the end of every commit message. Git can do this automatically with the `-s` flag:
+
+```bash
+git commit -s -m "feat: add new standard"
+```
+
+Your name and email must match your Git identity. Use a real name - pseudonyms are not accepted.
+
+If you forget to sign off, amend the commit:
+
+```bash
+git commit --amend -s --no-edit
+git push --force-with-lease
+```
+
+### Inbound license grant
+
+By submitting a contribution to this repository, you certify that you have the right to do so under the Developer Certificate of Origin 1.1, and you grant TMHSDigital a perpetual, worldwide, non-exclusive, royalty-free, irrevocable license to use, reproduce, prepare derivative works of, publicly display, publicly perform, sublicense, and distribute your contribution under the project's current license (CC-BY-NC-ND-4.0) or any successor license chosen by the project.
+
+This grant exists because CC-BY-NC-ND-4.0's "NoDerivatives" clause would otherwise prevent the project from accepting pull requests (every PR is a derivative). See [`standards/licensing.md`](standards/licensing.md) for the full rationale.
+
+### Enforcement
+
+The preferred enforcement is the built-in [GitHub DCO App](https://github.com/apps/dco). Maintainers enable it from repo settings; no workflow is required. PRs with unsigned commits are blocked by the App's status check.
+
+If the App is unavailable, a pinned fallback workflow can be added. Contributors do not need to do anything different - just sign off.
 
 ## Code of Conduct
 

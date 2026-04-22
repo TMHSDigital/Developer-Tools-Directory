@@ -8,13 +8,14 @@ This file tells AI coding agents how the Developer Tools Directory repo works an
 
 This is a **meta-repository** -- it does not contain a Cursor plugin or MCP server itself. It catalogs, standardizes, and scaffolds other TMHSDigital developer tool repos. It contains:
 
-- **`registry.json`** -- single source of truth for all tool repos (9 entries). The catalog site and README tables are derived from it.
-- **`standards/`** -- 9 Markdown docs defining conventions for folder structure, CI/CD, plugin manifests, GitHub Pages, commit conventions, README format, AGENTS.md format, and versioning.
+- **`registry.json`** -- single source of truth for all tool repos. README, CLAUDE.md, and the catalog site's embedded registry are generated from it by `scripts/sync_from_registry.py`.
+- **`standards/`** -- 17 Markdown docs defining conventions for folder structure, CI/CD, plugin manifests, GitHub Pages, commits, README format, AGENTS.md format, versioning, testing, skills, rules, MCP servers, security, licensing, scope, lifecycle, and writing style.
 - **`scaffold/`** -- Python repo generator (`create-tool.py`) with Jinja2 templates that produce a fully standards-compliant new tool repo.
+- **`scripts/`** -- automation utilities. `sync_from_registry.py` regenerates all derived artifacts from `registry.json`.
 - **`site-template/`** -- shared GitHub Pages build system for tool repos. `build_site.py` reads `.cursor-plugin/plugin.json`, `site.json`, `skills/`, `rules/`, and `mcp-tools.json` from a tool repo and renders `docs/index.html` via `template.html.j2`. Self-hosts Inter and JetBrains Mono fonts. Tool repos clone this directory in CI and run the build script at deploy time.
-- **`docs/`** -- static GitHub Pages catalog site (vanilla HTML/CSS/JS, no build step). Reads `registry.json` at runtime to render tool cards.
+- **`docs/`** -- static GitHub Pages catalog site (vanilla HTML/CSS/JS, no build step). Reads `registry.json` at runtime, falls back to an embedded copy.
 - **`assets/`** -- logo image.
-- **`.github/workflows/`** -- CI/CD for this repo (validate, pages, release, release-drafter, stale, codeql, dependency-review, label-sync).
+- **`.github/workflows/`** -- CI/CD for this repo. See [`.github/workflows/README.md`](.github/workflows/README.md) for the action-pinning convention and the full list.
 
 ## Branching and commit model
 
@@ -52,11 +53,13 @@ Checks:
 
 Has a concurrency guard -- only one release can run at a time. Commits with `[skip ci]` are ignored.
 
-The repo About section (description, homepage, topics) must be updated manually after registry changes since the GITHUB_TOKEN lacks permission for `gh repo edit`. Run locally:
+The repo About section (description, homepage, topics) is updated locally, not in CI. The `GITHUB_TOKEN` does not have `administration:write` and storing a PAT with that scope is an avoidable supply-chain risk. Instead:
 
 ```
-gh repo edit TMHSDigital/Developer-Tools-Directory --description "Centralized catalog, standards, and scaffolding for <N> TMHSDigital developer tools - <S> skills, <R> rules, <M> MCP tools"
+python scripts/sync_from_registry.py --about
 ```
+
+This prints the exact `gh repo edit ...` command. Review and run it locally.
 
 ### `release-drafter.yml` (runs on push to main and PR activity)
 
@@ -98,7 +101,7 @@ Array of tool objects. Required fields per entry:
 | `extras` | object | Optional extra counts (snippets, templates, natives, events) |
 | `npm` | string | npm package name (empty string or omit if none) |
 | `topics` | string[] | Discovery tags |
-| `status` | string | `active`, `beta`, `deprecated` |
+| `status` | string | `experimental`, `beta`, `active`, `maintenance`, `deprecated`, or `archived` (see [`standards/lifecycle.md`](standards/lifecycle.md)) |
 | `version` | string | Current semver version |
 | `language` | string | Primary language |
 | `license` | string | SPDX identifier |
@@ -107,7 +110,22 @@ Array of tool objects. Required fields per entry:
 
 ### `docs/index.html`
 
-The catalog site. It embeds a copy of the registry data in a `<script type="application/json">` tag as a fallback, and also fetches `registry.json` at runtime. When updating the registry, **also update the embedded copy in index.html** to keep them in sync.
+The catalog site. It embeds a copy of the registry data in a `<script type="application/json">` tag as a fallback, and also fetches `registry.json` at runtime. The embedded copy is regenerated from `registry.json` by `scripts/sync_from_registry.py`. Do not edit the embedded block by hand.
+
+### `scripts/sync_from_registry.py`
+
+Pure-stdlib Python script that regenerates every derived artifact from `registry.json`:
+
+- `README.md` tools table (between `<!-- registry:tools:start -->` / `<!-- registry:tools:end -->`)
+- `README.md` tool descriptions (between `<!-- registry:descriptions:start -->` / `<!-- registry:descriptions:end -->`)
+- `README.md` aggregate stats (between `<!-- registry:stats:start -->` / `<!-- registry:stats:end -->`)
+- `CLAUDE.md` cataloged tools and totals (same markers)
+- `docs/index.html` embedded registry JSON (inside the `<script id="registry-data">` tag)
+
+Modes:
+- `python scripts/sync_from_registry.py` - rewrite artifacts in place
+- `python scripts/sync_from_registry.py --check` - exit 1 if anything would change; used by CI (`sync-check` job in `validate.yml`)
+- `python scripts/sync_from_registry.py --about` - print the `gh repo edit` command to update the GitHub About section; run locally
 
 ### `scaffold/create-tool.py`
 
@@ -119,10 +137,11 @@ Pure documentation -- no code. Each file documents a convention derived from ana
 
 ## Adding a new tool to the registry
 
-1. Add an entry to `registry.json` following the schema above
-2. Update the embedded registry in `docs/index.html` to match
-3. Update the tools table and aggregate stats line in `README.md`
-4. Use `feat:` commit prefix
+1. Add an entry to `registry.json` following the schema above.
+2. Run `python scripts/sync_from_registry.py` to regenerate README, CLAUDE.md, and the embedded registry in `docs/index.html`.
+3. Run `python scripts/sync_from_registry.py --check` to confirm clean.
+4. Commit with `feat:` prefix and `git commit -s` (DCO sign-off required).
+5. Locally, run `python scripts/sync_from_registry.py --about` and execute the printed `gh repo edit` command to refresh the GitHub About section.
 
 ## Adding or updating a standard
 
@@ -143,12 +162,8 @@ Pure documentation -- no code. Each file documents a convention derived from ana
 - Every entry requires all fields listed in the schema table above. CI validates this on every push and PR.
 - `type` must be exactly `cursor-plugin` or `mcp-server`. No other values are accepted.
 - `skills`, `rules`, and `mcpTools` must be integers, not strings.
-- `status` must be `active`, `beta`, or `deprecated`.
-- After adding or modifying an entry, you must also update:
-  1. The embedded registry copy in `docs/index.html` -- find the `<script type="application/json" id="registry-data">` tag and sync it with `registry.json`
-  2. The tools table in `README.md` -- add/update the row
-  3. The tool descriptions `<details>` block in `README.md` -- add/update the description
-  4. The aggregate stats line in `README.md` (total repos, skills, rules, MCP tools)
+- `status` must be one of the six lifecycle values; see [`standards/lifecycle.md`](standards/lifecycle.md).
+- After adding or modifying an entry, run `python scripts/sync_from_registry.py` to regenerate every derived artifact. Do not edit those artifacts by hand - the `sync-check` CI job blocks PRs that drift.
 - Use `feat:` commit prefix when adding a new tool, `fix:` when correcting existing entries.
 
 ## When editing standards/
@@ -156,7 +171,7 @@ Pure documentation -- no code. Each file documents a convention derived from ana
 - Standards are pure Markdown documentation. They contain no executable code.
 - Each standard should have an H1 title, a brief overview paragraph, and H2 sections for major topics.
 - Write for public readership. Do not reference internal repos, private URLs, or credentials.
-- No em dashes or en dashes -- use hyphens or rewrite.
+- No em dashes or en dashes - use hyphens or rewrite. See [`standards/writing-style.md`](standards/writing-style.md) for the full prose conventions.
 - If adding a new standard document:
   1. Create the `.md` file in `standards/`
   2. Add a row to the table in `standards/README.md`
@@ -204,9 +219,10 @@ Pure documentation -- no code. Each file documents a convention derived from ana
 
 ## When editing workflows
 
-- **`validate.yml`** runs on PR and push to main. It has three jobs: registry validation, docs existence checks, and scaffold syntax + dry-run test. Keep checks fast -- avoid installing unnecessary dependencies.
+- **`validate.yml`** runs on PR and push to main. Jobs: registry schema validation, docs existence checks, scaffold syntax and dry-run test, registry sync-check (`scripts/sync_from_registry.py --check`), and public-repo safety scan (blocks leaked business email, drive-letter paths, unsafe DOM sinks, committed secrets). Keep checks fast - avoid installing unnecessary dependencies.
+- **`sync.yml`** runs on push to main when `registry.json` changes. Regenerates derived artifacts and opens a PR via `peter-evans/create-pull-request` rather than pushing directly. Uses only the default `GITHUB_TOKEN` - no PAT required.
 - **`pages.yml`** deploys to GitHub Pages on push to main when `docs/`, `assets/`, or `registry.json` change. It copies `registry.json` into `docs/` and `assets/` into `docs/assets/` before uploading. Uses `actions/deploy-pages`.
-- **`release.yml`** auto-creates a GitHub release on push to main (excluding docs/md/standards changes). It determines the version bump from conventional commit prefixes since the last tag. Has a concurrency guard -- only one release can run at a time. Commits containing `[skip ci]` are ignored. The repo About section must be updated manually via `gh repo edit` after registry changes (the GITHUB_TOKEN lacks permission for this).
+- **`release.yml`** auto-creates a GitHub release on push to main (excluding docs/md/standards changes). It determines the version bump from conventional commit prefixes since the last tag. Has a concurrency guard - only one release can run at a time. Commits containing `[skip ci]` are ignored. The repo About section is updated locally via `python scripts/sync_from_registry.py --about`, never by this workflow.
 - **`release-drafter.yml`** auto-drafts release notes from merged PR titles/labels. Config is in `.github/release-drafter.yml`. Categories: Features, Standards, Scaffold, Bug Fixes, Documentation, CI/Infrastructure. The autolabeler assigns labels based on changed file paths.
 - **`stale.yml`** runs weekly (Sunday midnight UTC). Issues: 60-day stale, 14-day close. PRs: 30-day stale, 14-day close. Labels exempt from staleness: `pinned`, `security`, `enhancement` (issues) and `pinned`, `security` (PRs).
 - **`codeql.yml`** runs Python security scanning on push/PR to main and weekly (Monday 06:00 UTC). Uses `github/codeql-action` v3.
@@ -215,18 +231,30 @@ Pure documentation -- no code. Each file documents a convention derived from ana
 
 ## Code conventions
 
-- No hardcoded credentials anywhere
-- No em dashes or en dashes -- use hyphens or rewrite
-- `registry.json` must be valid JSON at all times -- CI enforces this
-- The catalog site uses no external CDN dependencies -- everything is self-contained
-- Standards docs are written for public readership -- no internal references or private repo mentions
-- Conventional commits are required (`feat:`, `fix:`, `chore:`, `docs:`)
-- Single branch: `main` only
+- No hardcoded credentials, business emails, or local filesystem paths anywhere. The safety-scan CI job blocks these.
+- No em dashes or en dashes - use hyphens or rewrite. See [`standards/writing-style.md`](standards/writing-style.md).
+- `registry.json` must be valid JSON at all times - CI enforces this.
+- Derived artifacts (README tables, CLAUDE.md tables, docs embedded registry) are generated by `scripts/sync_from_registry.py`. Never edit them by hand.
+- The catalog site uses no external CDN dependencies and no `innerHTML`/`eval` on registry data.
+- Conventional commits are required (`feat:`, `fix:`, `chore:`, `docs:`), with a `Signed-off-by:` trailer (DCO; see [`CONTRIBUTING.md`](CONTRIBUTING.md)).
+- Single branch: `main` only.
+
+## Branch protection (maintainer responsibility)
+
+The `main` branch on this repo should be protected with:
+
+- Require pull request reviews before merging
+- Require status checks to pass: `validate-registry`, `sync-check`, `safety-scan`, DCO
+- Require signed commits (enforced by the DCO App)
+- Disallow force pushes
+- Disallow deletions
+
+These settings live outside the repo (Settings > Branches). They are not stored as code and must be configured manually by a maintainer with admin access.
 
 ## Dependencies
 
-This repo has one Python dependency: `Jinja2` (in `requirements.txt`). The docs site has zero dependencies -- vanilla HTML, CSS, and JavaScript.
+This repo has one Python dependency: `Jinja2` (in `requirements.txt`). The sync script is pure stdlib. The docs site has zero runtime dependencies.
 
 ## License
 
-CC-BY-NC-ND-4.0. All contributions fall under this license.
+Outbound: CC-BY-NC-ND-4.0. Inbound: DCO + broader grant (see [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`standards/licensing.md`](standards/licensing.md)).

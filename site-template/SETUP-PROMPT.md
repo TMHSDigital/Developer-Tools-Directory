@@ -158,7 +158,7 @@ CHANGELOG.md                -->  parse_changelog()-->  changelog (list), has_cha
 ### Running locally
 
 ```bash
-python site-template/build_site.py --repo-root E:\My-Tool --out E:\My-Tool\docs
+python site-template/build_site.py --repo-root /path/to/your-tool --out /path/to/your-tool/docs
 ```
 
 The script also copies `site-template/fonts/` and the repo's `assets/` directory into the output folder.

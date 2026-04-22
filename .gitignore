@@ -1,13 +1,46 @@
+# Python
 __pycache__/
-*.pyc
-*.pyo
-.env
-.venv/
-venv/
+*.py[cod]
 *.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage/
+htmlcov/
+
+# Node
+node_modules/
 dist/
 build/
+
+# Virtual envs and secrets
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+secrets.json
+*.pem
+*.key
+*.crt
+*.p12
+
+# IDE and OS
 .DS_Store
 Thumbs.db
-node_modules/
+.vscode/
+.idea/
+*.swp
+*.bak
+*.tmp
+
+# Agent and tool caches
+.claude/
+.cursor/agent-transcripts/
+.cursor/plans/
+.cache/
+
+# Scaffold test output
 output/
+/tmp/

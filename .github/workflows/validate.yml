@@ -47,7 +47,7 @@ jobs:
           }
           OPTIONAL = {"npm": str}
           VALID_TYPES = {"cursor-plugin", "mcp-server"}
-          VALID_STATUS = {"active", "beta", "deprecated"}
+          VALID_STATUS = {"experimental", "beta", "active", "maintenance", "deprecated", "archived"}
           VALID_PAGES = {"static", "mkdocs", "none"}
           errors = []
           for i, tool in enumerate(data):
@@ -119,3 +119,62 @@ jobs:
           test -f /tmp/scaffold-test/ci-test-plugin/mcp-tools.json
           test -f /tmp/scaffold-test/ci-test-plugin/mcp-server/server.py
           echo "Scaffold test passed"
+
+      - name: Scaffold leak scan
+        run: |
+          if grep -rnE "tmhospitalitystrateg[i]es" /tmp/scaffold-test; then
+            echo "::error::Scaffold output contains the old business email. Update scaffold/create-tool.py default."
+            exit 1
+          fi
+
+  sync-check:
+    name: Registry sync check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check derived artifacts match registry
+        run: python3 scripts/sync_from_registry.py --check
+
+  safety-scan:
+    name: Public-repo safety scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: No business email leak
+        run: |
+          # Pattern uses a character class so this workflow file does not match itself.
+          if grep -rnE --include='*.py' --include='*.md' --include='*.j2' --include='*.json' --include='*.html' "tmhospitalitystrateg[i]es" . ; then
+            echo "::error::Remove the real business email. Use contact@users.noreply.github.com or a placeholder."
+            exit 1
+          fi
+
+      - name: No local filesystem paths in docs
+        run: |
+          if grep -rnE --include='*.md' '(^|[^A-Za-z])[A-Z]:\\' . ; then
+            echo "::error::Windows drive-letter paths leaked in documentation. Replace with generic /path/to/... or \$VAR."
+            exit 1
+          fi
+          if grep -rnE --include='*.md' '/Users/[A-Za-z0-9_-]+/|/home/[A-Za-z0-9_-]+/' . ; then
+            echo "::error::Home directory paths leaked in documentation. Replace with generic paths."
+            exit 1
+          fi
+
+      - name: No unsafe DOM sinks in catalog site
+        run: |
+          if grep -rnE --include='*.js' --include='*.html' 'innerHTML|outerHTML|\beval\(|new Function\(' docs/ ; then
+            echo "::error::Unsafe DOM sink reintroduced in docs/. Use textContent; never eval registry data."
+            exit 1
+          fi
+
+      - name: No committed secrets
+        run: |
+          if git ls-files | grep -E '(^|/)\.env$|secrets\.json$|\.pem$|\.key$|\.p12$' ; then
+            echo "::error::Credential file committed. Remove and rotate any exposed secret."
+            exit 1
+          fi

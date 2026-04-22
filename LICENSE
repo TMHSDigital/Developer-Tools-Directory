@@ -1,3 +1,11 @@
+Outbound license: CC-BY-NC-ND-4.0 (Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International), full text below.
+
+Inbound contribution grant: see CONTRIBUTING.md. Contributors grant TMHSDigital a broader inbound license (DCO + explicit grant) because the "inbound = outbound" pattern cannot apply here - outbound terms forbid derivatives, but every pull request is a derivative. The inbound grant resolves this.
+
+See standards/licensing.md for the full contribution licensing model.
+
+---
+
 Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International
 
 Copyright (c) 2026 TMHSDigital

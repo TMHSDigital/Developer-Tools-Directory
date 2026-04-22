@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/TMHSDigital/Developer-Tools-Directory/security/advisories/new
+    about: Report a security issue privately via GitHub Security Advisory. Do not open a public issue for vulnerabilities.
+  - name: Questions and discussion
+    url: https://github.com/TMHSDigital/Developer-Tools-Directory/discussions
+    about: Use GitHub Discussions for questions, ideas, and general conversation.

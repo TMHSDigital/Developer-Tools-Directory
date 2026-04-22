@@ -26,7 +26,7 @@ The `.cursor-plugin/plugin.json` file is the plugin manifest. It declares the pl
   "version": "1.0.0",
   "author": {
     "name": "TMHSDigital",
-    "email": "contact@tmhospitalitystrategies.com"
+    "email": "contact@users.noreply.github.com"
   },
   "license": "CC-BY-NC-ND-4.0",
   "keywords": ["example", "cursor-plugin", "mcp"],

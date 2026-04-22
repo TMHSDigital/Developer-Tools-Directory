@@ -1,0 +1,53 @@
+name: Feature request
+description: Propose a new standard, automation, or catalog feature
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing, skim `ROADMAP.md` to see if this is already planned. Proposals aligned with existing milestones are easier to merge.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of change
+      options:
+        - New standard or revision to existing standard
+        - Automation or CI check
+        - Catalog site (docs/) feature
+        - Scaffold or site-template change
+        - New tool registration (use the "Add a tool" PR flow instead if you have the repo)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem does this solve? Cite an observation, bug report, or gap.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Concrete description of what to add or modify.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and out-of-scope
+      description: What this change covers and what it deliberately does not.
+    validations:
+      required: false

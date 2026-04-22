@@ -1,0 +1,21 @@
+# CODEOWNERS is enforced only when branch protection on `main` enables
+# "Require a pull request before merging" AND "Require review from Code Owners".
+# Without that setting this file is documentation, not enforcement.
+# See `.github/workflows/README.md` for the expected branch protection config.
+
+# Default ownership for the whole repo
+* @TMHSDigital
+
+# Ecosystem-wide standards: tighter review
+/standards/ @TMHSDigital
+
+# CI/CD and security-sensitive config
+/.github/ @TMHSDigital
+/scripts/ @TMHSDigital
+
+# Registry changes: require directory maintainer review
+/registry.json @TMHSDigital
+
+# Scaffold generator and shared site template affect every tool repo
+/scaffold/ @TMHSDigital
+/site-template/ @TMHSDigital

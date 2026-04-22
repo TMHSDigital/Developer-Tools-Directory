@@ -1,0 +1,59 @@
+name: Sync derived artifacts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "registry.json"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: registry-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync README, CLAUDE.md, and docs from registry
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Regenerate derived artifacts
+        run: python3 scripts/sync_from_registry.py
+
+      - name: Detect drift
+        id: drift
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open pull request with sync
+        if: steps.drift.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6.1.0
+        with:
+          branch: chore/registry-sync
+          delete-branch: true
+          commit-message: "chore: sync derived artifacts from registry"
+          title: "chore: sync derived artifacts from registry"
+          body: |
+            Automated sync from `registry.json`.
+
+            Regenerated:
+            - `README.md` tools table, descriptions, and stats
+            - `CLAUDE.md` cataloged tools table and totals
+            - `docs/index.html` embedded registry block
+
+            Review the diff for accuracy. About section on GitHub is not updated by this workflow; the maintainer runs `python scripts/sync_from_registry.py --about` locally and pipes to `gh repo edit`.
+          labels: registry,automated

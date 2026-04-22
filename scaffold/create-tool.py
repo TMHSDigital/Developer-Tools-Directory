@@ -81,8 +81,8 @@ Examples:
     )
     parser.add_argument(
         "--author-email",
-        default="contact@tmhospitalitystrategies.com",
-        help="Author email for plugin.json",
+        default="contact@users.noreply.github.com",
+        help="Author email for plugin.json (default: GitHub no-reply placeholder)",
     )
     return parser.parse_args()
 

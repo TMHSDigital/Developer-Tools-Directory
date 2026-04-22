@@ -28,9 +28,11 @@
 
 ---
 
+<!-- registry:stats:start -->
 <p align="center">
  9 repos &nbsp;&bull;&nbsp; 177 skills &nbsp;&bull;&nbsp; 71 rules &nbsp;&bull;&nbsp; 371 MCP tools
 </p>
+<!-- registry:stats:end -->
 
 ## How It Works
 
@@ -47,6 +49,7 @@ flowchart LR
 
 ## Tools
 
+<!-- registry:tools:start -->
 | Tool | Type | Skills | Rules | MCP&nbsp;Tools | Links |
 |:-----|:-----|-------:|------:|------:|:------|
 | **CFX Developer Tools** | Plugin | 9 | 6 | 6 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/CFX-Developer-Tools) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/CFX-Developer-Tools/) |
@@ -57,24 +60,27 @@ flowchart LR
 | **Plaid Developer Tools** | Plugin | 17 | 7 | 30 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Plaid-Developer-Tools) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Plaid-Developer-Tools/) |
 | **Monday Cursor Plugin** | Plugin | 21 | 8 | 45 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Monday-Cursor-Plugin) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Monday-Cursor-Plugin/) |
 | **Steam Cursor Plugin** | Plugin | 30 | 9 | 25 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Steam-Cursor-Plugin) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Steam-Cursor-Plugin/) |
-| **Steam MCP Server** | MCP Server | -- | -- | 25 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/steam-mcp) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/steam-mcp) |
+| **Steam MCP Server** | MCP Server | - | - | 25 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/steam-mcp) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/steam-mcp) |
+<!-- registry:tools:end -->
 
 <details>
 <summary>Tool descriptions</summary>
 
 &nbsp;
 
+<!-- registry:descriptions:start -->
 | Tool | Description |
 |:-----|:------------|
-| **CFX Developer Tools** | AI-powered Cursor IDE plugin for FiveM and RedM resource development. Scaffold resources, look up 12,000+ natives, generate manifests, and write optimized scripts in Lua, JavaScript, and C#. |
-| **Unity Developer Tools** | Cursor plugin for Unity game development with URP, HDRP, and Built-in render pipeline support. 20 snippets and 5 starter templates. |
-| **Docker Developer Tools** | Expert Docker workflows for Cursor, Claude Code, and any MCP-compatible editor. Container management, Compose, and Dockerfile best practices. |
-| **Home Lab Developer Tools** | Home lab and Raspberry Pi workflows with Docker Compose, monitoring, DNS, networking, backups, security, and administration via SSH. |
-| **Mobile App Developer Tools** | Full mobile development lifecycle for React Native, Expo, and Flutter -- from project setup to app store submission. |
-| **Plaid Developer Tools** | Cursor plugin and MCP companion for building on the Plaid API. Banking, fintech, and open-banking integrations. |
-| **Monday Cursor Plugin** | Monday.com integration with boards, items, sprints, docs, dashboards, and GraphQL queries. |
-| **Steam Cursor Plugin** | Steam and Steamworks integration for game developers, modders, and power users. Store data, achievements, Workshop, multiplayer, and cloud saves. |
-| **Steam MCP Server** | Standalone MCP server for Steam and Steamworks APIs. 18 read-only + 7 write tools. Published on npm as `@tmhs/steam-mcp`. |
+| **CFX Developer Tools** | AI-powered Cursor IDE plugin for FiveM and RedM resource development |
+| **Unity Developer Tools** | Cursor IDE plugin for Unity game development with URP, HDRP, and Built-in render pipeline support |
+| **Docker Developer Tools** | Cursor IDE plugin for Docker workflows with container management, Compose, and Dockerfile support |
+| **Home Lab Developer Tools** | Home lab and Raspberry Pi workflows for Cursor with Docker Compose, monitoring, DNS, networking, and security |
+| **Mobile App Developer Tools** | Cursor plugin for mobile app development with React Native, Expo, and Flutter support |
+| **Plaid Developer Tools** | Cursor plugin and MCP companion for building on the Plaid API |
+| **Monday Cursor Plugin** | Cursor IDE plugin for Monday.com with boards, items, sprints, docs, dashboards, and GraphQL |
+| **Steam Cursor Plugin** | Steam and Steamworks integration for Cursor IDE for game developers, modders, and power users |
+| **Steam MCP Server** | MCP server for Steam and Steamworks APIs with store data, player stats, reviews, achievements, and workshop tools |
+<!-- registry:descriptions:end -->
 
 </details>
 
@@ -86,23 +92,34 @@ Documented conventions for building new developer tools. All docs in [`standards
 |:---------|:--------|
 | [Folder Structure](standards/folder-structure.md) | Canonical repo layout for plugins and MCP servers |
 | [Plugin Manifest](standards/plugin-manifest.md) | `.cursor-plugin/plugin.json` specification and required fields |
-| [CI/CD](standards/ci-cd.md) | GitHub Actions workflows every repo must have (validate, release, pages, stale) |
-| [GitHub Pages](standards/github-pages.md) | Documentation site setup -- static HTML or MkDocs Material |
+| [CI/CD](standards/ci-cd.md) | GitHub Actions workflows every repo must have |
+| [GitHub Pages](standards/github-pages.md) | Documentation site setup (static HTML or MkDocs Material) |
 | [Commit Conventions](standards/commit-conventions.md) | Conventional commits and version bumping rules |
 | [README Template](standards/readme-template.md) | Standard README structure and required sections |
 | [AGENTS.md Template](standards/agents-template.md) | AI agent guidance file structure |
 | [Versioning](standards/versioning.md) | Semver management and automated release flow |
+| [Testing](standards/testing.md) | Test frameworks, coverage bar, and CI wiring |
+| [Skills](standards/skills.md) | `SKILL.md` structure and frontmatter |
+| [Rules](standards/rules.md) | `.mdc` structure, globs, and the secrets rule pattern |
+| [MCP Server](standards/mcp-server.md) | Tool naming, runtime, transport, destructive ops |
+| [Security](standards/security.md) | Disclosure, secrets handling, workflow supply chain |
+| [Licensing](standards/licensing.md) | DCO + inbound license grant model |
+| [Scope](standards/scope.md) | What belongs in the directory and what does not |
+| [Lifecycle](standards/lifecycle.md) | Tool status transitions |
+| [Writing Style](standards/writing-style.md) | Prose conventions across all repos |
 
 <details>
 <summary>Core principles</summary>
 
 &nbsp;
 
-1. **Automation first** -- CI handles versioning, releases, badge updates, and repo metadata. Manual edits to managed fields will be overwritten.
-2. **Single branch** -- All repos use `main` only. No develop, staging, or release branches.
-3. **Conventional commits** -- Every commit follows the conventional format. The release workflow parses them to determine version bumps.
-4. **AI-agent friendly** -- Every repo includes `AGENTS.md` and `.cursorrules` so AI coding agents understand the project.
-5. **Public by default** -- Standards, docs, and tooling are written for public consumption.
+1. **Derived artifacts are generated, not edited** - `registry.json` is the single source of truth. README tables, catalog site, and About section are emitted from it.
+2. **Single branch** - All repos use `main` only. No develop, staging, or release branches.
+3. **Conventional commits** - Every commit follows the conventional format. Release workflows parse them to determine version bumps.
+4. **AI-agent friendly** - Every repo includes `AGENTS.md` and `.cursorrules`. Standards are written so an agent can apply them without guessing.
+5. **Inbound DCO, outbound CC-BY-NC-ND-4.0** - See [`standards/licensing.md`](standards/licensing.md).
+6. **Scope gate** - Tools must be developer-facing, Cursor or MCP native, and actively maintained. See [`standards/scope.md`](standards/scope.md).
+7. **Lifecycle transitions are explicit** - Tools move through documented states. See [`standards/lifecycle.md`](standards/lifecycle.md).
 
 </details>
 

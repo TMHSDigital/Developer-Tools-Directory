@@ -4,7 +4,7 @@
 
 ## Current Status
 
-**v1.5.0** - Catalog site parity with tool template, full template documentation, npm publish standardization.
+**v1.6.0** - Standards and Governance. Nine new standards docs, registry-to-artifact sync automation, DCO + inbound license grant, scope and lifecycle principles, public-repo safety hardening.
 
 ## Release Plan
 
@@ -16,6 +16,10 @@
 | v1.3.0 | Content-Rich Pages | Released |
 | v1.4.0 | Discovery and Performance | Released |
 | v1.5.0 | Infrastructure and Documentation | Released |
+| v1.6.0 | Standards and Governance | In progress |
+| v1.7.0 | Sync Everywhere and Agent-File Drift | Planned |
+| v1.8.0 | Observability and Feedback | Planned |
+| v1.9.0 | Standards Versioning | Planned |
 
 ---
 
@@ -121,6 +125,85 @@ Make tools easier to find and sites faster to load.
 - Lighthouse audit across all 5 sites
 - Optimize: font preloading, lazy-load below-fold content, minimize unused CSS
 - Document baseline and post-optimization scores
+
+---
+
+## v1.6.0 - Standards and Governance
+
+Close the content, automation, and governance gaps identified in the v1.5 audit.
+
+### New standards docs
+
+- [`standards/testing.md`](standards/testing.md) - frameworks by runtime, minimum coverage bar, CI wiring
+- [`standards/skills.md`](standards/skills.md) - `SKILL.md` structure and frontmatter
+- [`standards/rules.md`](standards/rules.md) - `.mdc` frontmatter, globs, secrets-rule pattern
+- [`standards/mcp-server.md`](standards/mcp-server.md) - tool naming, runtime choice, transport, destructive ops, auth
+- [`standards/security.md`](standards/security.md) - disclosure, secrets handling, supply-chain hardening
+- [`standards/licensing.md`](standards/licensing.md) - DCO + inbound license grant model
+- [`standards/scope.md`](standards/scope.md) - what qualifies for the directory and what does not
+- [`standards/lifecycle.md`](standards/lifecycle.md) - tool status transitions
+- [`standards/writing-style.md`](standards/writing-style.md) - prose conventions (em-dash rule demoted here)
+
+### Automation
+
+- `scripts/sync_from_registry.py` regenerates README tables, CLAUDE.md, and the embedded registry in `docs/index.html` from `registry.json`
+- `validate.yml` runs `sync-check` and a public-repo `safety-scan` on every PR
+- `sync.yml` opens a PR with the regenerated artifacts when `registry.json` changes on `main` (no PAT required)
+- GitHub About section sync is a documented local one-liner (`python scripts/sync_from_registry.py --about`)
+
+### Governance
+
+- Principles in `standards/README.md` and `README.md` rewritten
+- DCO + inbound license grant in `CONTRIBUTING.md`, `LICENSE` header updated, `standards/licensing.md` published
+- GitHub DCO App as preferred enforcement; no third-party action stored in the repo
+
+### Public-repo hygiene
+
+- Hardened `.gitignore` covering Python, Node, envs, secrets, IDE, and agent caches
+- `.github/CODEOWNERS`, `ISSUE_TEMPLATE/`, `PULL_REQUEST_TEMPLATE.md`
+- `.github/workflows/README.md` documenting action SHA-pinning convention
+- `docs/.well-known/security.txt` per RFC 9116
+- All leaked business emails and local drive-letter paths scrubbed; CI blocks reintroduction
+- `scaffold/create-tool.py` default author email switched to `contact@users.noreply.github.com`
+
+### Worked example
+
+- `docs/contributors/adding-a-tool.md` walks a new tool from scaffold to registered-in-directory PR
+
+---
+
+## v1.7.0 - Sync Everywhere and Agent-File Drift
+
+Extend the single-source-of-truth pattern beyond the directory repo.
+
+- Generate `AGENTS.md` and `CLAUDE.md` sections in every tool repo from `registry.json` where they duplicate registry data
+- Add a `standards-version` frontmatter to every tool repo's `AGENTS.md` so the directory can audit compliance
+- Aggregate changelog workflow pulling each tool repo's `CHANGELOG.md` into a weekly digest on the catalog site
+- Cross-tool integration guidance: when to share code, when to duplicate, how to version shared modules
+
+---
+
+## v1.8.0 - Observability and Feedback
+
+Empirical signals to drive standards revision.
+
+- Opt-in telemetry spec for MCP tool invocation counts
+- npm download aggregator on the catalog site (public data)
+- `docs/INSIGHTS.md` generated weekly showing top tools/skills by signal
+- CI check flagging skills not invoked in the last 90 days as dormant
+- Feedback loop: standards changes must cite an empirical observation or user report
+
+---
+
+## v1.9.0 - Standards Versioning
+
+Version the ecosystem itself.
+
+- Each standards doc gets a `standards-version` header
+- A per-standard changelog
+- Tool repos pin the standards version they claim to meet
+- Directory emits a compliance matrix per tool by standards version
+- Principles doc maintains its own version and changelog
 
 ---
 

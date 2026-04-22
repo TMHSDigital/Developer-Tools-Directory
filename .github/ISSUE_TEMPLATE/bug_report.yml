@@ -1,0 +1,78 @@
+name: Bug report
+description: Something in the directory is broken (registry, catalog site, scaffold, or standards)
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. For security issues, do not file a public issue - open a Security Advisory instead: https://github.com/TMHSDigital/Developer-Tools-Directory/security/advisories/new
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the directory is affected?
+      options:
+        - Registry (registry.json)
+        - Catalog site (docs/)
+        - Standards docs (standards/)
+        - Scaffold generator (scaffold/)
+        - Site template (site-template/)
+        - CI workflows (.github/workflows/)
+        - Sync script (scripts/)
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: affected-tool
+    attributes:
+      label: Affected tool (if applicable)
+      description: Which tool repo or entry in registry.json does this relate to?
+      placeholder: e.g. Docker Developer Tools
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Minimal steps to reproduce the bug. Include commands and expected vs actual.
+      placeholder: |
+        1. Run `python scripts/sync_from_registry.py --check`
+        2. Observe output X
+        3. Expected output Y
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Python version, browser if applicable.
+      placeholder: e.g. Ubuntu 24.04, Python 3.12
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Any relevant output. Redact secrets before pasting.
+      render: shell
+    validations:
+      required: false
