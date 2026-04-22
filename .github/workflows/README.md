@@ -6,10 +6,10 @@ CI/CD for the Developer Tools Directory meta-repo. See [`standards/ci-cd.md`](..
 
 | File | Trigger | Purpose |
 |------|---------|---------|
-| `validate.yml` | PR and push to main | Registry schema, docs existence, scaffold dry-run, sync-check, safety scan |
+| `validate.yml` | PR and push to main | Registry schema, docs existence, scaffold dry-run, sync-check, safety scan, version-bump-check |
 | `sync.yml` | Push to main (registry.json changes), manual | Regenerate derived artifacts and open a PR |
 | `pages.yml` | Push to main (docs/, assets/, registry.json changes) | Deploy catalog site to GitHub Pages |
-| `release.yml` | Push to main (code changes) | Auto-version, tag, and release |
+| `release.yml` | Push to main (code changes) | Release when `VERSION` is ahead of latest tag; no-op if equal; fail if lower |
 | `release-drafter.yml` | PR activity and push to main | Draft release notes from PRs |
 | `stale.yml` | Weekly schedule | Mark and close inactive issues and PRs |
 | `codeql.yml` | Push/PR to main and weekly schedule | CodeQL security scanning |

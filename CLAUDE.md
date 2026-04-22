@@ -122,6 +122,11 @@ Open `docs/index.html` in a browser. The script falls back to embedded registry 
 - Scaffold dry-run test (generates repo, verifies key files exist, scans for leaked business email)
 - `sync-check` job: runs `python scripts/sync_from_registry.py --check` and fails on drift
 - `safety-scan` job: blocks leaked business emails, drive-letter paths, unsafe DOM sinks (`innerHTML`/`eval` in `docs/`), and committed credential files
+- `version-bump-check` job (PR only): requires a `VERSION` bump when the PR contains any `feat:` or `fix:` commit; opt out per commit with `[skip version]`
+
+### Release workflow
+
+`release.yml` runs on push to main and reads the `VERSION` file at the repo root. If `VERSION` is ahead of the latest git tag, it creates tag `v<VERSION>` and a GitHub Release. If `VERSION` equals the latest tag, the workflow no-ops. If `VERSION` is lower, the workflow fails. Release notes come from release-drafter's current draft body when present, otherwise from the commit log since the previous tag. The meta-repo uses VERSION-file-driven releases; tool repos use conventional-commit auto-bumps per `standards/versioning.md`.
 
 ## Conventions
 

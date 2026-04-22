@@ -46,10 +46,15 @@ Checks:
 
 ### `release.yml` (runs on push to main, ignores docs/md/standards changes)
 
-1. Gets the latest git tag
-2. Determines version bump from conventional commit prefixes since last tag
-3. Creates annotated tag and pushes it
-4. Creates a GitHub Release with auto-generated notes
+1. `check-version` reads `VERSION` at the repo root and compares it with the latest git tag
+2. If they match, the workflow exits cleanly - no release needed
+3. If `VERSION` is ahead, `release` creates annotated tag `v<VERSION>`, pushes it, and creates a GitHub Release
+4. Release notes come from release-drafter's current draft body when available, else from the commit log since the previous tag
+5. If `VERSION` is lower than the latest tag, the workflow fails with a clear error
+
+`VERSION` is the single source of truth for the meta-repo version. Bump it in the same PR that lands a feature or fix. Conventional commit prefixes are still used for commit messages, but they no longer drive version bumps. The `version-bump-check` job in `validate.yml` enforces that any `feat:` or `fix:` commit also bumps `VERSION` (opt out with `[skip version]` in the commit subject or body for workflow-only changes).
+
+Note: tool repos in the ecosystem use a different model (auto-bump from conventional commits, version stored in `.cursor-plugin/plugin.json`). See `standards/versioning.md` for the tool-repo rules. The meta-repo deviates intentionally because it does not ship as a plugin and the narrative in `ROADMAP.md` is human-authored.
 
 Has a concurrency guard -- only one release can run at a time. Commits with `[skip ci]` are ignored.
 
@@ -222,7 +227,7 @@ Pure documentation -- no code. Each file documents a convention derived from ana
 - **`validate.yml`** runs on PR and push to main. Jobs: registry schema validation, docs existence checks, scaffold syntax and dry-run test, registry sync-check (`scripts/sync_from_registry.py --check`), and public-repo safety scan (blocks leaked business email, drive-letter paths, unsafe DOM sinks, committed secrets). Keep checks fast - avoid installing unnecessary dependencies.
 - **`sync.yml`** runs on push to main when `registry.json` changes. Regenerates derived artifacts and opens a PR via `peter-evans/create-pull-request` rather than pushing directly. Uses only the default `GITHUB_TOKEN` - no PAT required.
 - **`pages.yml`** deploys to GitHub Pages on push to main when `docs/`, `assets/`, or `registry.json` change. It copies `registry.json` into `docs/` and `assets/` into `docs/assets/` before uploading. Uses `actions/deploy-pages`.
-- **`release.yml`** auto-creates a GitHub release on push to main (excluding docs/md/standards changes). It determines the version bump from conventional commit prefixes since the last tag. Has a concurrency guard - only one release can run at a time. Commits containing `[skip ci]` are ignored. The repo About section is updated locally via `python scripts/sync_from_registry.py --about`, never by this workflow.
+- **`release.yml`** creates a GitHub release on push to main when `VERSION` is ahead of the latest git tag (excluding docs/md/standards changes). Version is read from the `VERSION` file at the repo root; release notes come from release-drafter's draft body or the commit log since the previous tag. `validate.yml`'s `version-bump-check` ensures `feat:` and `fix:` commits come with a `VERSION` bump (opt out with `[skip version]`). Has a concurrency guard - only one release can run at a time. Commits containing `[skip ci]` are ignored. The repo About section is updated locally via `python scripts/sync_from_registry.py --about`, never by this workflow.
 - **`release-drafter.yml`** auto-drafts release notes from merged PR titles/labels. Config is in `.github/release-drafter.yml`. Categories: Features, Standards, Scaffold, Bug Fixes, Documentation, CI/Infrastructure. The autolabeler assigns labels based on changed file paths.
 - **`stale.yml`** runs weekly (Sunday midnight UTC). Issues: 60-day stale, 14-day close. PRs: 30-day stale, 14-day close. Labels exempt from staleness: `pinned`, `security`, `enhancement` (issues) and `pinned`, `security` (PRs).
 - **`codeql.yml`** runs Python security scanning on push/PR to main and weekly (Monday 06:00 UTC). Uses `github/codeql-action` v3.

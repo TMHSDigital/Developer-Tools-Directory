@@ -247,6 +247,22 @@ docs: clarify scaffold --license flag usage
 chore: bump Jinja2 to 3.1.5
 ```
 
+### Versioning
+
+The meta-repo uses a `VERSION` file at the repo root as the single source of truth for its own version. When your PR lands a user-visible feature or bug fix, bump `VERSION` in the same PR.
+
+Rules:
+
+- `VERSION` contains a single semver line, no `v` prefix, LF line ending (`1.6.1`).
+- Any commit whose subject starts with `feat:` or `fix:` (including scoped variants like `feat(registry):`) requires a `VERSION` bump in the same PR. The `version-bump-check` CI job enforces this.
+- `chore:`, `docs:`, `ci:`, `refactor:`, `test:`, and `style:` commits do not require a bump.
+- Bump kind is at your discretion and guided by semver: breaking behavior change to a published contract is major, new capability is minor, correction with no behavior change is patch.
+- Escape hatch: add `[skip version]` to the commit subject or body for workflow-only changes that slipped into a `feat:`/`fix:` subject. Use sparingly.
+
+On merge to `main`, `release.yml` compares `VERSION` against the latest tag. If `VERSION` is ahead, it creates tag `v<VERSION>` and a GitHub Release. If they match, the workflow no-ops. If `VERSION` is lower, the workflow fails and refuses to downgrade.
+
+This model applies to the meta-repo only. Tool repos in the ecosystem use the conventional-commit auto-bump model documented in [`standards/versioning.md`](standards/versioning.md).
+
 ### Review checklist
 
 Before submitting a PR, verify:
@@ -258,6 +274,7 @@ Before submitting a PR, verify:
 - [ ] `python scripts/sync_from_registry.py --check` exits 0
 - [ ] If standard added: both `standards/README.md` and `README.md` tables are updated
 - [ ] If scaffold changed: dry-run test passes
+- [ ] If any commit is `feat:` or `fix:`: `VERSION` is bumped in the same PR (see Versioning section)
 - [ ] Commit messages follow conventional format and are `Signed-off-by:` (see DCO section)
 
 ### CI checks

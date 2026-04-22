@@ -178,3 +178,61 @@ jobs:
             echo "::error::Credential file committed. Remove and rotate any exposed secret."
             exit 1
           fi
+
+  version-bump-check:
+    name: feat/fix commits require VERSION bump
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Verify VERSION bump accompanies feat/fix commits
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          COMMITS="$(git log "${BASE_SHA}..${HEAD_SHA}" --pretty=format:'%H%x00%s%x00%b%x1e')"
+
+          if [ -z "$COMMITS" ]; then
+            echo "No new commits to check."
+            exit 0
+          fi
+
+          NEEDS_BUMP="false"
+          while IFS= read -r -d $'\x1e' record; do
+            [ -z "$record" ] && continue
+            SHA="$(echo "$record" | awk -F '\0' '{print $1}')"
+            SUBJECT="$(echo "$record" | awk -F '\0' '{print $2}')"
+            BODY="$(echo "$record" | awk -F '\0' '{print $3}')"
+
+            # Escape hatch: commit opts out.
+            if echo "$SUBJECT $BODY" | grep -qF '[skip version]'; then
+              echo "skip  | $SHA | $SUBJECT  (opted out with [skip version])"
+              continue
+            fi
+
+            if echo "$SUBJECT" | grep -qiE '^(feat|fix)(\([^)]*\))?!?:'; then
+              echo "need  | $SHA | $SUBJECT"
+              NEEDS_BUMP="true"
+            else
+              echo "ok    | $SHA | $SUBJECT"
+            fi
+          done <<< "$COMMITS"
+
+          if [ "$NEEDS_BUMP" = "false" ]; then
+            echo "No feat: or fix: commits in this PR. VERSION bump not required."
+            exit 0
+          fi
+
+          if git diff --name-only "${BASE_SHA}..${HEAD_SHA}" | grep -qxF 'VERSION'; then
+            echo "VERSION was modified in this PR. Check passed."
+            exit 0
+          fi
+
+          echo "::error::feat: or fix: commits require a VERSION bump. Update VERSION and commit before merging. Use '[skip version]' in the commit subject or body to opt out for workflow-only changes."
+          exit 1

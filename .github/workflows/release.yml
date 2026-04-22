@@ -9,70 +9,168 @@ on:
       - "standards/**"
       - "LICENSE"
       - ".github/release-drafter.yml"
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: release
+  group: release-${{ github.workflow }}
   cancel-in-progress: false
 
 jobs:
-  release:
-    name: Create release
+  check-version:
+    name: Check VERSION vs latest tag
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    outputs:
+      should-release: ${{ steps.compare.outputs.should-release }}
+      version: ${{ steps.compare.outputs.version }}
+      tag: ${{ steps.compare.outputs.tag }}
+      previous-tag: ${{ steps.compare.outputs.previous-tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - name: Get latest tag
-        id: tag
+      - name: Read VERSION and compare with latest tag
+        id: compare
+        shell: bash
         run: |
-          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          echo "current=$TAG" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
 
-      - name: Determine version bump
-        id: bump
-        run: |
-          CURRENT="${{ steps.tag.outputs.current }}"
-          CURRENT="${CURRENT#v}"
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
-
-          COMMITS=$(git log "${{ steps.tag.outputs.current }}..HEAD" --pretty=format:"%s" 2>/dev/null || git log --pretty=format:"%s")
-
-          if echo "$COMMITS" | grep -qE "^feat!:|BREAKING CHANGE"; then
-            MAJOR=$((MAJOR + 1))
-            MINOR=0
-            PATCH=0
-          elif echo "$COMMITS" | grep -qE "^feat(\(.*\))?:"; then
-            MINOR=$((MINOR + 1))
-            PATCH=0
-          else
-            PATCH=$((PATCH + 1))
+          if [ ! -f VERSION ]; then
+            echo "::error::VERSION file is missing at repo root"
+            exit 1
           fi
 
-          NEW="$MAJOR.$MINOR.$PATCH"
-          echo "version=$NEW" >> "$GITHUB_OUTPUT"
-          echo "tag=v$NEW" >> "$GITHUB_OUTPUT"
+          VERSION="$(tr -d ' \t\r\n' < VERSION)"
+          if [ -z "$VERSION" ]; then
+            echo "::error::VERSION file is empty"
+            exit 1
+          fi
 
-      - name: Create tag
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$'; then
+            echo "::error::VERSION is not a valid semver: '$VERSION'"
+            exit 1
+          fi
+
+          LATEST_TAG="$(git describe --tags --abbrev=0 2>/dev/null || echo '')"
+          LATEST_VERSION="${LATEST_TAG#v}"
+
+          echo "VERSION file:     $VERSION"
+          echo "Latest tag:       ${LATEST_TAG:-<none>}"
+
+          if [ -z "$LATEST_TAG" ]; then
+            echo "No prior tag; releasing v$VERSION"
+            {
+              echo "should-release=true"
+              echo "version=$VERSION"
+              echo "tag=v$VERSION"
+              echo "previous-tag="
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "$VERSION" = "$LATEST_VERSION" ]; then
+            echo "VERSION matches latest tag. No release needed."
+            {
+              echo "should-release=false"
+              echo "version=$VERSION"
+              echo "tag=v$VERSION"
+              echo "previous-tag=$LATEST_TAG"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          HIGHEST="$(printf '%s\n%s\n' "$VERSION" "$LATEST_VERSION" | sort -V | tail -n1)"
+          if [ "$HIGHEST" != "$VERSION" ]; then
+            echo "::error::VERSION ($VERSION) is lower than the latest tag ($LATEST_TAG). VERSION must not decrease; to force, delete the newer tag first."
+            exit 1
+          fi
+
+          if git rev-parse --verify "refs/tags/v$VERSION" >/dev/null 2>&1; then
+            echo "::error::Tag v$VERSION already exists but does not match latest tag ($LATEST_TAG). Resolve tag history before proceeding."
+            exit 1
+          fi
+
+          echo "VERSION is ahead of latest tag. Proceeding to release."
+          {
+            echo "should-release=true"
+            echo "version=$VERSION"
+            echo "tag=v$VERSION"
+            echo "previous-tag=$LATEST_TAG"
+          } >> "$GITHUB_OUTPUT"
+
+  release:
+    name: Tag and release
+    needs: check-version
+    if: needs.check-version.outputs.should-release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Create annotated tag
+        env:
+          TAG: ${{ needs.check-version.outputs.tag }}
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "${{ steps.bump.outputs.tag }}" -m "Release ${{ steps.bump.outputs.tag }}"
-          git push origin "${{ steps.bump.outputs.tag }}"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin "$TAG"
 
-      - name: Create GitHub Release
-        run: |
-          gh release create "${{ steps.bump.outputs.tag }}" \
-            --title "${{ steps.bump.outputs.tag }}" \
-            --generate-notes
+      - name: Assemble release notes
+        id: notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.check-version.outputs.tag }}
+          PREV_TAG: ${{ needs.check-version.outputs.previous-tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          NOTES_FILE="$(mktemp)"
 
-      # About section sync requires a PAT with repo scope.
-      # Run manually after registry changes:
-      #   python3 -c "import json; d=json.load(open('registry.json')); t=len(d); s=sum(x['skills'] for x in d); r=sum(x['rules'] for x in d); m=sum(x['mcpTools'] for x in d); print(f'{t} tools, {s} skills, {r} rules, {m} MCP tools')"
-      #   gh repo edit TMHSDigital/Developer-Tools-Directory --description "Centralized catalog, standards, and scaffolding for <N> TMHSDigital developer tools - <S> skills, <R> rules, <M> MCP tools"
+          # Option B: prefer release-drafter's current draft body if present.
+          DRAFT_BODY="$(gh api "repos/${GITHUB_REPOSITORY}/releases" \
+            --jq 'map(select(.draft==true)) | .[0].body // ""' 2>/dev/null || echo '')"
+
+          if [ -n "$DRAFT_BODY" ] && [ "$(echo "$DRAFT_BODY" | tr -d '[:space:]')" != "" ]; then
+            echo "Using release-drafter draft body."
+            echo "$DRAFT_BODY" > "$NOTES_FILE"
+          elif [ -n "$PREV_TAG" ]; then
+            echo "No drafter draft. Falling back to commit log since $PREV_TAG."
+            {
+              echo "## Changes since $PREV_TAG"
+              echo ""
+              git log "$PREV_TAG..HEAD" --pretty=format:'- %s (%h)' --no-merges
+              echo ""
+              echo ""
+              echo "**Full Changelog**: https://github.com/${GITHUB_REPOSITORY}/compare/${PREV_TAG}...${TAG}"
+            } > "$NOTES_FILE"
+          else
+            echo "No prior tag and no drafter draft. Using generic first-release notes."
+            {
+              echo "## $TAG"
+              echo ""
+              echo "Initial tagged release."
+            } > "$NOTES_FILE"
+          fi
+
+          echo "notes-file=$NOTES_FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.check-version.outputs.tag }}
+          NOTES_FILE: ${{ steps.notes.outputs.notes-file }}
+        run: |
+          set -euo pipefail
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --notes-file "$NOTES_FILE"
