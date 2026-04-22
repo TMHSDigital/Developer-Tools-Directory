@@ -4,7 +4,12 @@
 
 ## Current Status
 
-**v1.6.0** - Standards and Governance. Nine new standards docs, registry-to-artifact sync automation, DCO + inbound license grant, scope and lifecycle principles, public-repo safety hardening.
+**v1.6.2** - Patch release. Release-drafter no longer computes its own version; change-note aggregation only. Versioning is fully driven by the `VERSION` file and `release.yml`.
+
+Prior milestones in this line:
+
+- **v1.6.1** - `VERSION`-file-driven releases. Replaces conventional-commit auto-bump with an authoritative `VERSION` file; `feat:`/`fix:` commits require a VERSION bump enforced by CI.
+- **v1.6.0** - Standards and Governance. Nine new standards docs, registry-to-artifact sync automation, DCO + inbound license grant, scope and lifecycle principles, public-repo safety hardening.
 
 ## Release Plan
 
@@ -16,7 +21,9 @@
 | v1.3.0 | Content-Rich Pages | Released |
 | v1.4.0 | Discovery and Performance | Released |
 | v1.5.0 | Infrastructure and Documentation | Released |
-| v1.6.0 | Standards and Governance | In progress |
+| v1.6.0 | Standards and Governance | Released |
+| v1.6.1 | VERSION-file-driven releases | Released |
+| v1.6.2 | Release-drafter decoupling | Released |
 | v1.7.0 | Sync Everywhere and Agent-File Drift | Planned |
 | v1.8.0 | Observability and Feedback | Planned |
 | v1.9.0 | Standards Versioning | Planned |
