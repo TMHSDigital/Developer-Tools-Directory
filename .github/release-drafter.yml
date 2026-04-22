@@ -1,11 +1,12 @@
-name-template: "v$RESOLVED_VERSION"
-tag-template: "v$RESOLVED_VERSION"
+# release-drafter aggregates merged PRs into categorized change notes.
+# Versioning is owned by the VERSION file at the repo root; release.yml
+# creates the tag and release using that version. Drafter does NOT compute
+# or emit a version here (no version-resolver, no name-template, no
+# tag-template) to avoid stale metadata in release bodies.
 template: |
   ## What's Changed
 
   $CHANGES
-
-  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
 categories:
   - title: "Features"
     labels:
@@ -35,23 +36,6 @@ categories:
       - "*"
 change-template: "- $TITLE (#$NUMBER) @$AUTHOR"
 change-title-escapes: '\<*_&'
-version-resolver:
-  major:
-    labels:
-      - "major"
-      - "breaking"
-  minor:
-    labels:
-      - "minor"
-      - "feature"
-      - "registry"
-  patch:
-    labels:
-      - "patch"
-      - "bug"
-      - "fix"
-      - "docs"
-  default: patch
 exclude-labels:
   - "skip-changelog"
 autolabeler:
