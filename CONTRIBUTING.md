@@ -124,6 +124,26 @@ For a full end-to-end walkthrough including scaffolding the tool repo, see [`doc
 
 5. Commit with `feat: add <standard-name> standard`
 
+### Drift checker
+
+Tool repos carry a `standards-version` signal in their agent files
+(`AGENTS.md`, `CLAUDE.md`, `skills/*/SKILL.md`, `rules/*.mdc`). The
+drift checker (`scripts/drift_check/`) verifies these against the
+meta-repo `VERSION` and surfaces other ecosystem-policy mismatches
+(broken standards links, required references, stale aggregate counts).
+
+The checker runs automatically: on push to `main` (when checker code
+or standards change), weekly on schedule, and on demand via
+`workflow_dispatch`. See [`docs/drift-check-token-setup.md`](docs/drift-check-token-setup.md)
+for the `DRIFT_CHECK_TOKEN` configuration that enables cross-repo
+sparse-checkout.
+
+For local runs:
+
+```bash
+python scripts/drift_check/cli.py --local /path/to/tool-repo
+```
+
 ## How to Update the Scaffold
 
 ### Editing an existing template
