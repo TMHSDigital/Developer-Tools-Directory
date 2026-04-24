@@ -234,7 +234,7 @@ Where `$TOOLS_ROOT` is the parent directory containing your checkouts of each to
 
 - Required approvals: 0 (solo-maintainer repo).
 - Merge method: squash merge only; merge commits and rebase merges are blocked.
-- All 8 required status checks listed under [CI checks](#ci-checks) must pass before merge is allowed.
+- All 7 required status checks listed under [CI checks](#ci-checks) must pass before merge is allowed.
 
 ### Branch naming
 
@@ -287,7 +287,7 @@ Before submitting a PR, verify:
 
 ### CI checks
 
-All PRs must pass these 8 required status checks (enforced by the `main protection` ruleset, not just advisory):
+All PRs must pass these 7 required status checks (enforced by the `main protection` ruleset, not just advisory):
 
 - `Validate registry.json` - JSON schema and required fields
 - `Validate docs site` - `docs/index.html`, `style.css`, `script.js` exist
@@ -295,8 +295,9 @@ All PRs must pass these 8 required status checks (enforced by the `main protecti
 - `Registry sync check` - `scripts/sync_from_registry.py --check` exits 0
 - `Public-repo safety scan` - no leaked emails, drive paths, unsafe DOM sinks, or committed secrets
 - `feat/fix commits require VERSION bump` - enforces the rule in the Versioning section
-- `Check VERSION vs latest tag` - ensures `VERSION` is not behind the latest tag
 - `CodeQL` - security scan on Python code
+
+`release.yml`'s `Check VERSION vs latest tag` runs on every push to `main` and will fail the release if `VERSION` is behind the latest tag. It is a post-merge guard, not a PR gate, so it is not in the required-contexts list.
 
 Additional (non-required) checks run on most PRs: dependency review, release-drafter preview, Socket Security. These provide signal but do not gate merges.
 

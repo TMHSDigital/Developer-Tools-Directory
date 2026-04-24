@@ -4,7 +4,7 @@
 
 ## Current Status
 
-**v1.6.3** - Patch release. Resolves drafter-body detection and branch-protection residuals from the version-scheme migration. `release.yml` now treats a drafter body of `## What's Changed / * No changes` as empty and falls through to the commit-log fallback. `main` is now protected by a GitHub ruleset (`main protection`) with 8 required status checks including `feat/fix commits require VERSION bump`, squash-merge only, no force pushes, no deletion, empty bypass list. Documentation across AGENTS.md, CLAUDE.md, CONTRIBUTING.md, `.github/workflows/README.md`, and `standards/ci-cd.md` updated to reflect the PR-based workflow.
+**v1.6.3** - Patch release. Resolves drafter-body detection and branch-protection residuals from the version-scheme migration. `release.yml` now treats a drafter body of `## What's Changed / * No changes` as empty and falls through to the commit-log fallback. `main` is now protected by a GitHub ruleset (`main protection`) with 7 required status checks including `feat/fix commits require VERSION bump`, squash-merge only, no force pushes, no deletion, empty bypass list. Documentation across AGENTS.md, CLAUDE.md, CONTRIBUTING.md, `.github/workflows/README.md`, and `standards/ci-cd.md` updated to reflect the PR-based workflow.
 
 Prior milestones in this line:
 

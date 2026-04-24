@@ -108,7 +108,7 @@ gh pr checks <number> --watch
 gh pr merge <number> --squash --delete-branch
 ```
 
-A PR cannot be merged until all 8 required status checks pass: `Validate registry.json`, `Validate docs site`, `Validate scaffold`, `Registry sync check`, `Public-repo safety scan`, `feat/fix commits require VERSION bump`, `Check VERSION vs latest tag`, `CodeQL`. Required approvals are 0 (solo maintainer).
+A PR cannot be merged until all 7 required status checks pass: `Validate registry.json`, `Validate docs site`, `Validate scaffold`, `Registry sync check`, `Public-repo safety scan`, `feat/fix commits require VERSION bump`, `CodeQL`. Required approvals are 0 (solo maintainer). `release.yml`'s `Check VERSION vs latest tag` is a post-merge guard, not a PR gate.
 
 ### Prerequisites
 

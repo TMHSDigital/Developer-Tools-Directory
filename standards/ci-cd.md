@@ -149,8 +149,9 @@ Every repo must protect `main` with a GitHub ruleset or classic branch protectio
 
 Repos using the meta-repo's `VERSION`-file-driven release model additionally require:
 
-- `Check VERSION vs latest tag`
-- `feat/fix commits require VERSION bump`
+- `feat/fix commits require VERSION bump` (PR gate, runs in `validate.yml`)
+
+The companion `Check VERSION vs latest tag` job in `release.yml` is a post-merge guard that runs on push to `main`. It should NOT be added to the PR-required-contexts list; doing so will permanently block every PR because `release.yml` does not run on PRs.
 
 Required approvals are a per-repo decision: solo-maintainer repos may set 0 approvals provided all other gates pass; multi-maintainer repos should require at least 1.
 

@@ -32,7 +32,7 @@ This is a **meta-repository** -- it does not contain a Cursor plugin or MCP serv
 
 ### Required status checks (ruleset-enforced on `main`)
 
-Every PR must pass these 8 checks before it can be merged:
+Every PR must pass these 7 checks before it can be merged:
 
 - `Validate registry.json`
 - `Validate docs site`
@@ -40,8 +40,9 @@ Every PR must pass these 8 checks before it can be merged:
 - `Registry sync check`
 - `Public-repo safety scan`
 - `feat/fix commits require VERSION bump`
-- `Check VERSION vs latest tag`
 - `CodeQL`
+
+`release.yml`'s `Check VERSION vs latest tag` is a post-merge guard that only runs on push to `main`, so it is deliberately not in the required-contexts list (including it would permanently block every PR).
 
 ## CI/CD workflows
 
@@ -266,7 +267,7 @@ Pure documentation -- no code. Each file documents a convention derived from ana
 
 - **Enforcement:** active, target is the default branch, bypass actors list is empty (applies to the repo owner as well).
 - **Pull request required:** 0 approving reviews, squash-merge only, other merge methods blocked.
-- **Required status checks:** `Validate registry.json`, `Validate docs site`, `Validate scaffold`, `Registry sync check`, `Public-repo safety scan`, `feat/fix commits require VERSION bump`, `Check VERSION vs latest tag`, `CodeQL`.
+- **Required status checks:** `Validate registry.json`, `Validate docs site`, `Validate scaffold`, `Registry sync check`, `Public-repo safety scan`, `feat/fix commits require VERSION bump`, `CodeQL`.
 - **Force pushes blocked** (`non_fast_forward` rule).
 - **Branch deletion blocked** (`deletion` rule).
 - **Signed commits** are enforced at commit-sign-off level by the DCO App status check (separate from the ruleset).
