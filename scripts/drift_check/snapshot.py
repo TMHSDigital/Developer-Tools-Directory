@@ -32,6 +32,24 @@ from .types import (
 )
 
 
+def list_meta_standards(meta_repo_path: Path) -> frozenset[str]:
+    """Return the set of filenames (relative to ``standards/``) that exist in
+    the meta-repo's ``standards/`` directory. Used by ``broken_refs`` to
+    resolve ``standards/foo.md`` links.
+
+    Session B ships the local-clone implementation. Session C will add a
+    sparse-checkout variant that resolves against a specific meta-repo SHA
+    for tool-repo CI runs.
+    """
+    std_dir = meta_repo_path / "standards"
+    if not std_dir.is_dir():
+        return frozenset()
+    return frozenset(
+        p.name for p in std_dir.iterdir()
+        if p.is_file() and p.suffix.lower() == ".md"
+    )
+
+
 def _detect_repo_type(repo_path: Path) -> RepoType:
     """Per the design doc's detection rules:
 
@@ -78,6 +96,8 @@ def build_local_snapshot(
     config: DriftConfig,
     slug: Optional[str] = None,
     warn_stream=sys.stderr,
+    meta_standards: frozenset[str] | None = None,
+    meta_required_refs: dict[str, dict[str, list[str]]] | None = None,
 ) -> RepoSnapshot:
     """Construct a RepoSnapshot by walking the local clone tree.
 
@@ -122,4 +142,6 @@ def build_local_snapshot(
         meta_version=meta_version,
         meta_commit=meta_commit,
         config=repo_config,
+        meta_standards=meta_standards if meta_standards is not None else frozenset(),
+        meta_required_refs=meta_required_refs or {},
     )

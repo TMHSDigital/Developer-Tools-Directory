@@ -1,15 +1,20 @@
 {
-  "repos": {
-    "steam-mcp": {
+  "version": 1,
+  "globals": {
+    "signal_policy": "same-major-minor",
+    "skip_checks": []
+  },
+  "types": {
+    "cursor-plugin": {
+      "skip_checks": []
+    },
+    "mcp-server": {
       "skip_checks": ["required-refs", "stale-counts"]
     }
   },
-  "types": {
-    "mcp-server": {
+  "repos": {
+    "steam-mcp": {
       "skip_checks": []
     }
-  },
-  "globals": {
-    "signal_policy": "same-major-minor"
   }
 }

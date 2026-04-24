@@ -65,3 +65,13 @@ The release workflow auto-generates release notes grouped by commit type:
 - **Other Changes** (everything else)
 
 `CHANGELOG.md` is maintained manually for curated, human-readable release history. It is not auto-generated.
+
+## What a MINOR bump means for ecosystem standards
+
+The meta-repo's `VERSION` file carries the ecosystem-wide standards version. It follows the same SemVer rules, but each component has a second, standards-specific meaning for tool repos that embed a `standards-version` signal in their agent files.
+
+- **MAJOR** (e.g., `1.x.y` → `2.0.0`) — an incompatible change to the standards themselves. New required elements, removed fields, or restructured file conventions that existing tool repos will fail to validate against without re-alignment.
+- **MINOR** (e.g., `1.6.x` → `1.7.0`) — ecosystem standards changed in a way that tool repos need to re-align with. Typical triggers: new required elements in agent files, changed frontmatter schemas, new required standards references, restructured validation rules, or new checks in the drift checker that introduce findings for existing tool-repo content. A mechanical rollout session across the tool repos is typically scheduled after a MINOR bump.
+- **PATCH** (e.g., `1.7.0` → `1.7.1`) — bug fixes, clarifications, or additions that do not change the standards surface. Tool repos with a PATCH-behind signal are reported as `info` by the drift checker — visible in verbose runs but not blocking CI.
+
+The drift checker enforces this mapping via the `same-major-minor` signal policy (see `standards/drift-checker.config.json`). Tool repos whose `standards-version` differs from the meta-repo's `VERSION` in MAJOR or MINOR are reported as `error`; PATCH differences are `info`; tool values ahead of meta are `warn` (either an in-flight rollout or a missed meta-repo bump, both worth surfacing).
