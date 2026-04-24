@@ -91,6 +91,25 @@ Static HTML/CSS/JS. No build step. No external CDN. The `pages.yml` workflow cop
 
 ## Development Workflow
 
+### Contribution flow
+
+`main` is protected by the `main protection` ruleset. Direct pushes, force pushes, and branch deletion are all blocked for every contributor including the repo owner (empty bypass list). All changes land via pull request with squash merge only.
+
+Standard loop for any change, including single-file edits:
+
+```bash
+git checkout -b <type>/<short-description>
+# edits
+git add <paths>
+git commit -s -m "<conventional subject>"
+git push -u origin HEAD
+gh pr create --base main
+gh pr checks <number> --watch
+gh pr merge <number> --squash --delete-branch
+```
+
+A PR cannot be merged until all 8 required status checks pass: `Validate registry.json`, `Validate docs site`, `Validate scaffold`, `Registry sync check`, `Public-repo safety scan`, `feat/fix commits require VERSION bump`, `Check VERSION vs latest tag`, `CodeQL`. Required approvals are 0 (solo maintainer).
+
 ### Prerequisites
 
 ```bash

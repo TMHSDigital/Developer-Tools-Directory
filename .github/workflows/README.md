@@ -49,18 +49,40 @@ jobs:
 
 Never use `permissions: write-all`.
 
-## Branch protection expectations
+## Branch protection (active ruleset)
 
-`CODEOWNERS` and the `sync-check` / `safety-scan` jobs are only meaningful when branch protection on `main` enforces them. The expected settings:
+`main` is protected by a GitHub ruleset named `main protection`. The ruleset is the active enforcement mechanism; the settings listed here are the canonical record because ruleset configuration lives in repo settings, not in git history.
 
-- Require a pull request before merging.
-- Require review from Code Owners.
-- Require status checks to pass: `validate-registry`, `validate-docs`, `validate-scaffold`, `sync-check`, `safety-scan`.
-- Require signed commits (DCO App verifies `Signed-off-by:` on every commit).
-- Disallow force pushes to `main`.
-- Disallow deletion of `main`.
+Current rules:
 
-These settings are not code; they must be configured in the repository settings. A maintainer change to branch protection does not show up in git history, so this file is the canonical record.
+| Rule | Configuration |
+|------|---------------|
+| Target | `~DEFAULT_BRANCH` (main) |
+| Enforcement | Active |
+| Bypass actors | None (applies to every contributor including the repo owner) |
+| Pull request required | 0 approving reviews, squash-merge only, other merge methods blocked |
+| Force pushes | Blocked (`non_fast_forward` rule) |
+| Branch deletion | Blocked (`deletion` rule) |
+
+Required status checks (a PR cannot merge until all 8 pass):
+
+- `Validate registry.json`
+- `Validate docs site`
+- `Validate scaffold`
+- `Registry sync check`
+- `Public-repo safety scan`
+- `feat/fix commits require VERSION bump`
+- `Check VERSION vs latest tag`
+- `CodeQL`
+
+DCO sign-off enforcement runs via the GitHub DCO App as a separate status check; it is not in the ruleset's required-checks list but PRs with unsigned commits are blocked by the App regardless.
+
+Verify current state:
+
+```bash
+gh api repos/TMHSDigital/Developer-Tools-Directory/rulesets
+gh api repos/TMHSDigital/Developer-Tools-Directory/rulesets/<id>
+```
 
 ## Forbidden patterns
 

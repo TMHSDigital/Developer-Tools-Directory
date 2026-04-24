@@ -228,6 +228,14 @@ Where `$TOOLS_ROOT` is the parent directory containing your checkouts of each to
 
 ## Pull Request Process
 
+### Branch protection
+
+`main` is protected by an active ruleset (`main protection`). All contributions, including from the repo owner, must land through a pull request. Direct pushes, force pushes, and branch deletion are blocked. The bypass-actors list is empty.
+
+- Required approvals: 0 (solo-maintainer repo).
+- Merge method: squash merge only; merge commits and rebase merges are blocked.
+- All 8 required status checks listed under [CI checks](#ci-checks) must pass before merge is allowed.
+
 ### Branch naming
 
 Use descriptive branch names with a type prefix:
@@ -254,7 +262,7 @@ The meta-repo uses a `VERSION` file at the repo root as the single source of tru
 Rules:
 
 - `VERSION` contains a single semver line, no `v` prefix, LF line ending (`1.6.1`).
-- Any commit whose subject starts with `feat:` or `fix:` (including scoped variants like `feat(registry):`) requires a `VERSION` bump in the same PR. The `version-bump-check` CI job enforces this.
+- Any commit whose subject starts with `feat:` or `fix:` (including scoped variants like `feat(registry):`) requires a `VERSION` bump in the same PR. The `version-bump-check` CI job enforces this, and it is a required status check in the branch-protection ruleset, so a PR without the bump cannot be merged.
 - `chore:`, `docs:`, `ci:`, `refactor:`, `test:`, and `style:` commits do not require a bump.
 - Bump kind is at your discretion and guided by semver: breaking behavior change to a published contract is major, new capability is minor, correction with no behavior change is patch.
 - Escape hatch: add `[skip version]` to the commit subject or body for workflow-only changes that slipped into a `feat:`/`fix:` subject. Use sparingly.
@@ -279,12 +287,18 @@ Before submitting a PR, verify:
 
 ### CI checks
 
-All PRs must pass:
-- Registry schema validation
-- Docs file existence
-- Scaffold syntax and dry-run test
-- CodeQL security scan
-- Dependency review
+All PRs must pass these 8 required status checks (enforced by the `main protection` ruleset, not just advisory):
+
+- `Validate registry.json` - JSON schema and required fields
+- `Validate docs site` - `docs/index.html`, `style.css`, `script.js` exist
+- `Validate scaffold` - Python syntax and scaffold dry-run
+- `Registry sync check` - `scripts/sync_from_registry.py --check` exits 0
+- `Public-repo safety scan` - no leaked emails, drive paths, unsafe DOM sinks, or committed secrets
+- `feat/fix commits require VERSION bump` - enforces the rule in the Versioning section
+- `Check VERSION vs latest tag` - ensures `VERSION` is not behind the latest tag
+- `CodeQL` - security scan on Python code
+
+Additional (non-required) checks run on most PRs: dependency review, release-drafter preview, Socket Security. These provide signal but do not gate merges.
 
 ## Style Guidelines
 

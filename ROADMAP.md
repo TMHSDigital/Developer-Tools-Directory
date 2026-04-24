@@ -4,10 +4,11 @@
 
 ## Current Status
 
-**v1.6.2** - Patch release. Release-drafter no longer computes its own version; change-note aggregation only. Versioning is fully driven by the `VERSION` file and `release.yml`.
+**v1.6.3** - Patch release. Resolves drafter-body detection and branch-protection residuals from the version-scheme migration. `release.yml` now treats a drafter body of `## What's Changed / * No changes` as empty and falls through to the commit-log fallback. `main` is now protected by a GitHub ruleset (`main protection`) with 8 required status checks including `feat/fix commits require VERSION bump`, squash-merge only, no force pushes, no deletion, empty bypass list. Documentation across AGENTS.md, CLAUDE.md, CONTRIBUTING.md, `.github/workflows/README.md`, and `standards/ci-cd.md` updated to reflect the PR-based workflow.
 
 Prior milestones in this line:
 
+- **v1.6.2** - Release-drafter decoupling. Release-drafter no longer computes its own version; change-note aggregation only. Versioning is fully driven by the `VERSION` file and `release.yml`.
 - **v1.6.1** - `VERSION`-file-driven releases. Replaces conventional-commit auto-bump with an authoritative `VERSION` file; `feat:`/`fix:` commits require a VERSION bump enforced by CI.
 - **v1.6.0** - Standards and Governance. Nine new standards docs, registry-to-artifact sync automation, DCO + inbound license grant, scope and lifecycle principles, public-repo safety hardening.
 
@@ -24,6 +25,7 @@ Prior milestones in this line:
 | v1.6.0 | Standards and Governance | Released |
 | v1.6.1 | VERSION-file-driven releases | Released |
 | v1.6.2 | Release-drafter decoupling | Released |
+| v1.6.3 | Drafter-body fix and branch-protection ruleset | Released |
 | v1.7.0 | Sync Everywhere and Agent-File Drift | Planned |
 | v1.8.0 | Observability and Feedback | Planned |
 | v1.9.0 | Standards Versioning | Planned |

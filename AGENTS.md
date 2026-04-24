@@ -20,12 +20,28 @@ This is a **meta-repository** -- it does not contain a Cursor plugin or MCP serv
 ## Branching and commit model
 
 - **Single branch**: `main` only. No develop/release branches.
+- **All changes land via pull request.** `main` is protected by an active ruleset (`main protection`) that blocks direct pushes, force pushes, and branch deletion for every contributor including the repo owner. No bypass actors are configured.
+- **Squash merge only.** Other merge methods are blocked by the ruleset.
+- **Zero required approvals** (solo-maintainer repo), but all required status checks must pass before a PR can be merged.
 - **Conventional commits** are required:
   - `feat:` -- new tool added to registry, new standard doc, new scaffold template
   - `fix:` -- corrections to existing content
   - `chore:` -- dependency updates, CI changes
   - `docs:` -- documentation-only changes
 - Commit messages should be concise and describe the "why", not the "what".
+
+### Required status checks (ruleset-enforced on `main`)
+
+Every PR must pass these 8 checks before it can be merged:
+
+- `Validate registry.json`
+- `Validate docs site`
+- `Validate scaffold`
+- `Registry sync check`
+- `Public-repo safety scan`
+- `feat/fix commits require VERSION bump`
+- `Check VERSION vs latest tag`
+- `CodeQL`
 
 ## CI/CD workflows
 
@@ -244,17 +260,25 @@ Pure documentation -- no code. Each file documents a convention derived from ana
 - Conventional commits are required (`feat:`, `fix:`, `chore:`, `docs:`), with a `Signed-off-by:` trailer (DCO; see [`CONTRIBUTING.md`](CONTRIBUTING.md)).
 - Single branch: `main` only.
 
-## Branch protection (maintainer responsibility)
+## Branch protection (active)
 
-The `main` branch on this repo should be protected with:
+`main` is protected by a GitHub ruleset named `main protection`. Current configuration:
 
-- Require pull request reviews before merging
-- Require status checks to pass: `validate-registry`, `sync-check`, `safety-scan`, DCO
-- Require signed commits (enforced by the DCO App)
-- Disallow force pushes
-- Disallow deletions
+- **Enforcement:** active, target is the default branch, bypass actors list is empty (applies to the repo owner as well).
+- **Pull request required:** 0 approving reviews, squash-merge only, other merge methods blocked.
+- **Required status checks:** `Validate registry.json`, `Validate docs site`, `Validate scaffold`, `Registry sync check`, `Public-repo safety scan`, `feat/fix commits require VERSION bump`, `Check VERSION vs latest tag`, `CodeQL`.
+- **Force pushes blocked** (`non_fast_forward` rule).
+- **Branch deletion blocked** (`deletion` rule).
+- **Signed commits** are enforced at commit-sign-off level by the DCO App status check (separate from the ruleset).
 
-These settings live outside the repo (Settings > Branches). They are not stored as code and must be configured manually by a maintainer with admin access.
+Agents must branch, push, and open a PR even for single-file edits. Direct pushes to `main` will be rejected by the ruleset.
+
+Ruleset configuration lives in repo settings, not in git history. Verify the current state with:
+
+```
+gh api repos/TMHSDigital/Developer-Tools-Directory/rulesets
+gh api repos/TMHSDigital/Developer-Tools-Directory/rulesets/<id>
+```
 
 ## Dependencies
 

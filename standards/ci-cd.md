@@ -126,3 +126,34 @@ Marks issues and PRs as stale after inactivity and closes them after further ina
 - Use `${{ secrets.GITHUB_TOKEN }}` (automatically provided) for all Git operations
 - Never store custom secrets unless absolutely required (e.g., npm publish tokens)
 - Set minimal `permissions` at the workflow level, not at the job level
+
+## Branch Protection and Merge Policy
+
+Every repo must protect `main` with a GitHub ruleset or classic branch protection that enforces the following. The meta-repo's `main protection` ruleset is the reference implementation.
+
+**Required rules:**
+
+- Direct pushes to `main` blocked; all changes land via pull request.
+- Force pushes blocked (`non_fast_forward`).
+- Branch deletion blocked.
+- Empty bypass-actors list (policy applies to repo owner and admins).
+- Squash-merge only. Merge commits and rebase merges should be disabled.
+
+**Required status checks** (minimum for plugin/tool repos):
+
+- JSON/manifest validation job
+- Skill and rule file-existence job
+- Credential-scanning / safety-scan job
+- `CodeQL` (if the repo includes source code substantive enough to scan)
+- Any repo-specific sync-check or safety-scan jobs
+
+Repos using the meta-repo's `VERSION`-file-driven release model additionally require:
+
+- `Check VERSION vs latest tag`
+- `feat/fix commits require VERSION bump`
+
+Required approvals are a per-repo decision: solo-maintainer repos may set 0 approvals provided all other gates pass; multi-maintainer repos should require at least 1.
+
+**Configuration lives in repo settings, not in git.** Document the current ruleset in `.github/workflows/README.md` so the state is discoverable without admin access.
+
+> Note: the tool-repo release model described in `release.yml` above uses conventional-commit auto-bumps and does not currently require the `VERSION`/`version-bump-check` gates. The meta-repo deviates intentionally. A decision on whether to propagate the `VERSION`-file model to tool repos is deferred; see `ROADMAP.md`.
