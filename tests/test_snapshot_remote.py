@@ -104,9 +104,12 @@ def test_remote_snapshot_issues_correct_git_commands(tmp_path: Path):
     assert scrub_args[2] == "set-url"
     assert "ghp_test" not in " ".join(scrub_args)
 
-    # Verify sparse-checkout includes all SPARSE_PATHS
+    # Verify sparse-checkout uses --no-cone (required for file-level
+    # patterns like AGENTS.md) and includes all SPARSE_PATHS
     sparse_args = fake.calls[2][0]
     assert sparse_args[1] == "sparse-checkout"
+    assert sparse_args[2] == "set"
+    assert "--no-cone" in sparse_args
     for p in SPARSE_PATHS:
         assert p in sparse_args
 

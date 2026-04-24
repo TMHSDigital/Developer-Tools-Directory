@@ -261,7 +261,15 @@ def _sparse_clone(
         clone_args += [clone_url, str(tmp)]
         _run_git(clone_args)
         _scrub_token_from_remote(tmp, owner, slug)
-        _run_git(["sparse-checkout", "set", *SPARSE_PATHS], cwd=tmp)
+        # `--no-cone` lets us mix file-level patterns (AGENTS.md, CLAUDE.md)
+        # with directory patterns (skills, rules). Cone-mode is the default
+        # since git 2.35 and rejects file patterns. The deprecation warning
+        # is acceptable here; the alternative (`--skip-checks`) is more
+        # invasive and the patterns set is small and stable.
+        _run_git(
+            ["sparse-checkout", "set", "--no-cone", *SPARSE_PATHS],
+            cwd=tmp,
+        )
         yield tmp
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
