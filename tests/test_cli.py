@@ -30,7 +30,7 @@ def test_missing_local_returns_2(capsys):
     rc = cli.main([])
     assert rc == 2
     err = capsys.readouterr().err
-    assert "--local" in err
+    assert "--local" in err and "--remote" in err
 
 
 def test_bad_path_returns_2(capsys, tmp_path: Path, meta_repo: Path):

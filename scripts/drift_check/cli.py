@@ -17,6 +17,17 @@ Invocation::
 """
 from __future__ import annotations
 
+import sys as _sys
+# When invoked as `python scripts/drift_check/cli.py`, Python prepends the
+# script's own directory to sys.path[0]. Our package contains a `types.py`
+# which then shadows stdlib `types` (e.g. `from types import GenericAlias`
+# inside enum). Scrub it before any further imports run. Detected when the
+# composite action ran on a Linux runner (different startup imports than
+# our Windows dev box). Same module-shadowing class as Session A's
+# `signal.py -> signals.py` rename.
+if _sys.path and _sys.path[0].rstrip("/\\").endswith("drift_check"):
+    _sys.path.pop(0)
+
 import argparse
 import subprocess
 import sys
@@ -38,10 +49,15 @@ if __package__ in (None, ""):
         load_required_refs,
     )
     from drift_check.config import ConfigError, load_config  # type: ignore
-    from drift_check.report import gh_summary, json_out, markdown  # type: ignore
+    from drift_check.report import gh_summary, issue, json_out, markdown  # type: ignore
     from drift_check.semver import parse_version  # type: ignore
     from drift_check.signals import _classify_by_name  # type: ignore
-    from drift_check.snapshot import build_local_snapshot, list_meta_standards  # type: ignore
+    from drift_check.snapshot import (  # type: ignore
+        RemoteSnapshotError,
+        build_local_snapshot,
+        build_remote_snapshot,
+        list_meta_standards,
+    )
     from drift_check.types import Finding, RepoSnapshot, Version  # type: ignore
 else:
     from .checks import (
@@ -52,10 +68,15 @@ else:
     )
     from .checks.required_refs import RequiredRefsError, load_required_refs
     from .config import ConfigError, load_config
-    from .report import gh_summary, json_out, markdown
+    from .report import gh_summary, issue, json_out, markdown
     from .semver import parse_version
     from .signals import _classify_by_name
-    from .snapshot import build_local_snapshot, list_meta_standards
+    from .snapshot import (
+        RemoteSnapshotError,
+        build_local_snapshot,
+        build_remote_snapshot,
+        list_meta_standards,
+    )
     from .types import Finding, RepoSnapshot, Version
 
 
@@ -90,6 +111,46 @@ def build_parser() -> argparse.ArgumentParser:
         default=[],
         metavar="PATH",
         help="path to a local clone to check (repeatable)",
+    )
+    p.add_argument(
+        "--remote",
+        action="append",
+        default=[],
+        metavar="OWNER/REPO",
+        help=(
+            "GitHub repo to sparse-checkout and check (repeatable). "
+            "Requires --gh-token. Use bare slug for default org "
+            "TMHSDigital."
+        ),
+    )
+    p.add_argument(
+        "--all",
+        action="store_true",
+        help=(
+            "check every active repo in registry.json via sparse-checkout. "
+            "Requires --gh-token."
+        ),
+    )
+    p.add_argument(
+        "--gh-token",
+        default=None,
+        help=(
+            "GitHub token for --remote / --all. Falls back to "
+            "$DRIFT_CHECK_TOKEN, then $GITHUB_TOKEN."
+        ),
+    )
+    p.add_argument(
+        "--update-sticky-issue",
+        action="store_true",
+        help=(
+            "after running checks, upsert the sticky drift-report issue "
+            "on the meta-repo. Requires --gh-token."
+        ),
+    )
+    p.add_argument(
+        "--sticky-issue-repo",
+        default="TMHSDigital/Developer-Tools-Directory",
+        help="repo to host the sticky issue (default: meta-repo)",
     )
     p.add_argument(
         "--format",
@@ -149,11 +210,13 @@ def build_parser() -> argparse.ArgumentParser:
 
 def _build_snapshots(
     local_paths: Sequence[Path],
+    remote_slugs: Sequence[str],
     meta_version: Version,
     meta_commit: str,
     config_path: Optional[Path],
     meta_repo_path: Path,
     required_refs_path: Optional[Path],
+    gh_token: Optional[str],
 ) -> List[RepoSnapshot]:
     try:
         cfg = load_config(config_path)
@@ -188,7 +251,62 @@ def _build_snapshots(
                 meta_required_refs=dict(required_refs),
             )
         )
+
+    if remote_slugs:
+        if not gh_token:
+            print(
+                "error: --remote / --all requires --gh-token (or "
+                "$DRIFT_CHECK_TOKEN / $GITHUB_TOKEN in env)",
+                file=sys.stderr,
+            )
+            raise SystemExit(2)
+        for slug in remote_slugs:
+            owner, _, name = slug.partition("/")
+            if not name:
+                owner, name = "TMHSDigital", owner
+            try:
+                snapshots.append(
+                    build_remote_snapshot(
+                        repo_slug=name,
+                        meta_version=meta_version,
+                        meta_commit=meta_commit,
+                        config=cfg,
+                        gh_token=gh_token,
+                        owner=owner,
+                        meta_standards=meta_standards,
+                        meta_required_refs=dict(required_refs),
+                    )
+                )
+            except RemoteSnapshotError as exc:
+                print(
+                    f"error: remote snapshot failed for {owner}/{name}: {exc}",
+                    file=sys.stderr,
+                )
+                raise SystemExit(2)
     return snapshots
+
+
+def _resolve_gh_token(args_token: Optional[str]) -> Optional[str]:
+    """Token precedence: explicit flag > $DRIFT_CHECK_TOKEN > $GITHUB_TOKEN."""
+    import os
+    if args_token:
+        return args_token
+    return os.environ.get("DRIFT_CHECK_TOKEN") or os.environ.get("GITHUB_TOKEN")
+
+
+def _expand_all_repos(meta_repo_path: Path) -> List[str]:
+    """Read registry.json from the meta-repo and return active repo slugs
+    (owner/name)."""
+    import json
+    reg_path = meta_repo_path / "registry.json"
+    if not reg_path.is_file():
+        print(
+            f"error: --all requires registry.json at {reg_path}",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+    data = json.loads(reg_path.read_text(encoding="utf-8"))
+    return [r["repo"] for r in data if r.get("status") == "active"]
 
 
 def _run_checks(snapshots: Sequence[RepoSnapshot]) -> List[Finding]:
@@ -209,14 +327,26 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
 
-    if not args.local:
-        print("error: at least one --local <path> is required", file=sys.stderr)
+    repo_root = _find_repo_root()
+    meta_repo_path = args.meta_repo.resolve() if args.meta_repo else repo_root
+    gh_token = _resolve_gh_token(args.gh_token)
+
+    remote_slugs: List[str] = list(args.remote)
+    if args.all:
+        try:
+            remote_slugs.extend(_expand_all_repos(meta_repo_path))
+        except SystemExit as exc:
+            return int(exc.code) if exc.code is not None else 2
+
+    if not args.local and not remote_slugs:
+        print(
+            "error: at least one of --local, --remote, or --all is required",
+            file=sys.stderr,
+        )
         return 2
 
     local_paths = [Path(p).resolve() for p in args.local]
 
-    repo_root = _find_repo_root()
-    meta_repo_path = args.meta_repo.resolve() if args.meta_repo else repo_root
     try:
         meta_version = _read_meta_version(meta_repo_path)
     except SystemExit:
@@ -228,11 +358,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     try:
         snapshots = _build_snapshots(
             local_paths=local_paths,
+            remote_slugs=remote_slugs,
             meta_version=meta_version,
             meta_commit=args.meta_commit,
             config_path=args.config,
             meta_repo_path=meta_repo_path,
             required_refs_path=args.required_refs,
+            gh_token=gh_token,
         )
     except SystemExit as exc:
         return int(exc.code) if exc.code is not None else 2
@@ -251,11 +383,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             try:
                 snapshots = _build_snapshots(
                     local_paths=local_paths,
+                    remote_slugs=remote_slugs,
                     meta_version=meta_version,
                     meta_commit=args.meta_commit,
                     config_path=args.config,
                     meta_repo_path=meta_repo_path,
                     required_refs_path=args.required_refs,
+                    gh_token=gh_token,
                 )
             except SystemExit as exc:
                 return int(exc.code) if exc.code is not None else 2
@@ -272,14 +406,36 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         sys.stdout.write(
             f"Wrote gh-summary to {path} ({err} errors, {warn} warnings)\n"
         )
-        return _exit_code(findings)
-
-    out_text = _render(snapshots, findings, args.format, args.verbose)
-
-    if args.output == "-":
-        sys.stdout.write(out_text)
     else:
-        Path(args.output).write_text(out_text, encoding="utf-8")
+        out_text = _render(snapshots, findings, args.format, args.verbose)
+        if args.output == "-":
+            sys.stdout.write(out_text)
+        else:
+            Path(args.output).write_text(out_text, encoding="utf-8")
+
+    if args.update_sticky_issue:
+        if not gh_token:
+            print(
+                "error: --update-sticky-issue requires --gh-token "
+                "(or $DRIFT_CHECK_TOKEN / $GITHUB_TOKEN in env)",
+                file=sys.stderr,
+            )
+            return 2
+        try:
+            action, url = issue.upsert_sticky_issue(
+                snapshots,
+                findings,
+                meta_commit=args.meta_commit,
+                repo=args.sticky_issue_repo,
+            )
+        except RuntimeError as exc:
+            print(f"error: sticky-issue upsert failed: {exc}", file=sys.stderr)
+            return 2
+        sys.stdout.write(
+            f"Sticky issue: {action}"
+            + (f" — {url}" if url else "")
+            + "\n"
+        )
 
     return _exit_code(findings)
 

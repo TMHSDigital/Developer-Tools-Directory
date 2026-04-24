@@ -1,9 +1,8 @@
-"""Build a ``RepoSnapshot`` from a local clone path.
+"""Build a ``RepoSnapshot`` from a local clone or a sparse-checkout.
 
-Session A is local-clone only. Sparse-checkout / ``gh api`` remote mode is
-Session C. The function signature here is already shaped so that a remote
-mode can be a sibling builder (``build_sparse_snapshot``) producing the
-same type.
+Session A shipped local-clone mode. Session C adds sparse-checkout for
+remote tool repos (CI-mode, where the meta-repo workflow checks every
+registered repo without committing 9 full clones to disk).
 
 File discovery is restricted to the four agent-file shapes we care about:
 
@@ -14,12 +13,22 @@ File discovery is restricted to the four agent-file shapes we care about:
 
 Plus ``.cursor-plugin/plugin.json`` for repo-type detection (not parsed
 into a FileSnapshot since it has no signal).
+
+Sparse-checkout uses git directly via subprocess. The token is injected
+into the clone URL ONCE and immediately scrubbed from ``.git/config``
+afterwards so it cannot leak via repo state captured to logs or temp
+inspection.
 """
 from __future__ import annotations
 
+import contextlib
+import os
+import shutil
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Iterator, Optional
 
 from .pragma import extract_pragmas
 from .signals import detect_signal
@@ -30,6 +39,21 @@ from .types import (
     RepoType,
     Version,
 )
+
+
+# Sparse-checkout target paths. Adding a new path here is the seam for
+# Phase 3 if/when the checker grows new file types.
+SPARSE_PATHS = (
+    "AGENTS.md",
+    "CLAUDE.md",
+    "skills",
+    "rules",
+    ".cursor-plugin",
+)
+
+
+class RemoteSnapshotError(RuntimeError):
+    """Raised when sparse-checkout fails (auth, network, missing repo)."""
 
 
 def list_meta_standards(meta_repo_path: Path) -> frozenset[str]:
@@ -89,6 +113,55 @@ def _collect_paths(repo_path: Path) -> list[Path]:
     return out
 
 
+def _build_snapshot_from_path(
+    repo_path: Path,
+    *,
+    slug: str,
+    meta_version: Version,
+    meta_commit: str,
+    config: DriftConfig,
+    warn_stream,
+    meta_standards: frozenset[str],
+    meta_required_refs: dict[str, dict[str, list[str]]],
+) -> RepoSnapshot:
+    """Shared core: turn a directory tree into a ``RepoSnapshot``. Used by
+    both ``build_local_snapshot`` and ``build_remote_snapshot`` so both
+    callers produce byte-identical snapshots given identical content."""
+    repo_type = _detect_repo_type(repo_path)
+    if repo_type == "unknown":
+        warn_stream.write(
+            f"warning: repo {slug} at {repo_path} has no cursor-plugin "
+            f"manifest and does not match the mcp-server shape; "
+            f"classifying as 'unknown'.\n"
+        )
+
+    files: Dict[Path, FileSnapshot] = {}
+    for path in _collect_paths(repo_path):
+        try:
+            content = path.read_bytes()
+        except OSError as exc:
+            warn_stream.write(f"warning: could not read {path}: {exc}\n")
+            continue
+        rel = path.relative_to(repo_path)
+        files[rel] = FileSnapshot(
+            path=rel,
+            content=content,
+            signal=detect_signal(rel, content),
+            pragmas=extract_pragmas(rel, content),
+        )
+
+    return RepoSnapshot(
+        slug=slug,
+        repo_type=repo_type,
+        files=files,
+        meta_version=meta_version,
+        meta_commit=meta_commit,
+        config=config.resolve(slug, repo_type),
+        meta_standards=meta_standards,
+        meta_required_refs=meta_required_refs,
+    )
+
+
 def build_local_snapshot(
     repo_path: Path,
     meta_version: Version,
@@ -108,40 +181,131 @@ def build_local_snapshot(
     if not repo_path.is_dir():
         raise FileNotFoundError(f"repo path is not a directory: {repo_path}")
 
-    resolved_slug = slug or repo_path.name
-    repo_type = _detect_repo_type(repo_path)
-
-    if repo_type == "unknown":
-        warn_stream.write(
-            f"warning: repo {resolved_slug} at {repo_path} has no "
-            f"cursor-plugin manifest and does not match the mcp-server "
-            f"shape; classifying as 'unknown'.\n"
-        )
-
-    files: Dict[Path, FileSnapshot] = {}
-    for path in _collect_paths(repo_path):
-        try:
-            content = path.read_bytes()
-        except OSError as exc:
-            warn_stream.write(f"warning: could not read {path}: {exc}\n")
-            continue
-        rel = path.relative_to(repo_path)
-        files[rel] = FileSnapshot(
-            path=rel,
-            content=content,
-            signal=detect_signal(rel, content),
-            pragmas=extract_pragmas(rel, content),
-        )
-
-    repo_config = config.resolve(resolved_slug, repo_type)
-
-    return RepoSnapshot(
-        slug=resolved_slug,
-        repo_type=repo_type,
-        files=files,
+    return _build_snapshot_from_path(
+        repo_path,
+        slug=slug or repo_path.name,
         meta_version=meta_version,
         meta_commit=meta_commit,
-        config=repo_config,
+        config=config,
+        warn_stream=warn_stream,
         meta_standards=meta_standards if meta_standards is not None else frozenset(),
         meta_required_refs=meta_required_refs or {},
     )
+
+
+# ---------------------------------------------------------------------------
+# Remote (sparse-checkout) mode
+# ---------------------------------------------------------------------------
+
+
+def _run_git(
+    args: list[str],
+    *,
+    cwd: Path | None = None,
+    env: dict[str, str] | None = None,
+    check: bool = True,
+) -> subprocess.CompletedProcess:
+    """Thin wrapper around git subprocess for testability and uniform
+    error handling. Uses ``GIT_TERMINAL_PROMPT=0`` to fail fast on auth
+    issues instead of hanging for input."""
+    full_env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
+    if env:
+        full_env.update(env)
+    result = subprocess.run(
+        ["git", *args],
+        cwd=str(cwd) if cwd else None,
+        env=full_env,
+        capture_output=True,
+        text=True,
+    )
+    if check and result.returncode != 0:
+        raise RemoteSnapshotError(
+            f"git {' '.join(args)} failed (rc={result.returncode}): "
+            f"{result.stderr.strip() or result.stdout.strip()}"
+        )
+    return result
+
+
+def _scrub_token_from_remote(repo_dir: Path, owner: str, slug: str) -> None:
+    """After clone, replace the token-bearing remote URL with a clean one.
+    Defense-in-depth: prevents the token from leaking via subsequent ``git
+    remote -v`` calls or accidental ``.git/config`` exposure."""
+    clean_url = f"https://github.com/{owner}/{slug}.git"
+    _run_git(["remote", "set-url", "origin", clean_url], cwd=repo_dir, check=False)
+
+
+@contextlib.contextmanager
+def _sparse_clone(
+    owner: str,
+    slug: str,
+    gh_token: str,
+    *,
+    branch: str | None = None,
+) -> Iterator[Path]:
+    """Sparse-checkout the listed ``SPARSE_PATHS`` into a tempdir, yield
+    the path, clean up on exit (errors and all)."""
+    tmp = Path(tempfile.mkdtemp(prefix=f"drift-{slug}-"))
+    try:
+        token = gh_token.strip()
+        if not token:
+            raise RemoteSnapshotError(f"gh_token is empty for {owner}/{slug}")
+        clone_url = f"https://x-access-token:{token}@github.com/{owner}/{slug}.git"
+        clone_args = [
+            "clone",
+            "--filter=blob:none",
+            "--sparse",
+            "--depth", "1",
+        ]
+        if branch:
+            clone_args += ["--branch", branch]
+        clone_args += [clone_url, str(tmp)]
+        _run_git(clone_args)
+        _scrub_token_from_remote(tmp, owner, slug)
+        # `--no-cone` lets us mix file-level patterns (AGENTS.md, CLAUDE.md)
+        # with directory patterns (skills, rules). Cone-mode is the default
+        # since git 2.35 and rejects file patterns. The deprecation warning
+        # is acceptable here; the alternative (`--skip-checks`) is more
+        # invasive and the patterns set is small and stable.
+        _run_git(
+            ["sparse-checkout", "set", "--no-cone", *SPARSE_PATHS],
+            cwd=tmp,
+        )
+        yield tmp
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def build_remote_snapshot(
+    repo_slug: str,
+    meta_version: Version,
+    meta_commit: str,
+    config: DriftConfig,
+    gh_token: str,
+    *,
+    owner: str = "TMHSDigital",
+    branch: str | None = None,
+    warn_stream=sys.stderr,
+    meta_standards: frozenset[str] | None = None,
+    meta_required_refs: dict[str, dict[str, list[str]]] | None = None,
+) -> RepoSnapshot:
+    """Sparse-checkout ``owner/repo_slug`` and snapshot it.
+
+    The temp directory is cleaned up before this function returns,
+    including on error. The slug embedded in the resulting snapshot is
+    ``repo_slug`` exactly (not lowercased; keeps GitHub-canonical case).
+
+    Raises ``RemoteSnapshotError`` if the clone or sparse-checkout fails
+    (e.g. auth, network, repo missing). Caller decides whether to log and
+    continue with other repos or treat as a tool error.
+    """
+    with _sparse_clone(owner, repo_slug, gh_token, branch=branch) as repo_path:
+        return _build_snapshot_from_path(
+            repo_path,
+            slug=repo_slug,
+            meta_version=meta_version,
+            meta_commit=meta_commit,
+            config=config,
+            warn_stream=warn_stream,
+            meta_standards=meta_standards if meta_standards is not None else frozenset(),
+            meta_required_refs=meta_required_refs or {},
+        )

@@ -1,0 +1,76 @@
+name: Drift check
+
+# All four triggers per Decision 5:
+#   - push:               only when checker code or standards change
+#   - schedule:           weekly catch-all so silent drift cannot pile up
+#   - workflow_dispatch:  on-demand manual run
+#   - pull_request:       guard the checker against accidental regressions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - VERSION
+      - standards/**
+      - scripts/drift_check/**
+      - .github/actions/drift-check/**
+      - .github/workflows/drift-check.yml
+      - registry.json
+  schedule:
+    # Mondays 13:00 UTC. Day-of-week chosen so a freshly-detected drift
+    # has the full work-week to be addressed.
+    - cron: '0 13 * * 1'
+  workflow_dispatch:
+    inputs:
+      repos:
+        description: 'comma-separated slugs to check (empty = all active in registry.json)'
+        required: false
+        default: ''
+  pull_request:
+    branches: [main]
+    paths:
+      - scripts/drift_check/**
+      - .github/actions/drift-check/**
+      - .github/workflows/drift-check.yml
+
+concurrency:
+  # Coalesce queued runs of the same trigger; do NOT cancel an in-flight
+  # check (the sticky-issue upsert is non-idempotent during the gh edit
+  # window).
+  group: drift-check-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Run drift checker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout meta-repo
+        uses: actions/checkout@v5
+
+      - name: Run drift check
+        id: drift
+        uses: ./.github/actions/drift-check
+        with:
+          mode: all
+          format: gh-summary
+          # DRIFT_CHECK_TOKEN provides cross-repo Contents:Read on the 9
+          # tool repos. GITHUB_TOKEN is the fallback for self-only runs
+          # where remote sparse-checkout is not needed.
+          github-token: ${{ secrets.DRIFT_CHECK_TOKEN || secrets.GITHUB_TOKEN }}
+          # Only the meta-repo's own runs upsert the sticky issue. Tool
+          # repos consume this composite action with update-sticky-issue=false.
+          update-sticky-issue: 'true'
+          meta-repo-ref: ${{ github.sha }}
+
+      - name: Report outcome
+        if: always()
+        shell: bash
+        run: |
+          echo "exit-code: ${{ steps.drift.outputs.exit-code }}"
+          echo "errors:    ${{ steps.drift.outputs.error-count }}"
+          echo "warnings:  ${{ steps.drift.outputs.warning-count }}"
+          echo "sticky:    ${{ steps.drift.outputs.sticky-issue-action }}"

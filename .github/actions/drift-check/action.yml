@@ -1,0 +1,205 @@
+# =============================================================================
+# Drift-check composite action
+# =============================================================================
+#
+# Reusable action invoked by:
+#   - the meta-repo's own drift-check.yml workflow (mode: all)
+#   - tool-repo validate.yml workflows (mode: self) — wired up in Session D
+#
+# What it does:
+#   1. Checks out THIS action's repo (TMHSDigital/Developer-Tools-Directory),
+#      which is where the drift_check Python package lives. Tool repos that
+#      consume this action only need to reference it by tag; they do NOT
+#      need to vendor the checker.
+#   2. Sets up Python and installs runtime deps (drift_check is stdlib-only
+#      today, but pip install -r requirements.txt runs anyway in case it
+#      grows deps in Phase 3).
+#   3. Runs the checker in `self` mode (caller's checkout) or `all` mode
+#      (every active repo in registry.json via sparse-checkout).
+#   4. Optionally upserts the sticky drift issue (meta-repo only).
+#   5. Writes a step summary and exposes counts as outputs so the calling
+#      workflow can branch on them.
+#
+# Pinning rule: tool repos MUST consume this action via @v1.7 (or a SHA),
+# never @main. The drift checker's release pipeline maintains the v1.7 tag
+# pointing at the latest 1.7.x. Q9 of the design doc explains why @main is
+# forbidden for tool-repo callers (would break every tool-repo PR on
+# unrelated meta-repo changes).
+# =============================================================================
+
+name: 'Agent-file drift check'
+description: 'Run the drift checker in self or all mode and optionally upsert the sticky issue.'
+author: 'TMHSDigital'
+
+inputs:
+  mode:
+    description: '"self" to check only the calling repo (uses GITHUB_WORKSPACE); "all" to check every active registry.json entry via sparse-checkout.'
+    required: true
+    default: 'self'
+  format:
+    description: 'Output format: markdown | json | gh-summary. Defaults to gh-summary so step summary is populated.'
+    required: false
+    default: 'gh-summary'
+  github-token:
+    description: 'GitHub token. Required for mode=all (sparse-checkout) and update-sticky-issue. Optional for mode=self.'
+    required: false
+    default: ''
+  update-sticky-issue:
+    description: 'true to upsert the sticky drift report issue. Only set true in the meta-repo workflow.'
+    required: false
+    default: 'false'
+  python-version:
+    description: 'Python interpreter for the checker.'
+    required: false
+    default: '3.11'
+  meta-repo-ref:
+    description: 'git ref of TMHSDigital/Developer-Tools-Directory to use for the checker code. Defaults to v1.7 (latest 1.7.x).'
+    required: false
+    default: 'v1.7'
+  caller-path:
+    description: 'When mode=self, path inside GITHUB_WORKSPACE that points at the caller checkout. Defaults to "." (root).'
+    required: false
+    default: '.'
+
+outputs:
+  exit-code:
+    description: 'drift checker exit code: 0=clean, 1=drift, 2=tool error'
+    value: ${{ steps.run.outputs.exit-code }}
+  error-count:
+    description: 'number of error-severity findings'
+    value: ${{ steps.run.outputs.error-count }}
+  warning-count:
+    description: 'number of warning-severity findings'
+    value: ${{ steps.run.outputs.warning-count }}
+  sticky-issue-action:
+    description: 'one of: created, updated, reopened, closed, no_op, skipped'
+    value: ${{ steps.sticky.outputs.action }}
+
+runs:
+  using: 'composite'
+  steps:
+    # The drift checker code lives in this repo. Whether the caller is the
+    # meta-repo itself or a tool repo, we always need the checker code at
+    # a known path. Use a dedicated subdirectory so we don't clobber the
+    # caller's own checkout (which lives at GITHUB_WORKSPACE).
+    - name: Checkout drift checker
+      uses: actions/checkout@v5
+      with:
+        repository: TMHSDigital/Developer-Tools-Directory
+        ref: ${{ inputs.meta-repo-ref }}
+        path: .drift-checker
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install dependencies (best-effort)
+      shell: bash
+      working-directory: .drift-checker
+      run: |
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        else
+          echo "no requirements.txt — drift_check is stdlib-only, skipping"
+        fi
+
+    - name: Resolve meta-commit
+      id: meta
+      shell: bash
+      working-directory: .drift-checker
+      run: |
+        echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        echo "version=$(cat VERSION)" >> "$GITHUB_OUTPUT"
+
+    - name: Run drift checker
+      id: run
+      shell: bash
+      working-directory: .drift-checker
+      env:
+        DRIFT_CHECK_TOKEN: ${{ inputs.github-token }}
+      run: |
+        set +e
+        EXTRA_ARGS=()
+        if [ "${{ inputs.mode }}" = "all" ]; then
+          EXTRA_ARGS+=(--all)
+        elif [ "${{ inputs.mode }}" = "self" ]; then
+          EXTRA_ARGS+=(--local "$GITHUB_WORKSPACE/${{ inputs.caller-path }}")
+        else
+          echo "::error::invalid mode: ${{ inputs.mode }} (expected 'self' or 'all')"
+          exit 2
+        fi
+
+        # Always emit JSON to a side-channel file so we can extract counts
+        # for outputs, then write the requested format separately.
+        python scripts/drift_check/cli.py \
+          "${EXTRA_ARGS[@]}" \
+          --format json \
+          --output /tmp/drift-findings.json \
+          --meta-commit "${{ steps.meta.outputs.sha }}"
+        FINDINGS_RC=$?
+
+        # Extract counts (default to 0 if jq missing or file absent).
+        ERR=0; WARN=0
+        if command -v jq >/dev/null 2>&1 && [ -f /tmp/drift-findings.json ]; then
+          ERR=$(jq -r '.summary.errors // 0' /tmp/drift-findings.json)
+          WARN=$(jq -r '.summary.warnings // 0' /tmp/drift-findings.json)
+        fi
+        echo "exit-code=$FINDINGS_RC" >> "$GITHUB_OUTPUT"
+        echo "error-count=$ERR" >> "$GITHUB_OUTPUT"
+        echo "warning-count=$WARN" >> "$GITHUB_OUTPUT"
+
+        # Now render the user-requested format (which writes to step summary
+        # automatically when format=gh-summary).
+        if [ "${{ inputs.format }}" != "json" ]; then
+          python scripts/drift_check/cli.py \
+            "${EXTRA_ARGS[@]}" \
+            --format "${{ inputs.format }}" \
+            --meta-commit "${{ steps.meta.outputs.sha }}"
+        fi
+
+        # Action exit code is decoupled from drift-checker exit code; we
+        # surface drift via outputs so the calling workflow chooses how
+        # to react. Composite action exits 0 unless the checker hit a
+        # tool error (rc=2).
+        if [ "$FINDINGS_RC" = "2" ]; then
+          exit 2
+        fi
+        exit 0
+
+    - name: Upsert sticky issue
+      id: sticky
+      if: ${{ inputs.update-sticky-issue == 'true' }}
+      shell: bash
+      working-directory: .drift-checker
+      env:
+        DRIFT_CHECK_TOKEN: ${{ inputs.github-token }}
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        set +e
+        if [ -z "${{ inputs.github-token }}" ]; then
+          echo "::warning::update-sticky-issue=true but github-token is empty; skipping"
+          echo "action=skipped" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        EXTRA_ARGS=()
+        if [ "${{ inputs.mode }}" = "all" ]; then
+          EXTRA_ARGS+=(--all)
+        else
+          EXTRA_ARGS+=(--local "$GITHUB_WORKSPACE/${{ inputs.caller-path }}")
+        fi
+        OUT=$(python scripts/drift_check/cli.py \
+          "${EXTRA_ARGS[@]}" \
+          --format json \
+          --output /dev/null \
+          --update-sticky-issue \
+          --meta-commit "${{ steps.meta.outputs.sha }}" 2>&1)
+        RC=$?
+        echo "$OUT"
+        # Parse the "Sticky issue: <action>" line emitted by cli.py.
+        ACTION=$(echo "$OUT" | grep -oE 'Sticky issue: (created|updated|reopened|closed|no_op)' | head -1 | awk '{print $3}')
+        echo "action=${ACTION:-unknown}" >> "$GITHUB_OUTPUT"
+        if [ "$RC" = "2" ]; then
+          exit 2
+        fi
+        exit 0
