@@ -17,6 +17,17 @@ Invocation::
 """
 from __future__ import annotations
 
+import sys as _sys
+# When invoked as `python scripts/drift_check/cli.py`, Python prepends the
+# script's own directory to sys.path[0]. Our package contains a `types.py`
+# which then shadows stdlib `types` (e.g. `from types import GenericAlias`
+# inside enum). Scrub it before any further imports run. Detected when the
+# composite action ran on a Linux runner (different startup imports than
+# our Windows dev box). Same module-shadowing class as Session A's
+# `signal.py -> signals.py` rename.
+if _sys.path and _sys.path[0].rstrip("/\\").endswith("drift_check"):
+    _sys.path.pop(0)
+
 import argparse
 import subprocess
 import sys
