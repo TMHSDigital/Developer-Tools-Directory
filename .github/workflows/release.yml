@@ -140,7 +140,21 @@ jobs:
           DRAFT_BODY="$(gh api "repos/${GITHUB_REPOSITORY}/releases" \
             --jq 'map(select(.draft==true)) | .[0].body // ""' 2>/dev/null || echo '')"
 
-          if [ -n "$DRAFT_BODY" ] && [ "$(echo "$DRAFT_BODY" | tr -d '[:space:]')" != "" ]; then
+          # Detect effectively-empty drafter bodies. Drafter categorizes only
+          # merged PRs; when code lands on main via direct push, it emits a
+          # body of just '## What's Changed / * No changes'. Strip markdown
+          # headings and bullet prefixes, reduce to lowercase alphanumerics,
+          # and treat the body as empty if the remainder is empty or exactly
+          # 'nochanges'. Real content containing the phrase "no changes" as
+          # one line among others will not match (the concatenated alnum
+          # string will have additional characters).
+          SUBSTANTIVE="$(printf '%s\n' "$DRAFT_BODY" \
+            | sed -E 's/^[[:space:]]*#{1,6}[[:space:]].*$//' \
+            | sed -E 's/^[[:space:]]*[-*][[:space:]]+//' \
+            | tr '[:upper:]' '[:lower:]' \
+            | tr -cd '[:alnum:]')"
+
+          if [ -n "$DRAFT_BODY" ] && [ -n "$SUBSTANTIVE" ] && [ "$SUBSTANTIVE" != "nochanges" ]; then
             echo "Using release-drafter draft body."
             echo "$DRAFT_BODY" > "$NOTES_FILE"
           elif [ -n "$PREV_TAG" ]; then
