@@ -1,0 +1,7 @@
+---
+description: clean rule
+globs: ["**/*.py"]
+standards-version: 1.6.3
+---
+
+# Clean rule

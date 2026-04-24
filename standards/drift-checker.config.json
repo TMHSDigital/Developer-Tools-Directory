@@ -1,0 +1,15 @@
+{
+  "repos": {
+    "steam-mcp": {
+      "skip_checks": ["required-refs", "stale-counts"]
+    }
+  },
+  "types": {
+    "mcp-server": {
+      "skip_checks": []
+    }
+  },
+  "globals": {
+    "signal_policy": "same-major-minor"
+  }
+}
