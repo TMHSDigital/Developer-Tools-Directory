@@ -20,6 +20,7 @@ except ImportError:
 
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
+VERSION_FILE = Path(__file__).parent.parent / "VERSION"
 
 LICENSE_FILES = {
     "cc-by-nc-nd-4.0": "CC-BY-NC-ND-4.0",
@@ -38,6 +39,34 @@ def slugify(name: str) -> str:
     slug = name.lower().strip()
     slug = re.sub(r"[^a-z0-9]+", "-", slug)
     return slug.strip("-")
+
+
+def read_standards_version() -> str:
+    """Read the meta-repo VERSION at generation time.
+
+    New tool repos are pre-aligned with the current standards version, so the
+    value here is not a runtime decision. If VERSION is missing or unreadable,
+    fail loudly rather than silently substituting a default - a wrong version
+    would defeat the drift-checker invariant.
+    """
+    try:
+        raw = VERSION_FILE.read_text(encoding="utf-8").strip()
+    except FileNotFoundError:
+        print(
+            f"Error: VERSION file not found at {VERSION_FILE}. "
+            "The scaffold must run from a working copy of Developer-Tools-Directory."
+        )
+        sys.exit(1)
+    except OSError as e:
+        print(f"Error: could not read {VERSION_FILE}: {e}")
+        sys.exit(1)
+    if not re.fullmatch(r"\d+\.\d+\.\d+", raw):
+        print(
+            f"Error: VERSION contents '{raw}' are not a valid X.Y.Z semver string. "
+            "Refusing to emit a standards-version marker with a malformed value."
+        )
+        sys.exit(1)
+    return raw
 
 
 def parse_args():
@@ -122,6 +151,8 @@ def main():
     skill_names = [f"skill-{i + 1}" for i in range(args.skills)]
     rule_names = [f"rule-{i + 1}" for i in range(args.rules)]
 
+    standards_version = read_standards_version()
+
     ctx = {
         "name": args.name,
         "slug": slug,
@@ -138,6 +169,7 @@ def main():
         "author_email": args.author_email,
         "repo_owner": "TMHSDigital",
         "repo_name": slug,
+        "standards_version": standards_version,
     }
 
     print(f"\nScaffolding '{args.name}' ({slug}) into {output_dir}\n")
@@ -183,6 +215,7 @@ name: {skill}
 description: TODO - describe this skill
 globs: ["**/*"]
 alwaysApply: false
+standards-version: {standards_version}
 ---
 
 # {skill.replace('-', ' ').title()}
@@ -197,6 +230,7 @@ TODO: Add skill content here.
 description: TODO - describe this rule
 globs: ["**/*"]
 alwaysApply: false
+standards-version: {standards_version}
 ---
 
 # {rule.replace('-', ' ').title()}

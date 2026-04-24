@@ -6,7 +6,11 @@ Every developer tool repo must include an `AGENTS.md` file at the root. This fil
 
 ### 1. Header
 
+Every `AGENTS.md` and `CLAUDE.md` in a tool repo must start with a `standards-version` marker on the first line, followed by a blank line, followed by the H1 title. The marker is an HTML comment so it does not render in GitHub's Markdown viewer.
+
 ```markdown
+<!-- standards-version: X.Y.Z -->
+
 # AGENTS.md
 
 This file tells AI coding agents how the <Tool Name> repo works
@@ -14,6 +18,12 @@ and how to contribute correctly.
 
 **Documentation site:** <URL> (auto-deployed on push to main)
 ```
+
+`X.Y.Z` matches the `Developer-Tools-Directory` `VERSION` the tool repo is aligned with. Update it when the tool repo is re-aligned with a new meta-repo release; do not update it on every commit.
+
+**Rationale:** the HTML comment format preserves the pure-Markdown, prose-first convention of `AGENTS.md` and `CLAUDE.md` (no YAML frontmatter in files that render as rendered docs), while giving the drift checker in `Developer-Tools-Directory` a deterministic signal to detect which version of the ecosystem standards a tool repo was last aligned with.
+
+`SKILL.md` and `.mdc` rule files use a different mechanism: a YAML frontmatter field named `standards-version`, placed alongside `name`, `description`, `globs`, `alwaysApply`. Those files are metadata-first component files rather than prose documents, so frontmatter is the natural home for the signal. See `standards/skills.md` and `standards/rules.md` for the full frontmatter conventions.
 
 ### 2. Repository Overview
 
