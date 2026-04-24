@@ -61,6 +61,11 @@ jobs:
           # tool repos. GITHUB_TOKEN is the fallback for self-only runs
           # where remote sparse-checkout is not needed.
           github-token: ${{ secrets.DRIFT_CHECK_TOKEN || secrets.GITHUB_TOKEN }}
+          # GITHUB_TOKEN with the workflow's issues:write permission is
+          # used for sticky-issue ops because fine-grained PATs may lack
+          # GraphQL updateIssue (only REST createIssue), causing 'edit'
+          # to fail after the first 'create' succeeded.
+          issues-token: ${{ secrets.GITHUB_TOKEN }}
           # Only the meta-repo's own runs upsert the sticky issue. Tool
           # repos consume this composite action with update-sticky-issue=false.
           update-sticky-issue: 'true'
