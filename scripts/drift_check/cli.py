@@ -27,20 +27,35 @@ from typing import List, Optional, Sequence
 # `python scripts/drift_check/cli.py` invocations.
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-    from drift_check.checks import VersionSignalCheck  # type: ignore
+    from drift_check.checks import (  # type: ignore
+        BrokenRefsCheck,
+        RequiredRefsCheck,
+        StaleCountsCheck,
+        VersionSignalCheck,
+    )
+    from drift_check.checks.required_refs import (  # type: ignore
+        RequiredRefsError,
+        load_required_refs,
+    )
     from drift_check.config import ConfigError, load_config  # type: ignore
-    from drift_check.report import json_out, markdown  # type: ignore
+    from drift_check.report import gh_summary, json_out, markdown  # type: ignore
     from drift_check.semver import parse_version  # type: ignore
     from drift_check.signals import _classify_by_name  # type: ignore
-    from drift_check.snapshot import build_local_snapshot  # type: ignore
+    from drift_check.snapshot import build_local_snapshot, list_meta_standards  # type: ignore
     from drift_check.types import Finding, RepoSnapshot, Version  # type: ignore
 else:
-    from .checks import VersionSignalCheck
+    from .checks import (
+        BrokenRefsCheck,
+        RequiredRefsCheck,
+        StaleCountsCheck,
+        VersionSignalCheck,
+    )
+    from .checks.required_refs import RequiredRefsError, load_required_refs
     from .config import ConfigError, load_config
-    from .report import json_out, markdown
+    from .report import gh_summary, json_out, markdown
     from .semver import parse_version
     from .signals import _classify_by_name
-    from .snapshot import build_local_snapshot
+    from .snapshot import build_local_snapshot, list_meta_standards
     from .types import Finding, RepoSnapshot, Version
 
 
@@ -78,7 +93,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument(
         "--format",
-        choices=("markdown", "json"),
+        choices=("markdown", "json", "gh-summary"),
         default="markdown",
         help="output format (default: markdown)",
     )
@@ -110,6 +125,21 @@ def build_parser() -> argparse.ArgumentParser:
         help="path to drift-checker.config.json (defaults to standards/drift-checker.config.json)",
     )
     p.add_argument(
+        "--required-refs",
+        type=Path,
+        default=None,
+        help="path to required-refs.json (defaults to standards/required-refs.json)",
+    )
+    p.add_argument(
+        "--meta-repo",
+        type=Path,
+        default=None,
+        help=(
+            "path to the meta-repo root for resolving standards/*.md references "
+            "(defaults to the repo that contains VERSION)"
+        ),
+    )
+    p.add_argument(
         "--meta-commit",
         default="HEAD",
         help="meta-repo commit SHA for the snapshot record (default: HEAD)",
@@ -122,12 +152,26 @@ def _build_snapshots(
     meta_version: Version,
     meta_commit: str,
     config_path: Optional[Path],
+    meta_repo_path: Path,
+    required_refs_path: Optional[Path],
 ) -> List[RepoSnapshot]:
     try:
         cfg = load_config(config_path)
     except ConfigError as exc:
         print(f"error: {exc}", file=sys.stderr)
         raise SystemExit(2)
+
+    try:
+        required_refs = load_required_refs(
+            required_refs_path
+            if required_refs_path is not None
+            else meta_repo_path / "standards" / "required-refs.json"
+        )
+    except RequiredRefsError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        raise SystemExit(2)
+
+    meta_standards = list_meta_standards(meta_repo_path)
 
     snapshots: List[RepoSnapshot] = []
     for path in local_paths:
@@ -140,6 +184,8 @@ def _build_snapshots(
                 meta_version=meta_version,
                 meta_commit=meta_commit,
                 config=cfg,
+                meta_standards=meta_standards,
+                meta_required_refs=dict(required_refs),
             )
         )
     return snapshots
@@ -147,8 +193,14 @@ def _build_snapshots(
 
 def _run_checks(snapshots: Sequence[RepoSnapshot]) -> List[Finding]:
     findings: List[Finding] = []
+    checks = (
+        VersionSignalCheck(),
+        BrokenRefsCheck(),
+        RequiredRefsCheck(),
+        StaleCountsCheck(),
+    )
     for snap in snapshots:
-        for check in (VersionSignalCheck(),):
+        for check in checks:
             findings.extend(check.run(snap))
     return findings
 
@@ -164,8 +216,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     local_paths = [Path(p).resolve() for p in args.local]
 
     repo_root = _find_repo_root()
+    meta_repo_path = args.meta_repo.resolve() if args.meta_repo else repo_root
     try:
-        meta_version = _read_meta_version(repo_root)
+        meta_version = _read_meta_version(meta_repo_path)
     except SystemExit:
         raise
     except Exception as exc:  # pragma: no cover - defensive
@@ -178,6 +231,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             meta_version=meta_version,
             meta_commit=args.meta_commit,
             config_path=args.config,
+            meta_repo_path=meta_repo_path,
+            required_refs_path=args.required_refs,
         )
     except SystemExit as exc:
         return int(exc.code) if exc.code is not None else 2
@@ -193,18 +248,31 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             meta_version=meta_version,
         )
         if touched:
-            # Rebuild snapshots & re-run checks so the report reflects the
-            # post-fix state.
             try:
                 snapshots = _build_snapshots(
                     local_paths=local_paths,
                     meta_version=meta_version,
                     meta_commit=args.meta_commit,
                     config_path=args.config,
+                    meta_repo_path=meta_repo_path,
+                    required_refs_path=args.required_refs,
                 )
             except SystemExit as exc:
                 return int(exc.code) if exc.code is not None else 2
             findings = _run_checks(snapshots)
+
+    if args.format == "gh-summary":
+        try:
+            path = gh_summary.write_summary(snapshots, findings, verbose=args.verbose)
+        except gh_summary.GHSummaryError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        err = sum(1 for f in findings if f.severity == "error")
+        warn = sum(1 for f in findings if f.severity == "warn")
+        sys.stdout.write(
+            f"Wrote gh-summary to {path} ({err} errors, {warn} warnings)\n"
+        )
+        return _exit_code(findings)
 
     out_text = _render(snapshots, findings, args.format, args.verbose)
 

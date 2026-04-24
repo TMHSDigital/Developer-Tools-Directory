@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "_comment": "Required standards references per repo type. Q2 resolution: start permissive. Audit on 2026-04-24 found zero tool repos with standards/*.md links; shipping with an empty requirements block so the check is silent until tool repos start referencing standards deliberately. File a follow-up issue against Developer-Tools-Directory to populate this when the first tool repo adds a standards reference.",
+  "requirements": {
+    "cursor-plugin": {},
+    "mcp-server": {}
+  }
+}
