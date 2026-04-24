@@ -47,10 +47,16 @@ Create a **fine-grained** PAT (not classic) at
 | ---------- | ----- | --------------------------------------------------------- |
 | Contents   | Read  | sparse-checkout `AGENTS.md`, `CLAUDE.md`, `skills/`, `rules/` |
 | Metadata   | Read  | mandatory for any fine-grained PAT                        |
-| Issues     | Write | upsert the sticky drift report on the meta-repo only      |
 
-The `Issues: Write` scope only matters for the meta-repo; you can leave
-it as `Read` on the 8 tool repos.
+The drift checker does NOT need `Issues: Write` on `DRIFT_CHECK_TOKEN`.
+Sticky-issue upsert uses the workflow's auto-issued `GITHUB_TOKEN` (with
+`issues: write` granted in the workflow's `permissions:` block) instead,
+because fine-grained PATs can have inconsistent GraphQL access — the
+`updateIssue` mutation has been observed to fail with "Resource not
+accessible" even when the REST `createIssue` succeeds. Two-token model:
+
+- `DRIFT_CHECK_TOKEN` → cross-repo `Contents: Read`
+- `GITHUB_TOKEN` → same-repo `Issues: Write`
 
 **Expiration:** 90 days is recommended. Calendar a rotation.
 

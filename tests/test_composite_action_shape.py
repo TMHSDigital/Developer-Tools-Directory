@@ -32,7 +32,10 @@ def test_action_yaml_parses(action_doc):
 
 def test_action_inputs_present(action_doc):
     inputs = action_doc["inputs"]
-    for key in ("mode", "format", "github-token", "update-sticky-issue", "python-version"):
+    for key in (
+        "mode", "format", "github-token", "issues-token",
+        "update-sticky-issue", "python-version",
+    ):
         assert key in inputs, f"missing input: {key}"
 
 

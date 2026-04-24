@@ -41,7 +41,11 @@ inputs:
     required: false
     default: 'gh-summary'
   github-token:
-    description: 'GitHub token. Required for mode=all (sparse-checkout) and update-sticky-issue. Optional for mode=self.'
+    description: 'GitHub token for cross-repo sparse-checkout in mode=all. Optional for mode=self. Typically a fine-grained PAT (DRIFT_CHECK_TOKEN) with Contents:Read on every registry repo.'
+    required: false
+    default: ''
+  issues-token:
+    description: 'GitHub token used for sticky-issue upsert. Defaults to github-token. The meta-repo workflow should pass GITHUB_TOKEN here (with issues:write in the workflow permissions block) since fine-grained PATs may lack GraphQL updateIssue access.'
     required: false
     default: ''
   update-sticky-issue:
@@ -173,12 +177,18 @@ runs:
       shell: bash
       working-directory: .drift-checker
       env:
+        # For sticky-issue ops we need a token with issues:write GraphQL
+        # access on the meta-repo. Fine-grained PATs sometimes lack
+        # updateIssue; the workflow's auto-GITHUB_TOKEN with the
+        # permissions block is the reliable source. issues-token defaults
+        # to github-token for backward compatibility.
         DRIFT_CHECK_TOKEN: ${{ inputs.github-token }}
-        GH_TOKEN: ${{ inputs.github-token }}
+        GH_TOKEN: ${{ inputs.issues-token != '' && inputs.issues-token || inputs.github-token }}
       run: |
         set +e
-        if [ -z "${{ inputs.github-token }}" ]; then
-          echo "::warning::update-sticky-issue=true but github-token is empty; skipping"
+        ISSUES_TOKEN="${{ inputs.issues-token != '' && inputs.issues-token || inputs.github-token }}"
+        if [ -z "$ISSUES_TOKEN" ]; then
+          echo "::warning::update-sticky-issue=true but no issues-token / github-token provided; skipping"
           echo "action=skipped" >> "$GITHUB_OUTPUT"
           exit 0
         fi
