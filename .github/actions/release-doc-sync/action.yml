@@ -87,15 +87,17 @@ runs:
   using: 'composite'
   steps:
     # The sync script lives in this repo. Whether the caller is the meta-repo
-    # itself or a tool repo, we always need the script at a known path. Use a
-    # dedicated subdirectory so we do not clobber the caller's own checkout
-    # (which lives at GITHUB_WORKSPACE).
+    # itself or a tool repo, we always need the script at a known path. Check
+    # out to runner.temp (OUTSIDE GITHUB_WORKSPACE) so the caller's release
+    # commit step (typically `git add -A`) does not pick up the meta-repo
+    # checkout as a 160000-mode gitlink. See v1.8.1 changelog for the bug
+    # this avoids; regression-tested in tests/test_release_doc_sync.py.
     - name: Checkout release-doc-sync script
       uses: actions/checkout@v5
       with:
         repository: TMHSDigital/Developer-Tools-Directory
         ref: ${{ inputs.meta-repo-ref }}
-        path: .release-doc-sync
+        path: ${{ runner.temp }}/release-doc-sync
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -105,7 +107,7 @@ runs:
     - name: Run release-doc-sync
       id: run
       shell: bash
-      working-directory: .release-doc-sync
+      working-directory: ${{ runner.temp }}/release-doc-sync
       env:
         PLUGIN_VERSION: ${{ inputs.plugin-version }}
         PREVIOUS_VERSION: ${{ inputs.previous-version }}

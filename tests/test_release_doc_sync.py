@@ -690,11 +690,47 @@ class TestCompositeAction:
 
         checkout_step = next(s for s in steps if "actions/checkout" in s.get("uses", ""))
         assert checkout_step["with"]["repository"] == "TMHSDigital/Developer-Tools-Directory"
-        assert checkout_step["with"]["path"] == ".release-doc-sync"
 
         shell_runs = [s.get("run", "") for s in steps if "run" in s]
         assert any("scripts/release_doc_sync/sync.py" in r for r in shell_runs), (
             "no step invokes the sync script"
+        )
+
+    def test_meta_repo_checkout_is_outside_workspace(self, action_doc):
+        """v1.8.1 regression guard. The meta-repo checkout MUST land outside
+        GITHUB_WORKSPACE (i.e., under runner.temp), otherwise the caller's
+        release commit step does `git add -A`, picks up the checkout
+        directory, and writes it into the release commit as a 160000-mode
+        gitlink. That polluted every Docker release commit pre-v1.8.1.
+
+        Both the checkout's `path:` and the run step's `working-directory:`
+        must reference runner.temp so they stay in lock-step."""
+        steps = action_doc["runs"]["steps"]
+
+        checkout_step = next(s for s in steps if "actions/checkout" in s.get("uses", ""))
+        checkout_path = checkout_step["with"]["path"]
+        assert "runner.temp" in checkout_path, (
+            f"Meta-repo checkout path must be under ${{{{ runner.temp }}}} to avoid "
+            f"polluting the caller's release commit with a gitlink. "
+            f"Got: {checkout_path!r}. See v1.8.1 / DTD#5 Phase 2b."
+        )
+        assert not checkout_path.startswith("."), (
+            f"Meta-repo checkout path must not be a workspace-relative dotted path "
+            f"(those land inside GITHUB_WORKSPACE). Got: {checkout_path!r}."
+        )
+
+        run_step = next(
+            s for s in steps
+            if s.get("id") == "run" or "sync.py" in s.get("run", "")
+        )
+        wd = run_step.get("working-directory", "")
+        assert "runner.temp" in wd, (
+            f"Run step's working-directory must match the checkout path "
+            f"(both under ${{{{ runner.temp }}}}). Got: {wd!r}."
+        )
+        assert checkout_path == wd, (
+            f"Checkout path and run working-directory must be identical "
+            f"(checkout={checkout_path!r}, working-directory={wd!r})."
         )
 
     def test_action_does_not_request_github_token(self, action_doc):
