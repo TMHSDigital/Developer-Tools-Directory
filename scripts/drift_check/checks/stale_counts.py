@@ -16,12 +16,27 @@ data like ``globs:`` and never contain aggregate narrative. We DO still
 scan inside fenced code blocks, by design: even in an example block, a
 stale count is stale information that will confuse readers once the real
 numbers drift.
+
+Two hardcoded scope rules (DTD#12 v1.9.0):
+
+1. ``AGENTS.md`` and ``CLAUDE.md`` are skipped wholesale. By ecosystem
+   convention these files carry narrative-aggregate prose ("177 skills,
+   71 rules") that is descriptive, not truth-bearing. Aggregate-truth
+   enforcement for those repos belongs in a CFX/Unity-style
+   ``validate-counts`` job against ``README.md``. Encoding this in the
+   check (rather than per-repo config) keeps the policy where it is
+   structurally true: those files' role in the standard.
+
+2. Lines inside ``## Example`` sections, and lines beginning with
+   ``**User:**`` / ``**Assistant:**`` markers, are skipped (DTD#37). The
+   numbers in roleplay dialogue are illustrative, not claims about the
+   skill's actual surface.
 """
 from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Iterable, List, Tuple
+from typing import Iterable, List, Set, Tuple
 
 from ..types import Finding, RepoSnapshot
 
@@ -40,6 +55,27 @@ _COUNT_RE = re.compile(
 # suggested fix copy differs.
 _STRONG_UNITS = ("skill", "rule", "mcp tool", "command")
 _YAML_FENCE_RE = re.compile(rb"^---\s*$", re.MULTILINE)
+
+# DTD#12 (v1.9.0): files always skipped by stale-counts regardless of
+# config. Match by basename, case-insensitive, to tolerate ``Agents.md``
+# or ``claude.md`` variants. The narrative-aggregate convention applies
+# to the file's role in the standard, not to a particular casing.
+_HARDCODED_SKIP_NAMES: frozenset[str] = frozenset({"agents.md", "claude.md"})
+
+# DTD#37: section headings that introduce roleplay/example content. Any
+# ``## Example...`` heading is treated as the start of a skipped section
+# until the next ``##``-or-shallower heading. We deliberately match the
+# generic ``## Example`` prefix so ``## Example Interaction``, ``## Example
+# Interactions``, ``## Example Usage``, etc. all qualify.
+_EXAMPLE_HEADING_RE = re.compile(rb"^##\s+Example\b", re.IGNORECASE)
+_HEADING_RE = re.compile(rb"^(#{1,6})\s+\S")
+# DTD#37: lines starting with these dialogue markers are skipped wherever
+# they appear, including outside an example section. Markdown bold form
+# wraps the colon: ``**User:**`` / ``**Assistant:**``. Tolerant of leading
+# whitespace and trailing content on the same line.
+_DIALOGUE_LINE_RE = re.compile(
+    rb"^\s*\*\*(User|Assistant)\s*:\*\*", re.IGNORECASE
+)
 
 
 def _strip_frontmatter(content: bytes) -> bytes:
@@ -85,6 +121,34 @@ def _frontmatter_line_offset(content: bytes, body: bytes) -> int:
     return content.count(b"\n", 0, consumed)
 
 
+def _example_dialogue_lines(body: bytes) -> Set[int]:
+    """Return the set of body-relative (1-indexed) line numbers that fall
+    inside an ``## Example`` section or that themselves are a roleplay
+    dialogue line (``**User:**``/``**Assistant:**``). Counts on these
+    lines are illustrative, not aggregate truth claims (DTD#37).
+
+    Section scoping: an ``## Example`` heading opens a region. The region
+    closes at the next ``##``-or-shallower heading (``# `` or ``## ``),
+    or end-of-file. Deeper headings (``### `` etc.) stay inside.
+    """
+    skipped: Set[int] = set()
+    in_example = False
+    for idx, raw in enumerate(body.split(b"\n"), start=1):
+        line = raw.rstrip(b"\r")
+        if _EXAMPLE_HEADING_RE.match(line):
+            in_example = True
+            skipped.add(idx)
+            continue
+        heading_match = _HEADING_RE.match(line)
+        if heading_match and len(heading_match.group(1)) <= 2:
+            in_example = False
+        if in_example:
+            skipped.add(idx)
+        elif _DIALOGUE_LINE_RE.match(line):
+            skipped.add(idx)
+    return skipped
+
+
 class StaleCountsCheck:
     name: str = NAME
 
@@ -94,6 +158,12 @@ class StaleCountsCheck:
 
         out: List[Finding] = []
         for rel_path, file in snapshot.files.items():
+            # DTD#12 (v1.9.0): hardcoded narrative-aggregate skip.
+            # AGENTS.md and CLAUDE.md describe the plugin in prose;
+            # aggregate-truth lives in README.md per ecosystem convention.
+            if Path(rel_path).name.lower() in _HARDCODED_SKIP_NAMES:
+                continue
+
             pragma = next(
                 (p for p in file.pragmas if p.check_name == NAME), None
             )
@@ -114,7 +184,10 @@ class StaleCountsCheck:
 
             body = _strip_frontmatter(file.content)
             offset = _frontmatter_line_offset(file.content, body)
+            example_lines = _example_dialogue_lines(body)
             for count, unit, line in _iter_counts(body):
+                if line in example_lines:
+                    continue
                 actual_line = line + offset
                 strong = _unit_is_strong(unit)
                 message = (
