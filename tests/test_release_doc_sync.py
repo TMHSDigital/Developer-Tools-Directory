@@ -696,41 +696,60 @@ class TestCompositeAction:
             "no step invokes the sync script"
         )
 
-    def test_meta_repo_checkout_is_outside_workspace(self, action_doc):
-        """v1.8.1 regression guard. The meta-repo checkout MUST land outside
-        GITHUB_WORKSPACE (i.e., under runner.temp), otherwise the caller's
-        release commit step does `git add -A`, picks up the checkout
-        directory, and writes it into the release commit as a 160000-mode
-        gitlink. That polluted every Docker release commit pre-v1.8.1.
+    def test_workspace_checkout_is_cleaned_up_before_action_returns(self, action_doc):
+        """v1.8.2 regression guard for the gitlink-pollution bug.
 
-        Both the checkout's `path:` and the run step's `working-directory:`
-        must reference runner.temp so they stay in lock-step."""
+        actions/checkout@v5 enforces `path:` resolves under GITHUB_WORKSPACE,
+        so we cannot avoid the transient workspace presence (v1.8.1 tried
+        ${{ runner.temp }} and broke checkout entirely with "Repository path
+        is not under <workspace>"). The fix is a defensive cleanup step
+        that runs `if: always()` and removes the checkout directory before
+        control returns to the caller, so the caller's `git add -A` cannot
+        commit it as a 160000-mode gitlink.
+
+        Constraints enforced here:
+          1. A cleanup step exists with `if: always()`.
+          2. The cleanup step runs `rm -rf` against the workspace path that
+             matches the checkout step's `path:`.
+          3. The cleanup step is positioned AFTER the run step (otherwise
+             it cleans before the script can use the checkout).
+
+        Future-me must not be able to silently drop or weaken this step
+        without one of these assertions firing. See DTD#5 Phase 2b."""
         steps = action_doc["runs"]["steps"]
 
         checkout_step = next(s for s in steps if "actions/checkout" in s.get("uses", ""))
         checkout_path = checkout_step["with"]["path"]
-        assert "runner.temp" in checkout_path, (
-            f"Meta-repo checkout path must be under ${{{{ runner.temp }}}} to avoid "
-            f"polluting the caller's release commit with a gitlink. "
-            f"Got: {checkout_path!r}. See v1.8.1 / DTD#5 Phase 2b."
+
+        cleanup_candidates = [
+            (i, s) for i, s in enumerate(steps)
+            if "rm -rf" in s.get("run", "") and checkout_path in s.get("run", "")
+        ]
+        assert cleanup_candidates, (
+            f"No cleanup step found that removes the checkout path {checkout_path!r}. "
+            f"Without it, the caller's `git add -A` will commit the meta-repo "
+            f"checkout as a 160000-mode gitlink. See v1.8.2 / DTD#5 Phase 2b."
         )
-        assert not checkout_path.startswith("."), (
-            f"Meta-repo checkout path must not be a workspace-relative dotted path "
-            f"(those land inside GITHUB_WORKSPACE). Got: {checkout_path!r}."
+        cleanup_idx, cleanup_step = cleanup_candidates[0]
+
+        assert cleanup_step.get("if") == "always()", (
+            f"Cleanup step must use `if: always()` so a failed sync.py still "
+            f"leaves a clean workspace. Got: if={cleanup_step.get('if')!r}."
         )
 
-        run_step = next(
-            s for s in steps
+        run_idx = next(
+            i for i, s in enumerate(steps)
             if s.get("id") == "run" or "sync.py" in s.get("run", "")
         )
-        wd = run_step.get("working-directory", "")
-        assert "runner.temp" in wd, (
-            f"Run step's working-directory must match the checkout path "
-            f"(both under ${{{{ runner.temp }}}}). Got: {wd!r}."
+        assert cleanup_idx > run_idx, (
+            f"Cleanup step (index {cleanup_idx}) must come AFTER the run step "
+            f"(index {run_idx}); otherwise the script has nothing to execute."
         )
-        assert checkout_path == wd, (
-            f"Checkout path and run working-directory must be identical "
-            f"(checkout={checkout_path!r}, working-directory={wd!r})."
+
+        cleanup_run = cleanup_step["run"]
+        assert "github.workspace" in cleanup_run, (
+            f"Cleanup must reference ${{{{ github.workspace }}}} to scope the "
+            f"rm -rf to the caller's workspace explicitly. Got: {cleanup_run!r}."
         )
 
     def test_action_does_not_request_github_token(self, action_doc):

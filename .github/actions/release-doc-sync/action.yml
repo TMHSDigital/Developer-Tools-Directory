@@ -87,17 +87,27 @@ runs:
   using: 'composite'
   steps:
     # The sync script lives in this repo. Whether the caller is the meta-repo
-    # itself or a tool repo, we always need the script at a known path. Check
-    # out to runner.temp (OUTSIDE GITHUB_WORKSPACE) so the caller's release
-    # commit step (typically `git add -A`) does not pick up the meta-repo
-    # checkout as a 160000-mode gitlink. See v1.8.1 changelog for the bug
-    # this avoids; regression-tested in tests/test_release_doc_sync.py.
+    # itself or a tool repo, we always need the script at a known path.
+    #
+    # actions/checkout@v5 enforces that `path:` resolves UNDER GITHUB_WORKSPACE
+    # (it rejects absolute or out-of-tree paths with "Repository path '...' is
+    # not under '...'"). So we check out to a dotted subdirectory and rely on
+    # the explicit "Clean up workspace checkout" step below to remove it
+    # before control returns to the caller.
+    #
+    # The cleanup step is the load-bearing piece: without it, the caller's
+    # release commit step (typically `git add -A`) would pick up the
+    # `.release-doc-sync` directory as a 160000-mode gitlink (submodule
+    # pointer to whatever SHA `v1.0` resolved to). Bug surfaced in v1.8.0,
+    # an attempted runner.temp fix shipped in v1.8.1 broke checkout entirely,
+    # and v1.8.2 introduced the cleanup-step pattern that actually works.
+    # Regression-tested in tests/test_release_doc_sync.py.
     - name: Checkout release-doc-sync script
       uses: actions/checkout@v5
       with:
         repository: TMHSDigital/Developer-Tools-Directory
         ref: ${{ inputs.meta-repo-ref }}
-        path: ${{ runner.temp }}/release-doc-sync
+        path: .release-doc-sync
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -107,7 +117,7 @@ runs:
     - name: Run release-doc-sync
       id: run
       shell: bash
-      working-directory: ${{ runner.temp }}/release-doc-sync
+      working-directory: .release-doc-sync
       env:
         PLUGIN_VERSION: ${{ inputs.plugin-version }}
         PREVIOUS_VERSION: ${{ inputs.previous-version }}
@@ -138,3 +148,14 @@ runs:
         # rc=0 (no changes) and rc=1 (changes made) are both successful from
         # the action's perspective. The action only fails on rc>=2 (tool error).
         exit 0
+
+    # Defensive cleanup: remove the meta-repo checkout from the caller's
+    # workspace before the action returns. This prevents the caller's
+    # release commit (`git add -A`) from picking up `.release-doc-sync` as
+    # a 160000-mode gitlink. Runs `if: always()` so a failed sync.py still
+    # leaves a clean workspace for the caller.
+    - name: Clean up workspace checkout
+      if: always()
+      shell: bash
+      run: |
+        rm -rf "${{ github.workspace }}/.release-doc-sync"
