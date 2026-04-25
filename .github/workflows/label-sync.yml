@@ -30,29 +30,33 @@ jobs:
           LABELS=""
 
           if echo "$FILES" | grep -q "^standards/"; then
-            LABELS="$LABELS,standards"
+            LABELS="$LABELS standards"
           fi
 
           if echo "$FILES" | grep -q "^scaffold/"; then
-            LABELS="$LABELS,scaffold"
+            LABELS="$LABELS scaffold"
           fi
 
           if echo "$FILES" | grep -q "^docs/"; then
-            LABELS="$LABELS,documentation"
+            LABELS="$LABELS documentation"
           fi
 
           if echo "$FILES" | grep -q "^registry.json"; then
-            LABELS="$LABELS,registry"
+            LABELS="$LABELS registry"
           fi
 
           if echo "$FILES" | grep -q "^\.github/"; then
-            LABELS="$LABELS,ci"
+            LABELS="$LABELS ci"
           fi
 
-          LABELS="${LABELS#,}"
-
           if [ -n "$LABELS" ]; then
-            gh pr edit ${{ github.event.pull_request.number }} --add-label "$LABELS"
+            for label in $LABELS; do
+              gh label create "$label" --force --color "ededed" 2>/dev/null || true
+              gh pr edit ${{ github.event.pull_request.number }} --add-label "$label"
+            done
+            echo "Applied labels:$LABELS"
+          else
+            echo "No labels to apply"
           fi
         env:
           FILES: ${{ steps.changed.outputs.files }}
