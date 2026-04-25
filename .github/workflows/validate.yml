@@ -196,7 +196,13 @@ jobs:
         run: |
           set -euo pipefail
 
-          COMMITS="$(git log "${BASE_SHA}..${HEAD_SHA}" --pretty=format:'%H%x00%s%x00%b%x1e')"
+          # DTD#24: field separator must NOT be NUL (\x00). Bash command
+          # substitution silently strips NUL bytes (with a warning to
+          # stderr that nothing inspects), gluing SHA+SUBJECT+BODY into
+          # one field and breaking the awk parse downstream. Use \x1f
+          # (Unit Separator) which preserves cleanly through bash. The
+          # record separator (\x1e Record Separator) was already safe.
+          COMMITS="$(git log "${BASE_SHA}..${HEAD_SHA}" --pretty=format:'%H%x1f%s%x1f%b%x1e')"
 
           if [ -z "$COMMITS" ]; then
             echo "No new commits to check."
@@ -206,9 +212,9 @@ jobs:
           NEEDS_BUMP="false"
           while IFS= read -r -d $'\x1e' record; do
             [ -z "$record" ] && continue
-            SHA="$(echo "$record" | awk -F '\0' '{print $1}')"
-            SUBJECT="$(echo "$record" | awk -F '\0' '{print $2}')"
-            BODY="$(echo "$record" | awk -F '\0' '{print $3}')"
+            SHA="$(echo "$record" | awk -F $'\x1f' '{print $1}')"
+            SUBJECT="$(echo "$record" | awk -F $'\x1f' '{print $2}')"
+            BODY="$(echo "$record" | awk -F $'\x1f' '{print $3}')"
 
             # Escape hatch: commit opts out.
             if echo "$SUBJECT $BODY" | grep -qF '[skip version]'; then
