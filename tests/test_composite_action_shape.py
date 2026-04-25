@@ -92,3 +92,53 @@ def test_workflow_token_has_fallback(workflow_doc):
     token = check_step["with"]["github-token"]
     assert "DRIFT_CHECK_TOKEN" in token
     assert "GITHUB_TOKEN" in token
+
+
+def test_action_propagates_checker_exit_code(action_doc):
+    """Final step must propagate the drift checker's rc to the caller.
+
+    Regression guard for the rc=1 swallowing bug fixed in v1.7.4: prior
+    to the fix the action exited 0 unless rc=2, so tool-repo CI passed
+    green even when drift was detected.
+    """
+    steps = action_doc["runs"]["steps"]
+    propagate = next(
+        (s for s in steps if s.get("name") == "Propagate checker exit code"),
+        None,
+    )
+    assert propagate is not None, "missing 'Propagate checker exit code' step"
+    # Must run unconditionally so it always surfaces the recorded rc.
+    assert propagate.get("if", "").strip().startswith("always()"), (
+        f"propagate step must use if: always(); got {propagate.get('if')!r}"
+    )
+    body = propagate.get("run", "")
+    assert "steps.run.outputs.exit-code" in body, (
+        "propagate step must read exit-code from the run step output"
+    )
+    assert 'exit "$RC"' in body, (
+        "propagate step must exit with the recorded rc, not a hard-coded value"
+    )
+
+
+def test_action_propagate_step_is_last(action_doc):
+    """The propagate step must be the last step so it determines the
+    action's exit code regardless of what happens before it."""
+    steps = action_doc["runs"]["steps"]
+    assert steps[-1].get("name") == "Propagate checker exit code", (
+        "propagate must be the last step; otherwise its exit code can be "
+        "overridden by a subsequent step"
+    )
+
+
+def test_action_sticky_step_does_not_swallow_rc(action_doc):
+    """Sticky-step is best-effort and should always exit 0; the propagate
+    step is the single source of truth for the action's rc."""
+    steps = action_doc["runs"]["steps"]
+    sticky = next((s for s in steps if s.get("id") == "sticky"), None)
+    assert sticky is not None, "missing sticky step"
+    body = sticky.get("run", "")
+    # No `exit "$RC"` or `exit $RC` in sticky — those would gate the
+    # action on a transient gh-API hiccup.
+    assert "exit \"$RC\"" not in body and "exit $RC" not in body, (
+        "sticky step must not propagate its own RC; that's the propagate step's job"
+    )
