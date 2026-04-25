@@ -33,6 +33,12 @@ push to main
 | `feat:` or `feat(scope):` | **minor** (x.Y.0) | `feat: add new skill` |
 | Anything else | **patch** (x.y.Z) | `fix: handle null in lookup` |
 
+### Patch releases and themed roadmap rows
+
+Patch releases (`x.y.Z`) do NOT get a row in `ROADMAP.md`'s themed-release table. The roadmap table tracks human-curated milestones with a theme line per row (e.g., `v0.12.0 - Niche, Scout, and Extras`); inventing a theme for a mechanical patch bump would dilute the table's signal. Patch releases are surfaced in `CHANGELOG.md` (one stub section per release) and in the `**Current:** vX.Y.Z` line at the top of `ROADMAP.md`, both of which are auto-maintained by the `release-doc-sync` composite action documented in [`release-doc-sync.md`](release-doc-sync.md).
+
+Minor and major releases SHOULD get a roadmap row, with the theme set during the planning of that release. The `release-doc-sync` action does not invent or move table rows for any bump type; humans curate the table and the action keeps the surrounding doc surface (CHANGELOG stub, current-version line, CLAUDE.md `**Version:**` line) in sync after the auto-bump runs.
+
 ## What NOT to Do
 
 - **Do not manually edit the version in `plugin.json`.** The release workflow will overwrite it.
