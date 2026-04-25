@@ -162,10 +162,12 @@ runs:
             --meta-commit "${{ steps.meta.outputs.sha }}"
         fi
 
-        # Action exit code is decoupled from drift-checker exit code; we
-        # surface drift via outputs so the calling workflow chooses how
-        # to react. Composite action exits 0 unless the checker hit a
-        # tool error (rc=2).
+        # Tool errors (rc=2) abort immediately and skip the sticky-issue
+        # step — there's nothing meaningful to publish if the checker
+        # itself failed. Drift findings (rc=1) are NOT propagated here so
+        # the optional sticky-issue step still runs; the final
+        # "Propagate checker exit code" step at the end of this composite
+        # surfaces rc=1 to the caller, failing the calling job on drift.
         if [ "$FINDINGS_RC" = "2" ]; then
           exit 2
         fi
@@ -209,7 +211,34 @@ runs:
         # Parse the "Sticky issue: <action>" line emitted by cli.py.
         ACTION=$(echo "$OUT" | grep -oE 'Sticky issue: (created|updated|reopened|closed|no_op)' | head -1 | awk '{print $3}')
         echo "action=${ACTION:-unknown}" >> "$GITHUB_OUTPUT"
-        if [ "$RC" = "2" ]; then
-          exit 2
-        fi
+        # Sticky-step rc is best-effort: don't gate the action on a
+        # transient gh-API hiccup. The final "Propagate checker exit
+        # code" step uses the original drift-checker rc captured by the
+        # run step, which is the authoritative pass/fail signal.
         exit 0
+
+    - name: Propagate checker exit code
+      # Always run so the action's exit code mirrors the drift checker's
+      # actual rc, regardless of whether the optional sticky step ran or
+      # what its rc was. This is what turns the composite into a real
+      # gate: rc=1 (drift) makes the calling job fail. rc=0 (clean) lets
+      # it pass. rc=2 (tool error) was already surfaced by the run step
+      # exiting 2; we mirror it here for completeness. If the run step
+      # never executed (e.g., checkout failed earlier), exit 0 so we
+      # don't mask the earlier failure that already failed the action.
+      if: always()
+      shell: bash
+      run: |
+        RC="${{ steps.run.outputs.exit-code }}"
+        if [ -z "$RC" ]; then
+          echo "drift checker did not run; nothing to propagate"
+          exit 0
+        fi
+        echo "drift checker exit code: $RC"
+        case "$RC" in
+          0) echo "no drift detected" ;;
+          1) echo "::error::drift detected — failing job per composite-action contract" ;;
+          2) echo "::error::tool error in drift checker" ;;
+          *) echo "::warning::unexpected exit code from drift checker: $RC" ;;
+        esac
+        exit "$RC"
