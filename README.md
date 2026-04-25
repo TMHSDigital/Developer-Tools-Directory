@@ -17,6 +17,7 @@
  <a href="https://github.com/TMHSDigital/Developer-Tools-Directory/actions/workflows/codeql.yml"><img src="https://github.com/TMHSDigital/Developer-Tools-Directory/actions/workflows/codeql.yml/badge.svg" alt="CodeQL" /></a>
  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.12+-3776ab?logo=python&logoColor=white" alt="Python 3.12+" /></a>
  <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs Welcome" /></a>
+ <a href="https://github.com/sponsors/TMHSDigital"><img src="https://img.shields.io/badge/sponsor-%E2%9D%A4-EA4AAA?logo=githubsponsors&logoColor=white" alt="Sponsor" /></a>
 </p>
 
 <p align="center">
