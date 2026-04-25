@@ -49,7 +49,7 @@ jobs:
       issues: write
     steps:
       - name: Checkout meta-repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Run drift check
         id: drift
