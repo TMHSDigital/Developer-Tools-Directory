@@ -6,10 +6,10 @@
   },
   "types": {
     "cursor-plugin": {
-      "skip_checks": ["stale-counts"]
+      "skip_checks": []
     },
     "mcp-server": {
-      "skip_checks": ["required-refs", "stale-counts"]
+      "skip_checks": ["required-refs"]
     }
   },
   "repos": {
