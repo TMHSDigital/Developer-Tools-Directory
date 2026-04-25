@@ -55,7 +55,14 @@ jobs:
             exit 1
           fi
 
-          LATEST_TAG="$(git describe --tags --abbrev=0 2>/dev/null || echo '')"
+          # DTD#23: walk tag refs sorted by semver, filtered to the
+          # vMAJOR.MINOR.PATCH pattern. Excludes floating tags like v1
+          # and v1.7 (which lack the third segment) so the comparison
+          # cannot be confused by an aliased or stale floating tag.
+          # Glob is fnmatch: '[0-9]*' matches a digit followed by
+          # anything, so vX.Y.Z and pre-releases (vX.Y.Z-rc1) match
+          # while vX, vX.Y do not.
+          LATEST_TAG="$(git for-each-ref --sort=-v:refname --format='%(refname:short)' 'refs/tags/v[0-9]*.[0-9]*.[0-9]*' | head -n1)"
           LATEST_VERSION="${LATEST_TAG#v}"
 
           echo "VERSION file:     $VERSION"
@@ -124,6 +131,32 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -a "$TAG" -m "Release $TAG"
           git push origin "$TAG"
+
+      - name: Update floating major and major.minor tags
+        env:
+          TAG: ${{ needs.check-version.outputs.tag }}
+          VERSION: ${{ needs.check-version.outputs.version }}
+        run: |
+          set -euo pipefail
+          # DTD#14: maintain vMAJOR and vMAJOR.MINOR floating tags
+          # automatically. Both patterns are in production: drift-check
+          # consumers pin @v1.7 (MAJOR.MINOR train), release-doc-sync
+          # consumers pin @v1 (MAJOR train).
+          MAJOR="${VERSION%%.*}"
+          REST="${VERSION#*.}"
+          MINOR="${REST%%.*}"
+
+          # Resolve the patch tag to its commit. Required because a
+          # bare 'git tag -f FLOAT ANNOTATED_TAG' would create a tag
+          # pointing to the annotated tag object, not the commit -
+          # the same alias-shape that broke DTD#4.
+          PATCH_COMMIT="$(git rev-parse "${TAG}^{commit}")"
+
+          for FLOAT in "v${MAJOR}.${MINOR}" "v${MAJOR}"; do
+            git tag -f "$FLOAT" "$PATCH_COMMIT"
+            git push -f origin "$FLOAT"
+            echo "Updated $FLOAT -> $PATCH_COMMIT"
+          done
 
       - name: Assemble release notes
         id: notes
