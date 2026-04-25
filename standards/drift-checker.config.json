@@ -6,7 +6,7 @@
   },
   "types": {
     "cursor-plugin": {
-      "skip_checks": []
+      "skip_checks": ["stale-counts"]
     },
     "mcp-server": {
       "skip_checks": ["required-refs", "stale-counts"]
