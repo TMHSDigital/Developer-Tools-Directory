@@ -222,3 +222,6 @@ Pull requests welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, how-to 
 <p align="center">
  <strong>Built by <a href="https://github.com/TMHSDigital">TMHSDigital</a></strong>
 </p>
+
+<!-- Test for version-bump-check (delete this line; PR will be closed) -->
+
