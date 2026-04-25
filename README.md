@@ -98,6 +98,7 @@ Documented conventions for building new developer tools. All docs in [`standards
 | [README Template](standards/readme-template.md) | Standard README structure and required sections |
 | [AGENTS.md Template](standards/agents-template.md) | AI agent guidance file structure |
 | [Versioning](standards/versioning.md) | Semver management and automated release flow |
+| [Release-doc-sync](standards/release-doc-sync.md) | Composite action contract for keeping CHANGELOG, CLAUDE, and ROADMAP in sync after auto-release |
 | [Testing](standards/testing.md) | Test frameworks, coverage bar, and CI wiring |
 | [Skills](standards/skills.md) | `SKILL.md` structure and frontmatter |
 | [Rules](standards/rules.md) | `.mdc` structure, globs, and the secrets rule pattern |

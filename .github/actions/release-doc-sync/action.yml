@@ -1,0 +1,138 @@
+# =============================================================================
+# Release-doc-sync composite action
+# =============================================================================
+#
+# Reusable action invoked by tool-repo `release.yml` workflows immediately
+# after the version bump and immediately before the release commit. Its job
+# is to keep CHANGELOG.md, CLAUDE.md, and ROADMAP.md in sync with the new
+# plugin.json version so that doc-consistency tests stay green after every
+# auto-release.
+#
+# What it does:
+#   1. Checks out THIS action's repo (TMHSDigital/Developer-Tools-Directory)
+#      at the pinned ref so consuming repos do not need to vendor the sync
+#      script. Mirrors the drift-check@v1.7 pattern.
+#   2. Sets up Python and runs scripts/release_doc_sync/sync.py against the
+#      caller's working tree.
+#   3. The script edits, in-place, the three doc files when present:
+#        - CHANGELOG.md:  prepends `## [X.Y.Z] - YYYY-MM-DD` stub section
+#                         pointing to the GitHub release notes
+#        - CLAUDE.md:     updates `**Version:** X.Y.Z` line and any
+#                         `vOLD` / `(vOLD)` mentions to the new version
+#        - ROADMAP.md:    updates the `**Current:** vX.Y.Z` line only;
+#                         table rows and `(current)` markers are left
+#                         untouched (per standards/versioning.md, patch
+#                         releases do not get themed roadmap rows)
+#   4. Surfaces a `changed` boolean and a space-separated `files-changed`
+#      list as outputs so the caller can branch on them or include them in
+#      the release commit message.
+#
+# Pinning rule: tool repos MUST consume this action via @v1.0 (or a SHA),
+# never @main. The meta-repo's tag pipeline maintains the v1.0 tag pointing
+# at the latest 1.x.y. See DTD#14 for the floating-tag automation
+# follow-up. The drift-check@v1.7 lessons apply: @main from a tool repo
+# means every meta-repo PR can break every tool-repo release.
+# =============================================================================
+
+name: 'Release doc sync'
+description: 'Align CHANGELOG.md, CLAUDE.md, and ROADMAP.md with the new plugin.json version after an auto-release.'
+author: 'TMHSDigital'
+
+inputs:
+  plugin-version:
+    description: 'New plugin version after the bump (semver, no v prefix). Required.'
+    required: true
+  previous-version:
+    description: 'Previous plugin version (semver, no v prefix). Used to scope CLAUDE.md replacements so unrelated version mentions are not mangled. Required.'
+    required: true
+  repository:
+    description: 'owner/repo used to construct the GitHub release-notes URL in the CHANGELOG entry. When unset (default), the action resolves to github.repository at runtime (which is what every tool repo wants).'
+    required: false
+    default: ''
+  release-date:
+    description: 'YYYY-MM-DD date stamp for the new CHANGELOG header. Defaults to today (UTC) at action runtime.'
+    required: false
+    default: ''
+  python-version:
+    description: 'Python interpreter for the sync script.'
+    required: false
+    default: '3.11'
+  meta-repo-ref:
+    description: 'git ref of TMHSDigital/Developer-Tools-Directory to use for the sync script. Defaults to v1.0 (latest 1.x.y).'
+    required: false
+    default: 'v1.0'
+  caller-path:
+    description: 'Path inside GITHUB_WORKSPACE that points at the caller checkout. Defaults to "." (root).'
+    required: false
+    default: '.'
+
+outputs:
+  changed:
+    description: 'true if at least one doc file was modified, false if every file was already aligned or absent.'
+    value: ${{ steps.run.outputs.changed }}
+  files-changed:
+    description: 'Space-separated list of files modified, relative to the caller checkout. Empty when changed=false.'
+    value: ${{ steps.run.outputs.files-changed }}
+  changelog-action:
+    description: 'One of: inserted, idempotent, missing. Reflects what happened to CHANGELOG.md.'
+    value: ${{ steps.run.outputs.changelog-action }}
+  claude-action:
+    description: 'One of: updated, idempotent, missing.'
+    value: ${{ steps.run.outputs.claude-action }}
+  roadmap-action:
+    description: 'One of: updated, idempotent, missing.'
+    value: ${{ steps.run.outputs.roadmap-action }}
+
+runs:
+  using: 'composite'
+  steps:
+    # The sync script lives in this repo. Whether the caller is the meta-repo
+    # itself or a tool repo, we always need the script at a known path. Use a
+    # dedicated subdirectory so we do not clobber the caller's own checkout
+    # (which lives at GITHUB_WORKSPACE).
+    - name: Checkout release-doc-sync script
+      uses: actions/checkout@v5
+      with:
+        repository: TMHSDigital/Developer-Tools-Directory
+        ref: ${{ inputs.meta-repo-ref }}
+        path: .release-doc-sync
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Run release-doc-sync
+      id: run
+      shell: bash
+      working-directory: .release-doc-sync
+      env:
+        PLUGIN_VERSION: ${{ inputs.plugin-version }}
+        PREVIOUS_VERSION: ${{ inputs.previous-version }}
+        REPOSITORY: ${{ inputs.repository != '' && inputs.repository || github.repository }}
+        RELEASE_DATE: ${{ inputs.release-date }}
+        CALLER_PATH: ${{ github.workspace }}/${{ inputs.caller-path }}
+      run: |
+        set +e
+        EXTRA_ARGS=()
+        if [ -n "$RELEASE_DATE" ]; then
+          EXTRA_ARGS+=(--date "$RELEASE_DATE")
+        fi
+
+        python scripts/release_doc_sync/sync.py \
+          --repo-path "$CALLER_PATH" \
+          --plugin-version "$PLUGIN_VERSION" \
+          --previous-version "$PREVIOUS_VERSION" \
+          --repository "$REPOSITORY" \
+          --github-output \
+          "${EXTRA_ARGS[@]}"
+        RC=$?
+
+        if [ "$RC" -ne 0 ] && [ "$RC" -ne 1 ]; then
+          echo "::error::release-doc-sync failed with exit code $RC"
+          exit "$RC"
+        fi
+
+        # rc=0 (no changes) and rc=1 (changes made) are both successful from
+        # the action's perspective. The action only fails on rc>=2 (tool error).
+        exit 0
