@@ -39,6 +39,22 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 2. Update `CHANGELOG.md` if the change is user-facing
 3. Use a descriptive PR title following conventional commit format
 
-## License
+## Inbound license grant and DCO
 
-By contributing, you agree that your contributions will be licensed under the project's {{ license_spdx }} license.
+This project's outbound license is {{ license_spdx }}. Contributions are accepted inbound under a broader grant via the Developer Certificate of Origin (DCO). Both pieces are required because {{ license_spdx }} alone cannot cleanly accept third-party derivatives.
+
+### Required grant
+
+By submitting a contribution to this repository, you certify that you have the right to do so under the Developer Certificate of Origin (DCO) 1.1, and you grant TMHSDigital a perpetual, worldwide, non-exclusive, royalty-free, irrevocable license to use, reproduce, prepare derivative works of, publicly display, publicly perform, sublicense, and distribute your contribution under the project's current license ({{ license_spdx }}) or any successor license chosen by the project.
+
+### DCO sign-off
+
+Every commit in a pull request must carry a `Signed-off-by:` trailer matching the commit author. Sign at commit time with the `-s` flag:
+
+```bash
+git commit -s -m "feat: add new skill"
+```
+
+This appends a line like `Signed-off-by: Jane Developer <jane@example.com>` to the commit message. The GitHub DCO App enforces this on every PR.
+
+For the full inbound/outbound model and rationale, see [`standards/licensing.md`](https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards/licensing.md) in the Developer-Tools-Directory meta-repo.

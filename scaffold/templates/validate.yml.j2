@@ -32,7 +32,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Check required manifest fields
-        run: python3 -c "
+        run: |
+          python3 << 'PYEOF'
           import json, re
           m = json.load(open('.cursor-plugin/plugin.json'))
           required = ['name', 'displayName', 'description', 'version', 'author', 'license', 'skills', 'rules']
@@ -40,25 +41,27 @@ jobs:
           assert not missing, f'Missing fields: {missing}'
           assert re.match(r'^[a-z0-9]+(-[a-z0-9]+)*$', m['name']), 'name must be lowercase kebab-case'
           print('Plugin manifest valid')
-          "
+          PYEOF
 
       - name: Check skill files exist
-        run: python3 -c "
+        run: |
+          python3 << 'PYEOF'
           import json, os
           m = json.load(open('.cursor-plugin/plugin.json'))
           for skill in m.get('skills', []):
               assert os.path.exists(skill), f'Skill not found: {skill}'
-          print(f'All {len(m[\"skills\"])} skill files exist')
-          "
+          print(f'All {len(m["skills"])} skill files exist')
+          PYEOF
 
       - name: Check rule files exist
-        run: python3 -c "
+        run: |
+          python3 << 'PYEOF'
           import json, os
           m = json.load(open('.cursor-plugin/plugin.json'))
           for rule in m.get('rules', []):
               assert os.path.exists(rule), f'Rule not found: {rule}'
-          print(f'All {len(m[\"rules\"])} rule files exist')
-          "
+          print(f'All {len(m["rules"])} rule files exist')
+          PYEOF
 
   validate-content:
     name: Validate content quality
@@ -100,6 +103,43 @@ jobs:
             fi
             echo "OK: $rule_file"
           done
+
+  validate-counts:
+    name: Validate content counts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check content counts match README
+        run: |
+          python3 << 'PYEOF'
+          import os, sys
+
+          errors = []
+
+          skill_count = len([
+              d for d in os.listdir('skills')
+              if os.path.isdir(os.path.join('skills', d))
+              and os.path.exists(os.path.join('skills', d, 'SKILL.md'))
+          ]) if os.path.isdir('skills') else 0
+          rule_count = len([
+              f for f in os.listdir('rules')
+              if f.endswith('.mdc')
+          ]) if os.path.isdir('rules') else 0
+
+          readme = open('README.md').read()
+          if f'{skill_count} skills' not in readme:
+              errors.append(f'README skill count mismatch (expected "{skill_count} skills")')
+          if f'{rule_count} rules' not in readme:
+              errors.append(f'README rule count mismatch (expected "{rule_count} rules")')
+
+          if errors:
+              for e in errors:
+                  print(f'::error::{e}', file=sys.stderr)
+              sys.exit(1)
+
+          print(f'Counts verified: {skill_count} skills, {rule_count} rules')
+          PYEOF
 {% endif %}
 {% if has_mcp %}
 
