@@ -8,6 +8,7 @@ on:
       - "docs/**"
       - "*.md"
       - "LICENSE"
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -20,20 +21,24 @@ jobs:
   version-and-release:
     name: Bump version, tag, and release
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     steps:
-      - uses: actions/checkout@v4
+{% raw %}
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          token: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get current version
         id: current
         run: |
+{% endraw %}
 {% if type == 'cursor-plugin' %}
           version=$(python3 -c "import json; print(json.load(open('.cursor-plugin/plugin.json'))['version'])")
 {% else %}
           version=$(python3 -c "import json; print(json.load(open('package.json'))['version'])")
 {% endif %}
+{% raw %}
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "Current version: $version"
 
@@ -47,6 +52,9 @@ jobs:
             commits=$(git log "$last_tag"..HEAD --oneline --format="%s")
           fi
 
+          echo "Commits since last release:"
+          echo "$commits"
+
           bump="patch"
           if echo "$commits" | grep -qiE "^(feat|feature)(\(.+\))?!:|BREAKING CHANGE"; then
             bump="major"
@@ -55,25 +63,43 @@ jobs:
           fi
 
           echo "bump=$bump" >> "$GITHUB_OUTPUT"
+          echo "Bump type: $bump"
 
       - name: Compute new version
         id: new
         run: |
-          current="{% raw %}${{ steps.current.outputs.version }}{% endraw %}"
-          bump="{% raw %}${{ steps.bump.outputs.bump }}{% endraw %}"
-          IFS='.' read -r major minor patch <<< "$current"
-          case "$bump" in
-            major) major=$((major + 1)); minor=0; patch=0 ;;
-            minor) minor=$((minor + 1)); patch=0 ;;
-            patch) patch=$((patch + 1)) ;;
-          esac
-          echo "version=$major.$minor.$patch" >> "$GITHUB_OUTPUT"
+          current="${{ steps.current.outputs.version }}"
+          bump="${{ steps.bump.outputs.bump }}"
 
-      - name: Check if version changed
+          IFS='.' read -r major minor patch <<< "$current"
+
+          # Initial release: when there is no prior tag, hold version at the
+          # value already in the manifest. The first release is cut at the
+          # scaffolded version (typically 0.1.0) instead of bumping to 0.2.0
+          # on the first feat: commit. After the first tag exists, normal
+          # conventional-commit-driven bumping resumes.
+          last_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$last_tag" ]; then
+            new_version="$current"
+          else
+            case "$bump" in
+              major) major=$((major + 1)); minor=0; patch=0 ;;
+              minor) minor=$((minor + 1)); patch=0 ;;
+              patch) patch=$((patch + 1)) ;;
+            esac
+            new_version="$major.$minor.$patch"
+          fi
+
+          echo "version=$new_version" >> "$GITHUB_OUTPUT"
+          echo "New version: $new_version"
+
+      - name: Check if tag already exists
         id: check
         run: |
-          if [ "{% raw %}${{ steps.current.outputs.version }}{% endraw %}" = "{% raw %}${{ steps.new.outputs.version }}{% endraw %}" ]; then
+          new_version="${{ steps.new.outputs.version }}"
+          if git rev-parse "v$new_version" >/dev/null 2>&1; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Tag v$new_version already exists, skipping"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
@@ -81,16 +107,17 @@ jobs:
       - name: Update version files
         if: steps.check.outputs.skip == 'false'
         env:
-          NEW_VERSION: {% raw %}${{ steps.new.outputs.version }}{% endraw %}
-          OLD_VERSION: {% raw %}${{ steps.current.outputs.version }}{% endraw %}
+          NEW_VERSION: ${{ steps.new.outputs.version }}
+          OLD_VERSION: ${{ steps.current.outputs.version }}
         run: |
           python3 -c "
           import json, os
 
           new_version = os.environ['NEW_VERSION']
           old_version = os.environ['OLD_VERSION']
-
+{% endraw %}
 {% if type == 'cursor-plugin' %}
+
           path = '.cursor-plugin/plugin.json'
           with open(path) as f:
               data = json.load(f)
@@ -101,31 +128,57 @@ jobs:
 {% endif %}
 
           readme = 'README.md'
-          with open(readme) as f:
-              content = f.read()
-          content = content.replace(
-              f'version-{old_version}-blue',
-              f'version-{new_version}-blue'
-          )
-          with open(readme, 'w') as f:
-              f.write(content)
+          if os.path.exists(readme):
+              with open(readme) as f:
+                  content = f.read()
+              content = content.replace(
+                  f'version-{old_version}-blue',
+                  f'version-{new_version}-blue'
+              )
+              with open(readme, 'w') as f:
+                  f.write(content)
           "
+{% raw %}
+      - name: Sync release docs
+        if: steps.check.outputs.skip == 'false'
+        uses: TMHSDigital/Developer-Tools-Directory/.github/actions/release-doc-sync@v1
+        with:
+          plugin-version: ${{ steps.new.outputs.version }}
+          previous-version: ${{ steps.current.outputs.version }}
 
-      - name: Commit and tag
+      - name: Commit version bump
         if: steps.check.outputs.skip == 'false'
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "chore: bump version to {% raw %}${{ steps.new.outputs.version }}{% endraw %} [skip ci]"
-          git tag "v{% raw %}${{ steps.new.outputs.version }}{% endraw %}"
-          git push origin main --tags
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: bump version to ${{ steps.new.outputs.version }} [skip ci]"
+            git push origin main
+          fi
+
+      - name: Create and push tags
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          new_version="${{ steps.new.outputs.version }}"
+          IFS='.' read -r major minor _patch <<< "$new_version"
+
+          git tag "v$new_version"
+          git tag -f "v$major"
+          git tag -f "v$major.$minor"
+
+          git push origin "v$new_version"
+          git push origin "v$major" --force
+          git push origin "v$major.$minor" --force
 
       - name: Create GitHub Release
         if: steps.check.outputs.skip == 'false'
         env:
-          GH_TOKEN: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "v{% raw %}${{ steps.new.outputs.version }}{% endraw %}" \
-            --title "v{% raw %}${{ steps.new.outputs.version }}{% endraw %}" \
+          gh release create "v${{ steps.new.outputs.version }}" \
+            --title "v${{ steps.new.outputs.version }}" \
             --generate-notes
+{% endraw %}

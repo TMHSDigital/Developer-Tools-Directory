@@ -183,6 +183,11 @@ def main():
     write_file(output_dir, ".github/workflows/release.yml", render_template(env, "release.yml.j2", ctx))
     write_file(output_dir, ".github/workflows/pages.yml", render_template(env, "pages.yml.j2", ctx))
     write_file(output_dir, ".github/workflows/stale.yml", render_template(env, "stale.yml.j2", ctx))
+    write_file(output_dir, ".github/workflows/drift-check.yml", render_template(env, "drift-check.yml.j2", ctx))
+    write_file(output_dir, ".github/workflows/label-sync.yml", render_template(env, "label-sync.yml.j2", ctx))
+
+    # Dependabot config (github-actions ecosystem standard, optional pip for MCP)
+    write_file(output_dir, ".github/dependabot.yml", render_template(env, "dependabot.yml.j2", ctx))
 
     # Documentation files
     write_file(output_dir, "README.md", render_template(env, "README.md.j2", ctx))

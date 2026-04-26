@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+{% if has_mcp %}
+  - package-ecosystem: "pip"
+    directory: "/mcp-server"
+    schedule:
+      interval: "weekly"
+{% endif %}

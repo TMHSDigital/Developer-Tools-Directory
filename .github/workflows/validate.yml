@@ -92,12 +92,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install Jinja2
+        run: pip install Jinja2 PyYAML
 
       - name: Check scaffold syntax
         run: python3 -m py_compile scaffold/create-tool.py
@@ -114,11 +114,100 @@ jobs:
 
           test -f /tmp/scaffold-test/ci-test-plugin/.cursor-plugin/plugin.json
           test -f /tmp/scaffold-test/ci-test-plugin/.github/workflows/validate.yml
+          test -f /tmp/scaffold-test/ci-test-plugin/.github/workflows/release.yml
           test -f /tmp/scaffold-test/ci-test-plugin/.github/workflows/pages.yml
+          test -f /tmp/scaffold-test/ci-test-plugin/.github/workflows/stale.yml
+          test -f /tmp/scaffold-test/ci-test-plugin/.github/workflows/drift-check.yml
+          test -f /tmp/scaffold-test/ci-test-plugin/.github/workflows/label-sync.yml
+          test -f /tmp/scaffold-test/ci-test-plugin/.github/dependabot.yml
           test -f /tmp/scaffold-test/ci-test-plugin/site.json
           test -f /tmp/scaffold-test/ci-test-plugin/mcp-tools.json
           test -f /tmp/scaffold-test/ci-test-plugin/mcp-server/server.py
           echo "Scaffold test passed"
+
+      - name: Scaffold YAML well-formed
+        run: |
+          # Catches Jinja2 trim_blocks bugs that collapse adjacent expression lines.
+          python3 -c "
+          import yaml, sys
+          paths = [
+              '/tmp/scaffold-test/ci-test-plugin/.github/workflows/validate.yml',
+              '/tmp/scaffold-test/ci-test-plugin/.github/workflows/release.yml',
+              '/tmp/scaffold-test/ci-test-plugin/.github/workflows/pages.yml',
+              '/tmp/scaffold-test/ci-test-plugin/.github/workflows/stale.yml',
+              '/tmp/scaffold-test/ci-test-plugin/.github/workflows/drift-check.yml',
+              '/tmp/scaffold-test/ci-test-plugin/.github/workflows/label-sync.yml',
+              '/tmp/scaffold-test/ci-test-plugin/.github/dependabot.yml',
+          ]
+          fail = False
+          for p in paths:
+              try:
+                  with open(p) as f:
+                      yaml.safe_load(f)
+                  print(f'OK  {p}')
+              except yaml.YAMLError as e:
+                  print(f'FAIL {p}: {e}', file=sys.stderr)
+                  fail = True
+          sys.exit(1 if fail else 0)
+          "
+
+      - name: Scaffold regression checks for DTD#41 patterns
+        run: |
+          # validate-counts job present
+          grep -q 'validate-counts' /tmp/scaffold-test/ci-test-plugin/.github/workflows/validate.yml \
+            || { echo "::error::validate.yml missing validate-counts job"; exit 1; }
+
+          # drift-check pinned to @v1.9
+          grep -q 'drift-check@v1.9' /tmp/scaffold-test/ci-test-plugin/.github/workflows/drift-check.yml \
+            || { echo "::error::drift-check.yml not pinned to @v1.9"; exit 1; }
+
+          # release.yml consumes release-doc-sync@v1
+          grep -q 'release-doc-sync@v1' /tmp/scaffold-test/ci-test-plugin/.github/workflows/release.yml \
+            || { echo "::error::release.yml does not consume release-doc-sync@v1"; exit 1; }
+
+          # release.yml has the initial-release version-handling branch
+          grep -q 'Initial release' /tmp/scaffold-test/ci-test-plugin/.github/workflows/release.yml \
+            || { echo "::error::release.yml missing initial-release branch"; exit 1; }
+
+          # release.yml does floating tag automation
+          grep -q 'tag -f "v\$major"' /tmp/scaffold-test/ci-test-plugin/.github/workflows/release.yml \
+            || { echo "::error::release.yml missing floating major tag automation"; exit 1; }
+
+          # label-sync uses self-healing per-label gh label create --force
+          grep -q 'gh label create.*--force' /tmp/scaffold-test/ci-test-plugin/.github/workflows/label-sync.yml \
+            || { echo "::error::label-sync.yml missing self-healing label create"; exit 1; }
+
+          # dependabot has github-actions ecosystem
+          grep -q 'package-ecosystem: "github-actions"' /tmp/scaffold-test/ci-test-plugin/.github/dependabot.yml \
+            || { echo "::error::dependabot.yml missing github-actions ecosystem"; exit 1; }
+
+          # CLAUDE.md has **Version:** line so release-doc-sync can update it
+          grep -q '^\*\*Version:\*\* 0\.1\.0' /tmp/scaffold-test/ci-test-plugin/CLAUDE.md \
+            || { echo "::error::CLAUDE.md missing **Version:** 0.1.0 line"; exit 1; }
+
+          # ROADMAP.md has standards-version marker and **Current:** line
+          grep -q '<!-- standards-version:' /tmp/scaffold-test/ci-test-plugin/ROADMAP.md \
+            || { echo "::error::ROADMAP.md missing standards-version marker"; exit 1; }
+          grep -q '^\*\*Current:\*\* v0\.1\.0' /tmp/scaffold-test/ci-test-plugin/ROADMAP.md \
+            || { echo "::error::ROADMAP.md missing **Current:** v0.1.0 line"; exit 1; }
+
+          # AGENTS.md keeps standards-version marker
+          grep -q '<!-- standards-version:' /tmp/scaffold-test/ci-test-plugin/AGENTS.md \
+            || { echo "::error::AGENTS.md missing standards-version marker"; exit 1; }
+
+          # LICENSE has correct CC-BY-NC-ND-4.0 copyright (TM Hospitality Strategies, not TMHSDigital)
+          grep -q 'Copyright (c) 2026 TM Hospitality Strategies' /tmp/scaffold-test/ci-test-plugin/LICENSE \
+            || { echo "::error::LICENSE missing canonical 'TM Hospitality Strategies' copyright line"; exit 1; }
+          grep -q 'SPDX-License-Identifier: CC-BY-NC-ND-4.0' /tmp/scaffold-test/ci-test-plugin/LICENSE \
+            || { echo "::error::LICENSE missing SPDX-License-Identifier"; exit 1; }
+
+          # CONTRIBUTING.md has DCO inbound grant section
+          grep -q 'Developer Certificate of Origin' /tmp/scaffold-test/ci-test-plugin/CONTRIBUTING.md \
+            || { echo "::error::CONTRIBUTING.md missing DCO section"; exit 1; }
+          grep -q 'Signed-off-by' /tmp/scaffold-test/ci-test-plugin/CONTRIBUTING.md \
+            || { echo "::error::CONTRIBUTING.md missing Signed-off-by guidance"; exit 1; }
+
+          echo "All DTD#41 scaffold regression checks passed"
 
       - name: Scaffold leak scan
         run: |
@@ -133,7 +222,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -184,7 +273,7 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 

@@ -22,10 +22,12 @@ concurrency:
 
 jobs:
   build-and-deploy:
+{% raw %}
     environment:
       name: github-pages
-      url: {% raw %}${{ steps.deployment.outputs.page_url }}{% endraw %}
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+{% endraw %}
     steps:
       - uses: actions/checkout@v4
 
