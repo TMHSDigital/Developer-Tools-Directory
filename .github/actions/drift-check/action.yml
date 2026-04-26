@@ -57,9 +57,9 @@ inputs:
     required: false
     default: '3.11'
   meta-repo-ref:
-    description: 'git ref of TMHSDigital/Developer-Tools-Directory to use for the checker code. Defaults to v1.7 (latest 1.7.x).'
+    description: 'git ref of TMHSDigital/Developer-Tools-Directory to use for the checker code. Defaults to v1 (auto-maintained MAJOR floating tag, per DTD#14). Future MINORs auto-flow through this default without requiring action.yml edits.'
     required: false
-    default: 'v1.7'
+    default: 'v1'
   caller-path:
     description: 'When mode=self, path inside GITHUB_WORKSPACE that points at the caller checkout. Defaults to "." (root).'
     required: false
