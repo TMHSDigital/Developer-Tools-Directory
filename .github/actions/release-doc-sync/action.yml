@@ -58,9 +58,9 @@ inputs:
     required: false
     default: '3.11'
   meta-repo-ref:
-    description: 'git ref of TMHSDigital/Developer-Tools-Directory to use for the sync script. Defaults to v1.0 (latest 1.x.y).'
+    description: 'git ref of TMHSDigital/Developer-Tools-Directory to use for the sync script. Defaults to v1 (floating major, auto-maintained by release.yml on every release).'
     required: false
-    default: 'v1.0'
+    default: 'v1'
   caller-path:
     description: 'Path inside GITHUB_WORKSPACE that points at the caller checkout. Defaults to "." (root).'
     required: false
