@@ -27,11 +27,19 @@
 #      list as outputs so the caller can branch on them or include them in
 #      the release commit message.
 #
-# Pinning rule: tool repos MUST consume this action via @v1.0 (or a SHA),
-# never @main. The meta-repo's tag pipeline maintains the v1.0 tag pointing
-# at the latest 1.x.y. See DTD#14 for the floating-tag automation
-# follow-up. The drift-check@v1.7 lessons apply: @main from a tool repo
-# means every meta-repo PR can break every tool-repo release.
+# Pinning rule: tool repos MUST consume this action via a floating tag or a
+# SHA, never @main. Three supported pin styles:
+#   - @v1     (floating major, default; auto-maintained by release.yml on
+#             every release; what most consumers use)
+#   - @v1.X   (floating minor, e.g. @v1.9; auto-maintained; used by strict
+#             consumers that want minor-level pinning while still picking up
+#             patch updates automatically)
+#   - @<SHA>  (full commit SHA; strictest, manual maintenance; used only when
+#             a consumer needs to freeze the action at a specific point)
+# The meta-repo's tag pipeline maintains @v1 and the @v1.X floating tags on
+# every release. See DTD#14 for the floating-tag automation status. The
+# drift-check@v1.7 lessons apply: @main from a tool repo means every
+# meta-repo PR can break every tool-repo release.
 # =============================================================================
 
 name: 'Release doc sync'
