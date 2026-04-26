@@ -3,12 +3,6 @@ name: Release
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - "*.md"
-      - "docs/**"
-      - "standards/**"
-      - "LICENSE"
-      - ".github/release-drafter.yml"
   workflow_dispatch:
 
 permissions:
