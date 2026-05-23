@@ -24,7 +24,7 @@ Thank you for your interest in contributing. This guide covers everything you ne
 ```
 Developer-Tools-Directory/
   registry.json              # Tool catalog (source of truth)
-  standards/                 # Convention documentation (9 docs)
+  standards/                 # Convention documentation (18 docs)
   scaffold/
     create-tool.py           # Repo generator script
     templates/               # Jinja2 templates for new repos

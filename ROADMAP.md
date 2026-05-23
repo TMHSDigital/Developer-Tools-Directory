@@ -4,10 +4,18 @@
 
 ## Current Status
 
-**v1.6.3** - Patch release. Resolves drafter-body detection and branch-protection residuals from the version-scheme migration. `release.yml` now treats a drafter body of `## What's Changed / * No changes` as empty and falls through to the commit-log fallback. `main` is now protected by a GitHub ruleset (`main protection`) with 7 required status checks including `feat/fix commits require VERSION bump`, squash-merge only, no force pushes, no deletion, empty bypass list. Documentation across AGENTS.md, CLAUDE.md, CONTRIBUTING.md, `.github/workflows/README.md`, and `standards/ci-cd.md` updated to reflect the PR-based workflow.
+**v1.9.5** - Patch release. Removes `paths-ignore` from the meta-repo `release.yml` so content-only changes still gate releases on commit prefix. Companion fix removes `paths-ignore` from the scaffold `release.yml.j2` template so generated repos get the same behavior.
 
 Prior milestones in this line:
 
+- **v1.9.4** - docs: update release-doc-sync header comment to reflect the @v1 / @v1.X floating-tag convention.
+- **v1.9.3** - fix: align scaffold output with current ecosystem patterns (ref #45).
+- **v1.9.2** - fix: release-doc-sync default meta-repo-ref changed to `v1` (floating major tag).
+- **v1.9.1** - fix: stale-counts policy correction; example sections and dialogue lines added to aggregate-scan skip list (DTD#37).
+- **v1.9.0** - CI maintenance. Node 24-compatible GitHub Actions versions, dependabot coverage extended to github-actions ecosystem, Sponsor button and FUNDING.yml, stale-counts DTD#12 skip for AGENTS.md and CLAUDE.md.
+- **v1.8.x** - release-doc-sync composite action (v1.8.0) plus fixes for checkout pollution, workspace cleanup, label-sync self-healing, floating-tag automation in `release.yml`, and version-bump-check parser.
+- **v1.7.x** - drift checker in two phases: Phase 1 (agents-template standard, scaffold updates, workflow docs); Phase 2 (core library, additional checks, CI integration, token separation, exit-code propagation).
+- **v1.6.3** - Drafter-body fix and branch-protection ruleset. `release.yml` treats a drafter body of `## What's Changed / * No changes` as empty. `main protection` ruleset established with 7 required checks.
 - **v1.6.2** - Release-drafter decoupling. Release-drafter no longer computes its own version; change-note aggregation only. Versioning is fully driven by the `VERSION` file and `release.yml`.
 - **v1.6.1** - `VERSION`-file-driven releases. Replaces conventional-commit auto-bump with an authoritative `VERSION` file; `feat:`/`fix:` commits require a VERSION bump enforced by CI.
 - **v1.6.0** - Standards and Governance. Nine new standards docs, registry-to-artifact sync automation, DCO + inbound license grant, scope and lifecycle principles, public-repo safety hardening.
@@ -26,9 +34,12 @@ Prior milestones in this line:
 | v1.6.1 | VERSION-file-driven releases | Released |
 | v1.6.2 | Release-drafter decoupling | Released |
 | v1.6.3 | Drafter-body fix and branch-protection ruleset | Released |
-| v1.7.0 | Sync Everywhere and Agent-File Drift | Planned |
-| v1.8.0 | Observability and Feedback | Planned |
-| v1.9.0 | Standards Versioning | Planned |
+| v1.7.0 | Drift Checker Foundation | Released |
+| v1.7.1 - v1.7.5 | Drift Checker Complete | Released |
+| v1.8.0 | Release Doc Sync | Released |
+| v1.8.1 - v1.8.5 | Release Doc Sync Fixes | Released |
+| v1.9.0 | CI Maintenance | Released |
+| v1.9.1 - v1.9.5 | Scaffold and Pipeline Fixes | Released |
 
 ---
 
@@ -181,38 +192,68 @@ Close the content, automation, and governance gaps identified in the v1.5 audit.
 
 ---
 
-## v1.7.0 - Sync Everywhere and Agent-File Drift
+## v1.7.0 - Drift Checker Foundation
 
-Extend the single-source-of-truth pattern beyond the directory repo.
+Phase 1 of the drift checker project. Established the agents-template standard, updated scaffold templates, and aligned workflow documentation with the branch-protection ruleset.
 
-- Generate `AGENTS.md` and `CLAUDE.md` sections in every tool repo from `registry.json` where they duplicate registry data
-- Add a `standards-version` frontmatter to every tool repo's `AGENTS.md` so the directory can audit compliance
-- Aggregate changelog workflow pulling each tool repo's `CHANGELOG.md` into a weekly digest on the catalog site
-- Cross-tool integration guidance: when to share code, when to duplicate, how to version shared modules
-
----
-
-## v1.8.0 - Observability and Feedback
-
-Empirical signals to drive standards revision.
-
-- Opt-in telemetry spec for MCP tool invocation counts
-- npm download aggregator on the catalog site (public data)
-- `docs/INSIGHTS.md` generated weekly showing top tools/skills by signal
-- CI check flagging skills not invoked in the last 90 days as dormant
-- Feedback loop: standards changes must cite an empirical observation or user report
+- `standards/agents-template.md` added, documenting the required structure for AI agent guidance files in tool repos
+- Scaffold updated to generate compliant `AGENTS.md` from the new template
+- Workflow documentation across `AGENTS.md`, `CLAUDE.md`, and `.github/workflows/README.md` updated to reflect the active `main protection` ruleset
 
 ---
 
-## v1.9.0 - Standards Versioning
+## v1.7.1 - v1.7.5 - Drift Checker Complete
 
-Version the ecosystem itself.
+Phase 2: the drift checker itself. Automated detection of tool-repo policy drift surfaced as GitHub issues.
 
-- Each standards doc gets a `standards-version` header
-- A per-standard changelog
-- Tool repos pin the standards version they claim to meet
-- Directory emits a compliance matrix per tool by standards version
-- Principles doc maintains its own version and changelog
+- `scripts/drift_check/` core library: checks for standards-version signals in `AGENTS.md`, `CLAUDE.md`, skills, and rules files against the meta-repo `VERSION`
+- Additional policy checks: broken standards links, required references, stale aggregate counts in markdown
+- CI integration: runs on push to `main` (when checker code or standards change), weekly on schedule, and on demand via `workflow_dispatch`
+- Token split: `DRIFT_CHECK_TOKEN` for cross-repo sparse-checkout reads, `GITHUB_TOKEN` for issue writes
+- Exit-code propagation fix for the composite action caller
+
+---
+
+## v1.8.0 - Release Doc Sync
+
+Composite action for keeping `CHANGELOG.md`, `CLAUDE.md`, and `ROADMAP.md` in sync after an automated release.
+
+- `.github/actions/release-doc-sync/action.yml` composite action checks out the tool repo, runs the sync script, commits and pushes any drift
+- Designed for use in tool-repo `release.yml` workflows: `uses: TMHSDigital/Developer-Tools-Directory/.github/actions/release-doc-sync@v1`
+- `standards/release-doc-sync.md` documents the contract between the action and calling repos
+
+---
+
+## v1.8.1 - v1.8.5 - Release Doc Sync Fixes
+
+Correctness fixes for the composite action and related CI machinery.
+
+- Checkout pollution: action no longer contaminates the caller's working tree
+- Defensive workspace cleanup added on failure paths
+- Label-sync self-healing: ports the self-healing pattern to the meta-repo `label-sync.yml`
+- Floating-tag automation: `release.yml` now creates and updates `v1` and `v1.X` floating tags on every release
+- Version-bump-check parser: fixed silent pass-all bug affecting PRs with multi-line commit subjects
+
+---
+
+## v1.9.0 - CI Maintenance
+
+Routine maintenance to keep the CI stack current and discoverable.
+
+- GitHub Actions bumped to Node 24-compatible versions across all workflows
+- Dependabot coverage extended to the `github-actions` ecosystem
+- Sponsor button added via `.github/FUNDING.yml`
+- Stale-counts check: `AGENTS.md` and `CLAUDE.md` skipped wholesale by filename regardless of config (DTD#12); aggregate-truth for those files belongs in a per-repo validate-counts job
+
+---
+
+## v1.9.1 - v1.9.5 - Scaffold and Pipeline Fixes
+
+- Stale-counts policy correction: example sections and roleplay dialogue lines excluded from aggregate scanning (DTD#37)
+- release-doc-sync `action.yml` default `meta-repo-ref` corrected to `v1` (floating major tag)
+- Scaffold `release.yml.j2` template: `paths-ignore` removed so content-only changes still gate releases on commit prefix
+- Scaffold output aligned with current ecosystem patterns (ref #45)
+- Meta-repo `release.yml`: `paths-ignore` removed for the same reason as the scaffold fix
 
 ---
 
