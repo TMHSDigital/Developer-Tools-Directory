@@ -16,7 +16,7 @@ Developer Tools Directory is a **meta-repository** that catalogs, standardizes, 
 ```
 Developer-Tools-Directory/
   registry.json              # Source of truth for all tool repos
-  standards/                 # 17 convention docs (structure, CI/CD, testing, MCP, security, licensing, etc.)
+  standards/                 # 18 convention docs (structure, CI/CD, testing, MCP, security, licensing, etc.)
   scaffold/
     create-tool.py           # Python repo generator (Jinja2)
     templates/               # Jinja2 templates for new repos

@@ -9,7 +9,7 @@ This file tells AI coding agents how the Developer Tools Directory repo works an
 This is a **meta-repository** -- it does not contain a Cursor plugin or MCP server itself. It catalogs, standardizes, and scaffolds other TMHSDigital developer tool repos. It contains:
 
 - **`registry.json`** -- single source of truth for all tool repos. README, CLAUDE.md, and the catalog site's embedded registry are generated from it by `scripts/sync_from_registry.py`.
-- **`standards/`** -- 17 Markdown docs defining conventions for folder structure, CI/CD, plugin manifests, GitHub Pages, commits, README format, AGENTS.md format, versioning, testing, skills, rules, MCP servers, security, licensing, scope, lifecycle, and writing style.
+- **`standards/`** -- 18 Markdown docs defining conventions for folder structure, CI/CD, plugin manifests, GitHub Pages, commits, README format, AGENTS.md format, versioning, release-doc-sync, testing, skills, rules, MCP servers, security, licensing, scope, lifecycle, and writing style.
 - **`scaffold/`** -- Python repo generator (`create-tool.py`) with Jinja2 templates that produce a fully standards-compliant new tool repo.
 - **`scripts/`** -- automation utilities. `sync_from_registry.py` regenerates all derived artifacts from `registry.json`.
 - **`site-template/`** -- shared GitHub Pages build system for tool repos. `build_site.py` reads `.cursor-plugin/plugin.json`, `site.json`, `skills/`, `rules/`, and `mcp-tools.json` from a tool repo and renders `docs/index.html` via `template.html.j2`. Self-hosts Inter and JetBrains Mono fonts. Tool repos clone this directory in CI and run the build script at deploy time.
