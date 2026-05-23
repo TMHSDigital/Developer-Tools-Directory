@@ -1,6 +1,6 @@
 # CI/CD Standards
 
-Every developer tool repository must have these four core GitHub Actions workflows. Optional workflows are documented at the end.
+Cursor-plugin repositories must have the four core GitHub Actions workflows listed below. MCP-server repositories require a different set of three; see MCP-server Variations. Optional workflows are documented at the end.
 
 ## Core Workflows
 
@@ -92,11 +92,11 @@ Marks issues and PRs as stale after inactivity and closes them after further ina
 
 ## MCP-server Variations
 
-MCP-server repos follow the same core requirement as cursor-plugin repos, with these adjustments:
+MCP-server repos require three workflows: `drift-check.yml`, `stale.yml`, and `publish.yml`. This is a different set from cursor-plugin repos, not a superset or subset.
 
+- **`validate.yml` is not required**. Every check in `validate.yml` (`plugin.json` validity, manifest fields, skill and rule file existence) assumes a `plugin.json`. MCP-server repos have no `plugin.json`, so `validate.yml` does not apply. CI validation is still expected; use `ci.yml` or an equivalent workflow suited to the server's runtime.
 - **`publish.yml` replaces `release.yml`**. MCP servers release via npm publish (OIDC provenance recommended; see [versioning.md](versioning.md)). A conventional-commit `release.yml` that reads `plugin.json` does not apply.
 - **`pages.yml` is optional**. Include it if the repo has a `docs/` site; omit it otherwise.
-- **Plugin-manifest checks in `validate.yml` may be omitted**. The JSON-validity, manifest-fields, skill-file-existence, and rule-file-existence checks all assume a `plugin.json`. Remove or skip those checks if no `plugin.json` is present. Credential scanning still applies.
 - **`drift-check.yml` and `stale.yml` are required**, same as cursor-plugin repos.
 
 ## Workflow Naming
