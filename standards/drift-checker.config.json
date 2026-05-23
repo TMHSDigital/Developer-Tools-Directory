@@ -6,10 +6,21 @@
   },
   "types": {
     "cursor-plugin": {
-      "skip_checks": []
+      "skip_checks": [],
+      "required_workflows": [
+        "validate.yml",
+        "release.yml",
+        "stale.yml",
+        "drift-check.yml"
+      ]
     },
     "mcp-server": {
-      "skip_checks": ["required-refs"]
+      "skip_checks": ["required-refs"],
+      "required_workflows": [
+        "drift-check.yml",
+        "stale.yml",
+        "publish.yml"
+      ]
     }
   },
   "repos": {

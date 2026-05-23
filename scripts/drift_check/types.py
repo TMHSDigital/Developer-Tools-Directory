@@ -94,6 +94,11 @@ class RepoConfig:
     repo_type: RepoType
     skip_checks: frozenset[str] = frozenset()
     signal_policy: str = "same-major-minor"
+    # Additive-strictness: tiers ADD requirements, never relax them.
+    # This is the opposite safety direction from skip_checks (which accumulates
+    # permissiveness). Do not change to a last-tier-wins override - that would
+    # let a repo-tier entry silently zero out the type-tier requirements.
+    required_workflows: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -109,8 +114,16 @@ class DriftConfig:
 
     def resolve(self, slug: str, repo_type: RepoType) -> RepoConfig:
         """Merge globals -> type -> repo. Later layers override scalars and
-        extend ``skip_checks``."""
+        extend accumulating sets (``skip_checks``, ``required_workflows``).
+
+        Note on required_workflows: the merge is additive-strictness only.
+        Tiers can ADD required workflows but cannot remove them. This is the
+        opposite safety direction from skip_checks (which accumulates
+        permissiveness). A repo tier that lists extra workflows makes the repo
+        stricter, never more lenient.
+        """
         skip: set[str] = set()
+        required_wf: set[str] = set()
         signal_policy = str(self.globals.get("signal_policy", "same-major-minor"))
 
         for tier in (self.globals, self.types.get(repo_type, {}), self.repos.get(slug, {})):
@@ -121,12 +134,16 @@ class DriftConfig:
                 skip.update(str(x) for x in tier_skips)
             if "signal_policy" in tier:
                 signal_policy = str(tier["signal_policy"])
+            wf_list = tier.get("required_workflows", [])
+            if isinstance(wf_list, list):
+                required_wf.update(str(x) for x in wf_list)
 
         return RepoConfig(
             slug=slug,
             repo_type=repo_type,
             skip_checks=frozenset(skip),
             signal_policy=signal_policy,
+            required_workflows=frozenset(required_wf),
         )
 
 
@@ -145,6 +162,10 @@ class RepoSnapshot:
     # this in remote mode via sparse-checkout.
     meta_standards: frozenset[str] = frozenset()
     meta_required_refs: Mapping[str, Mapping[str, Sequence[str]]] = field(default_factory=dict)
+    # Filenames (not paths) of workflow files present under .github/workflows/.
+    # Populated at snapshot time; the required-workflows check reads this.
+    # Default frozenset() so existing snapshot constructions remain valid.
+    present_workflows: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
