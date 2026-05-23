@@ -41,6 +41,7 @@ if __package__ in (None, ""):
     from drift_check.checks import (  # type: ignore
         BrokenRefsCheck,
         RequiredRefsCheck,
+        RequiredWorkflowsCheck,
         StaleCountsCheck,
         VersionSignalCheck,
     )
@@ -63,6 +64,7 @@ else:
     from .checks import (
         BrokenRefsCheck,
         RequiredRefsCheck,
+        RequiredWorkflowsCheck,
         StaleCountsCheck,
         VersionSignalCheck,
     )
@@ -315,6 +317,7 @@ def _run_checks(snapshots: Sequence[RepoSnapshot]) -> List[Finding]:
         VersionSignalCheck(),
         BrokenRefsCheck(),
         RequiredRefsCheck(),
+        RequiredWorkflowsCheck(),
         StaleCountsCheck(),
     )
     for snap in snapshots:

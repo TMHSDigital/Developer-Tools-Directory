@@ -49,6 +49,7 @@ SPARSE_PATHS = (
     "skills",
     "rules",
     ".cursor-plugin",
+    ".github/workflows",  # workflow presence for the required-workflows check
 )
 
 
@@ -89,6 +90,19 @@ def _detect_repo_type(repo_path: Path) -> RepoType:
     if not has_skills and not has_rules and has_claude:
         return "mcp-server"
     return "unknown"
+
+
+def _collect_workflow_names(repo_path: Path) -> frozenset[str]:
+    """Return the set of workflow filenames (not paths) present under
+    ``.github/workflows/``. Only ``.yml`` and ``.yaml`` files count.
+    Missing directory -> empty frozenset (not an error)."""
+    wf_dir = repo_path / ".github" / "workflows"
+    if not wf_dir.is_dir():
+        return frozenset()
+    return frozenset(
+        p.name for p in wf_dir.iterdir()
+        if p.is_file() and p.suffix.lower() in (".yml", ".yaml")
+    )
 
 
 def _collect_paths(repo_path: Path) -> list[Path]:
@@ -159,6 +173,7 @@ def _build_snapshot_from_path(
         config=config.resolve(slug, repo_type),
         meta_standards=meta_standards,
         meta_required_refs=meta_required_refs,
+        present_workflows=_collect_workflow_names(repo_path),
     )
 
 
