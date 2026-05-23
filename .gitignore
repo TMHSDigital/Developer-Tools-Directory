@@ -43,4 +43,5 @@ Thumbs.db
 
 # Scaffold test output
 output/
+_scaffold*/
 /tmp/
