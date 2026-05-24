@@ -181,5 +181,24 @@
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "none",
     "hasCI": true
+  },
+  {
+    "name": "Developer Tools MCP",
+    "repo": "TMHSDigital/Developer-Tools-MCP",
+    "slug": "developer-tools-mcp",
+    "description": "MCP server exposing the TMHSDigital developer-tools ecosystem as agent-callable read tools for fleet status, registry access, and drift detection",
+    "type": "mcp-server",
+    "homepage": "",
+    "skills": 0,
+    "rules": 0,
+    "mcpTools": 4,
+    "extras": {},
+    "topics": ["mcp-server", "developer-tools", "ecosystem", "registry", "typescript"],
+    "status": "experimental",
+    "version": "0.1.0",
+    "language": "TypeScript",
+    "license": "CC-BY-NC-ND-4.0",
+    "pagesType": "none",
+    "hasCI": true
   }
 ]

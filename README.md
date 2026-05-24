@@ -62,6 +62,7 @@ flowchart LR
 | **Monday Cursor Plugin** | Plugin | 21 | 8 | 45 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Monday-Cursor-Plugin) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Monday-Cursor-Plugin/) |
 | **Steam Cursor Plugin** | Plugin | 30 | 9 | 25 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Steam-Cursor-Plugin) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Steam-Cursor-Plugin/) |
 | **Steam MCP Server** | MCP Server | - | - | 25 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/steam-mcp) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/steam-mcp) |
+| **Developer Tools MCP** | MCP Server | - | - | 4 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Developer-Tools-MCP) |
 <!-- registry:tools:end -->
 
 <details>
@@ -81,6 +82,7 @@ flowchart LR
 | **Monday Cursor Plugin** | Cursor IDE plugin for Monday.com with boards, items, sprints, docs, dashboards, and GraphQL |
 | **Steam Cursor Plugin** | Steam and Steamworks integration for Cursor IDE for game developers, modders, and power users |
 | **Steam MCP Server** | MCP server for Steam and Steamworks APIs with store data, player stats, reviews, achievements, and workshop tools |
+| **Developer Tools MCP** | MCP server exposing the TMHSDigital developer-tools ecosystem as agent-callable read tools for fleet status, registry access, and drift detection |
 <!-- registry:descriptions:end -->
 
 </details>
