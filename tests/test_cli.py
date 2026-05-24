@@ -9,11 +9,11 @@ from tests.conftest import FIXTURES
 
 @pytest.fixture
 def meta_repo(tmp_path: Path) -> Path:
-    """Isolated meta-repo for CLI tests. Pins meta VERSION to 1.6.3 so that
+    """Isolated meta-repo for CLI tests. Pins STANDARDS_VERSION to 1.6.3 so that
     the on-disk fixtures (which still carry 1.6.3 signals) read as clean."""
     root = tmp_path / "meta"
     root.mkdir()
-    (root / "VERSION").write_text("1.6.3", encoding="utf-8")
+    (root / "STANDARDS_VERSION").write_text("1.6.3", encoding="utf-8")
     (root / "standards").mkdir()
     (root / "standards" / "required-refs.json").write_text(
         '{"version": 1, "requirements": {"cursor-plugin": {}, "mcp-server": {}}}',

@@ -16,7 +16,7 @@ from tests.conftest import FIXTURES
 def meta_repo(tmp_path: Path) -> Path:
     root = tmp_path / "meta"
     root.mkdir()
-    (root / "VERSION").write_text("1.6.3", encoding="utf-8")
+    (root / "STANDARDS_VERSION").write_text("1.6.3", encoding="utf-8")
     (root / "standards").mkdir()
     (root / "standards" / "required-refs.json").write_text(
         '{"version": 1, "requirements": {"cursor-plugin": {}, "mcp-server": {}}}',
@@ -48,7 +48,7 @@ def test_remote_without_token_errors(capsys, meta_repo: Path, monkeypatch):
 def test_all_without_registry_errors(capsys, tmp_path: Path):
     bare = tmp_path / "bare-meta"
     bare.mkdir()
-    (bare / "VERSION").write_text("1.6.3", encoding="utf-8")
+    (bare / "STANDARDS_VERSION").write_text("1.6.3", encoding="utf-8")
     rc = cli.main([
         "--all",
         "--meta-repo", str(bare),
