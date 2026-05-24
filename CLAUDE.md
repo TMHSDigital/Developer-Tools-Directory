@@ -84,6 +84,7 @@ Static HTML/CSS/JS. No build step. No external CDN. The `pages.yml` workflow cop
 | Steam Cursor Plugin | Plugin | 30 | 9 | 25 |
 | Steam MCP Server | MCP Server | 0 | 0 | 25 |
 | Developer Tools MCP | MCP Server | 0 | 0 | 7 |
+| CFX MCP | MCP Server | 0 | 0 | 0 |
 <!-- registry:tools:end -->
 
 <!-- registry:stats:start -->

@@ -260,5 +260,24 @@
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "static",
     "hasCI": true
+  },
+  {
+    "name": "CFX MCP",
+    "repo": "TMHSDigital/cfx-mcp",
+    "slug": "cfx-mcp",
+    "description": "MCP server providing agent-callable tools for CFX/FiveM resource development, server management, and community platform integration.",
+    "type": "mcp-server",
+    "homepage": "",
+    "skills": 0,
+    "rules": 0,
+    "mcpTools": 0,
+    "extras": {},
+    "topics": [],
+    "status": "experimental",
+    "version": "0.1.0",
+    "language": "TypeScript",
+    "license": "CC-BY-NC-ND-4.0",
+    "pagesType": "none",
+    "hasCI": true
   }
 ]

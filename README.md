@@ -63,6 +63,7 @@ flowchart LR
 | **Steam Cursor Plugin** | Plugin | 30 | 9 | 25 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Steam-Cursor-Plugin) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Steam-Cursor-Plugin/) |
 | **Steam MCP Server** | MCP Server | - | - | 25 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/steam-mcp) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/steam-mcp) |
 | **Developer Tools MCP** | MCP Server | - | - | 7 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Developer-Tools-MCP) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Developer-Tools-MCP/) |
+| **CFX MCP** | MCP Server | - | - | 0 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/cfx-mcp) |
 <!-- registry:tools:end -->
 
 <details>
@@ -83,6 +84,7 @@ flowchart LR
 | **Steam Cursor Plugin** | Steam and Steamworks integration for Cursor IDE for game developers, modders, and power users |
 | **Steam MCP Server** | MCP server for Steam and Steamworks APIs with store data, player stats, reviews, achievements, and workshop tools |
 | **Developer Tools MCP** | MCP server providing agent-callable read and write access to the TMHSDigital developer-tools ecosystem: registry, fleet status, drift checking, and standards management |
+| **CFX MCP** | MCP server providing agent-callable tools for CFX/FiveM resource development, server management, and community platform integration. |
 <!-- registry:descriptions:end -->
 
 </details>
