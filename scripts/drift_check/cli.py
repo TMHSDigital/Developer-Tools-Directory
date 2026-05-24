@@ -86,19 +86,19 @@ DEFAULT_PHASE1_SCRIPTS = Path(r"E:\.TMHS-Tool-Ecosystem-Workspace\phase1-script"
 
 
 def _find_repo_root() -> Path:
-    """Walk up from this file to the repo that contains ``VERSION``."""
+    """Walk up from this file to the repo that contains ``STANDARDS_VERSION``."""
     here = Path(__file__).resolve()
     for candidate in (here.parent, *here.parents):
-        if (candidate / "VERSION").is_file():
+        if (candidate / "STANDARDS_VERSION").is_file():
             return candidate
     return here.parents[2]
 
 
 def _read_meta_version(repo_root: Path) -> Version:
-    raw = (repo_root / "VERSION").read_text(encoding="utf-8").strip()
+    raw = (repo_root / "STANDARDS_VERSION").read_text(encoding="utf-8").strip()
     v = parse_version(raw)
     if v is None:
-        raise SystemExit(f"meta-repo VERSION is not a valid semver: {raw!r}")
+        raise SystemExit(f"meta-repo STANDARDS_VERSION is not a valid semver: {raw!r}")
     return v
 
 
@@ -199,7 +199,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help=(
             "path to the meta-repo root for resolving standards/*.md references "
-            "(defaults to the repo that contains VERSION)"
+            "(defaults to the repo that contains STANDARDS_VERSION)"
         ),
     )
     p.add_argument(
@@ -355,7 +355,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     except SystemExit:
         raise
     except Exception as exc:  # pragma: no cover - defensive
-        print(f"error: cannot read VERSION: {exc}", file=sys.stderr)
+        print(f"error: cannot read STANDARDS_VERSION: {exc}", file=sys.stderr)
         return 2
 
     try:

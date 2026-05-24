@@ -20,7 +20,7 @@ except ImportError:
 
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
-VERSION_FILE = Path(__file__).parent.parent / "VERSION"
+STANDARDS_VERSION_FILE = Path(__file__).parent.parent / "STANDARDS_VERSION"
 
 LICENSE_FILES = {
     "cc-by-nc-nd-4.0": "CC-BY-NC-ND-4.0",
@@ -42,23 +42,23 @@ def slugify(name: str) -> str:
 
 
 def read_standards_version() -> str:
-    """Read the meta-repo VERSION at generation time.
+    """Read the meta-repo STANDARDS_VERSION at generation time.
 
     New tool repos are pre-aligned with the current standards version, so the
-    value here is not a runtime decision. If VERSION is missing or unreadable,
-    fail loudly rather than silently substituting a default - a wrong version
-    would defeat the drift-checker invariant.
+    value here is not a runtime decision. If STANDARDS_VERSION is missing or
+    unreadable, fail loudly rather than silently substituting a default - a
+    wrong version would defeat the drift-checker invariant.
     """
     try:
-        raw = VERSION_FILE.read_text(encoding="utf-8").strip()
+        raw = STANDARDS_VERSION_FILE.read_text(encoding="utf-8").strip()
     except FileNotFoundError:
         print(
-            f"Error: VERSION file not found at {VERSION_FILE}. "
+            f"Error: STANDARDS_VERSION file not found at {STANDARDS_VERSION_FILE}. "
             "The scaffold must run from a working copy of Developer-Tools-Directory."
         )
         sys.exit(1)
     except OSError as e:
-        print(f"Error: could not read {VERSION_FILE}: {e}")
+        print(f"Error: could not read {STANDARDS_VERSION_FILE}: {e}")
         sys.exit(1)
     if not re.fullmatch(r"\d+\.\d+\.\d+", raw):
         print(
