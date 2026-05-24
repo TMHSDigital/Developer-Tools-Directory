@@ -72,12 +72,24 @@ The release workflow auto-generates release notes grouped by commit type:
 
 `CHANGELOG.md` is maintained manually for curated, human-readable release history. It is not auto-generated.
 
-## What a MINOR bump means for ecosystem standards
+## Two version files in the meta-repo
 
-The meta-repo's `VERSION` file carries the ecosystem-wide standards version. It follows the same SemVer rules, but each component has a second, standards-specific meaning for tool repos that embed a `standards-version` signal in their agent files.
+The meta-repo root contains two separate version files that serve distinct purposes and move independently.
 
-- **MAJOR** (e.g., `1.x.y` → `2.0.0`) — an incompatible change to the standards themselves. New required elements, removed fields, or restructured file conventions that existing tool repos will fail to validate against without re-alignment.
-- **MINOR** (e.g., `1.6.x` → `1.7.0`) — ecosystem standards changed in a way that tool repos need to re-align with. Typical triggers: new required elements in agent files, changed frontmatter schemas, new required standards references, restructured validation rules, or new checks in the drift checker that introduce findings for existing tool-repo content. A mechanical rollout session across the tool repos is typically scheduled after a MINOR bump.
-- **PATCH** (e.g., `1.7.0` → `1.7.1`) — bug fixes, clarifications, or additions that do not change the standards surface. Tool repos with a PATCH-behind signal are reported as `info` by the drift checker — visible in verbose runs but not blocking CI.
+### `VERSION` - meta-repo release version
 
-The drift checker enforces this mapping via the `same-major-minor` signal policy (see `standards/drift-checker.config.json`). Tool repos whose `standards-version` differs from the meta-repo's `VERSION` in MAJOR or MINOR are reported as `error`; PATCH differences are `info`; tool values ahead of meta are `warn` (either an in-flight rollout or a missed meta-repo bump, both worth surfacing).
+Tracks the release history of the meta-repo itself (registry additions, scaffold changes, doc updates, new CI workflows). Bumped by `release.yml` on every qualifying push to `main` using the same conventional-commit rules as tool repos. Registry additions (`feat:`) force a MINOR bump here. This number appears in GitHub Releases and the release changelog but has no direct meaning to tool repos.
+
+### `STANDARDS_VERSION` - ecosystem standards surface version
+
+Tracks the version of the standards that tool repos are expected to comply with. Tool repos embed this value in their `<!-- standards-version: X.Y.Z -->` markers in CLAUDE.md, AGENTS.md, and ROADMAP.md. The drift checker compares each tool repo's embedded marker against this file, not against `VERSION`.
+
+`STANDARDS_VERSION` moves **only** when the standards surface actually changes in a way that requires tool repos to update:
+
+- **MAJOR** (e.g., `1.x.y` to `2.0.0`) - an incompatible change to the standards themselves. New required elements, removed fields, or restructured file conventions that existing tool repos will fail to validate against without re-alignment.
+- **MINOR** (e.g., `1.6.x` to `1.7.0`) - standards changed in a way that tool repos need to re-align with. Typical triggers: new required elements in agent files, changed frontmatter schemas, new required standards references, restructured validation rules, or new checks in the drift checker that introduce findings for existing tool-repo content. A fleet-wide re-stamp session is typically scheduled after a MINOR bump.
+- **PATCH** (e.g., `1.7.0` to `1.7.1`) - clarifications or additions that do not change the standards surface. Tool repos with a PATCH-behind marker are reported as `info` by the drift checker - visible in verbose runs but not blocking CI.
+
+Registry-only changes, scaffold improvements, docs additions, and other meta-repo work that does not change what tool repos are required to contain **do not** bump `STANDARDS_VERSION`, even if they bump `VERSION`.
+
+The drift checker enforces this mapping via the `same-major-minor` signal policy (see `standards/drift-checker.config.json`). Tool repos whose `standards-version` marker differs from `STANDARDS_VERSION` in MAJOR or MINOR are reported as `error`; PATCH differences are `info`; tool values ahead of meta are `warn`.
