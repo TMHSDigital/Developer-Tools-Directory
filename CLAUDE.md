@@ -83,11 +83,11 @@ Static HTML/CSS/JS. No build step. No external CDN. The `pages.yml` workflow cop
 | Monday Cursor Plugin | Plugin | 21 | 8 | 45 |
 | Steam Cursor Plugin | Plugin | 30 | 9 | 25 |
 | Steam MCP Server | MCP Server | 0 | 0 | 25 |
-| Developer Tools MCP | MCP Server | 0 | 0 | 4 |
+| Developer Tools MCP | MCP Server | 0 | 0 | 7 |
 <!-- registry:tools:end -->
 
 <!-- registry:stats:start -->
-**Totals:** 177 skills, 71 rules, 371 MCP tools across 9 repos
+**Totals:** 177 skills, 71 rules, 378 MCP tools across 10 repos
 <!-- registry:stats:end -->
 
 ## Development Workflow

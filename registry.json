@@ -15,7 +15,13 @@
       "natives": 12000,
       "events": 101
     },
-    "topics": ["fivem", "redm", "cfx", "lua", "game-development"],
+    "topics": [
+      "fivem",
+      "redm",
+      "cfx",
+      "lua",
+      "game-development"
+    ],
     "status": "active",
     "version": "0.7.2",
     "language": "Python",
@@ -37,7 +43,13 @@
       "snippets": 20,
       "templates": 5
     },
-    "topics": ["unity", "game-development", "csharp", "urp", "hdrp"],
+    "topics": [
+      "unity",
+      "game-development",
+      "csharp",
+      "urp",
+      "hdrp"
+    ],
     "status": "active",
     "version": "1.2.1",
     "language": "Python",
@@ -57,7 +69,13 @@
     "mcpTools": 150,
     "extras": {},
     "npm": "@tmhs/docker-mcp",
-    "topics": ["docker", "containers", "devops", "docker-compose", "dockerfile"],
+    "topics": [
+      "docker",
+      "containers",
+      "devops",
+      "docker-compose",
+      "dockerfile"
+    ],
     "status": "active",
     "version": "1.0.0",
     "language": "Python",
@@ -77,7 +95,13 @@
     "mcpTools": 50,
     "extras": {},
     "npm": "@tmhs/homelab-mcp",
-    "topics": ["homelab", "raspberry-pi", "infrastructure", "docker-compose", "monitoring"],
+    "topics": [
+      "homelab",
+      "raspberry-pi",
+      "infrastructure",
+      "docker-compose",
+      "monitoring"
+    ],
     "status": "active",
     "version": "1.0.0",
     "language": "Python",
@@ -97,7 +121,13 @@
     "mcpTools": 36,
     "extras": {},
     "npm": "@tmhs/mobile-mcp",
-    "topics": ["react-native", "expo", "flutter", "mobile-development", "typescript"],
+    "topics": [
+      "react-native",
+      "expo",
+      "flutter",
+      "mobile-development",
+      "typescript"
+    ],
     "status": "active",
     "version": "1.0.0",
     "language": "TypeScript",
@@ -116,7 +146,13 @@
     "rules": 7,
     "mcpTools": 30,
     "extras": {},
-    "topics": ["plaid", "fintech", "banking", "open-banking", "plaid-api"],
+    "topics": [
+      "plaid",
+      "fintech",
+      "banking",
+      "open-banking",
+      "plaid-api"
+    ],
     "status": "active",
     "version": "1.0.0",
     "language": "Python",
@@ -135,7 +171,13 @@
     "rules": 8,
     "mcpTools": 45,
     "extras": {},
-    "topics": ["monday", "project-management", "graphql", "productivity", "work-management"],
+    "topics": [
+      "monday",
+      "project-management",
+      "graphql",
+      "productivity",
+      "work-management"
+    ],
     "status": "active",
     "version": "1.0.0",
     "language": "TypeScript",
@@ -154,7 +196,13 @@
     "rules": 9,
     "mcpTools": 25,
     "extras": {},
-    "topics": ["steam", "steamworks", "game-development", "modding", "steam-workshop"],
+    "topics": [
+      "steam",
+      "steamworks",
+      "game-development",
+      "modding",
+      "steam-workshop"
+    ],
     "status": "active",
     "version": "1.0.0",
     "language": "TypeScript",
@@ -174,7 +222,13 @@
     "mcpTools": 25,
     "extras": {},
     "npm": "@tmhs/steam-mcp",
-    "topics": ["steam", "mcp-server", "steamworks", "game-development", "npm"],
+    "topics": [
+      "steam",
+      "mcp-server",
+      "steamworks",
+      "game-development",
+      "npm"
+    ],
     "status": "active",
     "version": "1.0.0",
     "language": "TypeScript",
@@ -186,19 +240,25 @@
     "name": "Developer Tools MCP",
     "repo": "TMHSDigital/Developer-Tools-MCP",
     "slug": "developer-tools-mcp",
-    "description": "MCP server exposing the TMHSDigital developer-tools ecosystem as agent-callable read tools for fleet status, registry access, and drift detection",
+    "description": "MCP server providing agent-callable read and write access to the TMHSDigital developer-tools ecosystem: registry, fleet status, drift checking, and standards management",
     "type": "mcp-server",
-    "homepage": "",
+    "homepage": "https://tmhsdigital.github.io/Developer-Tools-MCP/",
     "skills": 0,
     "rules": 0,
-    "mcpTools": 4,
+    "mcpTools": 7,
     "extras": {},
-    "topics": ["mcp-server", "developer-tools", "ecosystem", "registry", "typescript"],
-    "status": "experimental",
-    "version": "0.1.0",
+    "topics": [
+      "mcp-server",
+      "developer-tools",
+      "ecosystem",
+      "registry",
+      "typescript"
+    ],
+    "status": "active",
+    "version": "0.2.0",
     "language": "TypeScript",
     "license": "CC-BY-NC-ND-4.0",
-    "pagesType": "none",
+    "pagesType": "static",
     "hasCI": true
   }
 ]
