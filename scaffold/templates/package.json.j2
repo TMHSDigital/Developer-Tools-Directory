@@ -1,0 +1,21 @@
+{
+  "name": "@{{ repo_owner | lower }}/{{ slug }}",
+  "version": "0.1.0",
+  "description": "{{ description }}",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {"{{ slug }}": "dist/index.js"},
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "echo 'No build target yet'",
+    "test": "echo 'No tests yet' && exit 0",
+    "prepublishOnly": "npm run build"
+  },
+  "author": "{{ author_name }}",
+  "license": "{{ license_spdx }}",
+  "repository": {"type": "git", "url": "git+https://github.com/{{ repo_owner }}/{{ slug }}.git"},
+  "homepage": "https://github.com/{{ repo_owner }}/{{ slug }}#readme",
+  "bugs": {"url": "https://github.com/{{ repo_owner }}/{{ slug }}/issues"},
+  "keywords": ["mcp", "model-context-protocol", "developer-tools"],
+  "engines": {"node": ">=20.0.0"}
+}
