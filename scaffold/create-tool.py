@@ -178,10 +178,16 @@ def main():
     if args.type == "cursor-plugin":
         write_file(output_dir, ".cursor-plugin/plugin.json", render_template(env, "plugin.json.j2", ctx))
 
-    # GitHub workflows
-    write_file(output_dir, ".github/workflows/validate.yml", render_template(env, "validate.yml.j2", ctx))
-    write_file(output_dir, ".github/workflows/release.yml", render_template(env, "release.yml.j2", ctx))
-    write_file(output_dir, ".github/workflows/pages.yml", render_template(env, "pages.yml.j2", ctx))
+    # GitHub workflows — branched by type
+    if args.type == "mcp-server":
+        write_file(output_dir, ".github/workflows/validate.yml", render_template(env, "validate.mcp.yml.j2", ctx))
+        write_file(output_dir, ".github/workflows/release.yml", render_template(env, "release.mcp.yml.j2", ctx))
+        write_file(output_dir, ".github/workflows/pages.yml", render_template(env, "pages.mcp.yml.j2", ctx))
+        write_file(output_dir, ".github/workflows/publish.yml", render_template(env, "publish.yml.j2", ctx))
+    else:
+        write_file(output_dir, ".github/workflows/validate.yml", render_template(env, "validate.yml.j2", ctx))
+        write_file(output_dir, ".github/workflows/release.yml", render_template(env, "release.yml.j2", ctx))
+        write_file(output_dir, ".github/workflows/pages.yml", render_template(env, "pages.yml.j2", ctx))
     write_file(output_dir, ".github/workflows/stale.yml", render_template(env, "stale.yml.j2", ctx))
     write_file(output_dir, ".github/workflows/drift-check.yml", render_template(env, "drift-check.yml.j2", ctx))
     write_file(output_dir, ".github/workflows/label-sync.yml", render_template(env, "label-sync.yml.j2", ctx))
@@ -212,6 +218,11 @@ def main():
     (output_dir / "assets").mkdir(parents=True, exist_ok=True)
     (output_dir / "assets" / ".gitkeep").touch()
     print("  created assets/.gitkeep")
+
+    # MCP server specific files
+    if args.type == "mcp-server":
+        write_file(output_dir, "package.json", render_template(env, "package.json.j2", ctx))
+        write_file(output_dir, "docs/index.html", render_template(env, "docs/index.mcp.html.j2", ctx))
 
     # Skills
     for skill in skill_names:
