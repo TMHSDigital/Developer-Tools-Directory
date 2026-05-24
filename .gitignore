@@ -45,3 +45,6 @@ Thumbs.db
 output/
 _scaffold*/
 /tmp/
+
+# Windows NULL device - appears as untracked on Windows when shells redirect to nul
+nul
