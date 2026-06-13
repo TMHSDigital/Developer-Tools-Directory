@@ -64,11 +64,13 @@ Runs the ecosystem drift checker against the repo's own agent files to detect ve
 **Required configuration:**
 
 ```yaml
-- uses: TMHSDigital/Developer-Tools-Directory/.github/actions/drift-check@v1.9
+- uses: TMHSDigital/Developer-Tools-Directory/.github/actions/drift-check@v<MAJOR>.<MINOR>
   with:
     mode: self
     format: gh-summary
 ```
+
+Pin the action to the meta-repo's current `MAJOR.MINOR` floating tag, never `@main` and never an older hardcoded minor. The scaffold derives this pin from the meta-repo `VERSION` at generation time, so newly created repos are born current; bumping the pin in existing repos is the periodic standards re-stamp's job. The companion `release-doc-sync` action pins to the `MAJOR` train (`@v<MAJOR>`) by the same rule. See [`release-doc-sync.md`](release-doc-sync.md) for that action's pinning convention.
 
 `mode: self` checks only the calling repo's checkout; no cross-repo token is needed. Findings at `info` severity are advisory. Findings at `error` or `warn` severity indicate real drift that should be addressed.
 

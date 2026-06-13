@@ -133,13 +133,16 @@ jobs:
               with open(readme, 'w') as f:
                   f.write(content)
           "
-{% raw %}
       - name: Sync release docs
         if: steps.check.outputs.skip == 'false'
-        uses: TMHSDigital/Developer-Tools-Directory/.github/actions/release-doc-sync@v1
+        uses: TMHSDigital/Developer-Tools-Directory/.github/actions/release-doc-sync@v{{ meta_major }}
         with:
+{% raw %}
           plugin-version: ${{ steps.new.outputs.version }}
           previous-version: ${{ steps.current.outputs.version }}
+{% endraw %}
+          meta-repo-ref: v{{ meta_major }}.{{ meta_minor }}.{{ meta_patch }}
+{% raw %}
 
       - name: Commit version bump
         if: steps.check.outputs.skip == 'false'
