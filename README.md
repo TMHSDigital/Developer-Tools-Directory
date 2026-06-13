@@ -31,7 +31,7 @@
 
 <!-- registry:stats:start -->
 <p align="center">
- 10 repos &nbsp;&bull;&nbsp; 177 skills &nbsp;&bull;&nbsp; 71 rules &nbsp;&bull;&nbsp; 378 MCP tools
+ 11 repos &nbsp;&bull;&nbsp; 189 skills &nbsp;&bull;&nbsp; 77 rules &nbsp;&bull;&nbsp; 378 MCP tools
 </p>
 <!-- registry:stats:end -->
 
@@ -64,6 +64,7 @@ flowchart LR
 | **Steam MCP Server** | MCP Server | - | - | 25 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/steam-mcp) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/steam-mcp) |
 | **Developer Tools MCP** | MCP Server | - | - | 7 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Developer-Tools-MCP) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Developer-Tools-MCP/) |
 | **CFX MCP** | MCP Server | - | - | 0 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/cfx-mcp) |
+| **Blender Developer Tools** | Plugin | 12 | 6 | 0 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Blender-Developer-Tools) |
 <!-- registry:tools:end -->
 
 <details>
@@ -85,6 +86,7 @@ flowchart LR
 | **Steam MCP Server** | MCP server for Steam and Steamworks APIs with store data, player stats, reviews, achievements, and workshop tools |
 | **Developer Tools MCP** | MCP server providing agent-callable read and write access to the TMHSDigital developer-tools ecosystem: registry, fleet status, drift checking, and standards management |
 | **CFX MCP** | MCP server providing agent-callable tools for CFX/FiveM resource development, server management, and community platform integration. |
+| **Blender Developer Tools** | Cursor and Claude Code skills, rules, snippets, and templates for Blender Python add-on and scripting development |
 <!-- registry:descriptions:end -->
 
 </details>

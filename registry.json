@@ -279,5 +279,33 @@
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "none",
     "hasCI": true
+  },
+  {
+    "name": "Blender Developer Tools",
+    "repo": "TMHSDigital/Blender-Developer-Tools",
+    "slug": "blender-developer-tools",
+    "description": "Cursor and Claude Code skills, rules, snippets, and templates for Blender Python add-on and scripting development",
+    "type": "cursor-plugin",
+    "homepage": "",
+    "skills": 12,
+    "rules": 6,
+    "mcpTools": 0,
+    "extras": {
+      "snippets": 17,
+      "templates": 2
+    },
+    "topics": [
+      "blender",
+      "python",
+      "bpy",
+      "3d",
+      "addon-development"
+    ],
+    "status": "active",
+    "version": "0.2.3",
+    "language": "Python",
+    "license": "CC-BY-NC-ND-4.0",
+    "pagesType": "none",
+    "hasCI": true
   }
 ]

@@ -85,10 +85,11 @@ Static HTML/CSS/JS. No build step. No external CDN. The `pages.yml` workflow cop
 | Steam MCP Server | MCP Server | 0 | 0 | 25 |
 | Developer Tools MCP | MCP Server | 0 | 0 | 7 |
 | CFX MCP | MCP Server | 0 | 0 | 0 |
+| Blender Developer Tools | Plugin | 12 | 6 | 0 |
 <!-- registry:tools:end -->
 
 <!-- registry:stats:start -->
-**Totals:** 177 skills, 71 rules, 378 MCP tools across 10 repos
+**Totals:** 189 skills, 77 rules, 378 MCP tools across 11 repos
 <!-- registry:stats:end -->
 
 ## Development Workflow
