@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -673,12 +674,17 @@ class TestCompositeAction:
         ):
             assert key in outputs, f"missing output: {key}"
 
-    def test_meta_repo_ref_default_is_v1_0(self, action_doc):
-        """The pinning convention from DTD#5 is that tool repos consume
-        @v1.0 (matching drift-check@v1.7's pattern of major-floating tags).
-        Defending the default keeps tool-repo PRs from accidentally
-        consuming @main."""
-        assert action_doc["inputs"]["meta-repo-ref"]["default"] == "v1.0"
+    def test_meta_repo_ref_default_is_floating_major(self, action_doc):
+        """DTD#14: the meta-repo-ref default must be a floating MAJOR tag
+        (v1, v2, ...), never a hardcoded MINOR (v1.0) or PATCH. The major
+        train is auto-maintained by release.yml on every release, so a
+        consumer that does not override the input tracks the latest patch
+        instead of pinning to whatever minor was current when the action
+        last shipped. Defending the default keeps tool-repo PRs from
+        accidentally consuming @main or a stale minor."""
+        assert re.fullmatch(
+            r"v\d+", action_doc["inputs"]["meta-repo-ref"]["default"]
+        ), "meta-repo-ref default must be a floating major tag (v1, v2, ...)"
 
     def test_steps_follow_drift_check_pattern(self, action_doc):
         """Composite must check out the meta-repo at the pinned ref into a

@@ -21,6 +21,7 @@ except ImportError:
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 STANDARDS_VERSION_FILE = Path(__file__).parent.parent / "STANDARDS_VERSION"
+VERSION_FILE = Path(__file__).parent.parent / "VERSION"
 
 LICENSE_FILES = {
     "cc-by-nc-nd-4.0": "CC-BY-NC-ND-4.0",
@@ -67,6 +68,36 @@ def read_standards_version() -> str:
         )
         sys.exit(1)
     return raw
+
+
+def read_meta_version() -> tuple[int, int, int]:
+    """Read the meta-repo VERSION at generation time, split into (major, minor, patch).
+
+    Workflow action pins in generated repos are DERIVED from this so a repo
+    scaffolded after any future meta release is born current instead of stale.
+    Hardcoding today's number in the templates only moves staleness forward one
+    release; deriving from the live VERSION removes it. If VERSION is missing or
+    malformed, fail loudly rather than emit a wrong pin.
+    """
+    try:
+        raw = VERSION_FILE.read_text(encoding="utf-8").strip()
+    except FileNotFoundError:
+        print(
+            f"Error: VERSION file not found at {VERSION_FILE}. "
+            "The scaffold must run from a working copy of Developer-Tools-Directory."
+        )
+        sys.exit(1)
+    except OSError as e:
+        print(f"Error: could not read {VERSION_FILE}: {e}")
+        sys.exit(1)
+    m = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", raw)
+    if not m:
+        print(
+            f"Error: VERSION contents '{raw}' are not a valid X.Y.Z semver string. "
+            "Refusing to derive workflow action pins from a malformed value."
+        )
+        sys.exit(1)
+    return int(m.group(1)), int(m.group(2)), int(m.group(3))
 
 
 def parse_args():
@@ -152,6 +183,7 @@ def main():
     rule_names = [f"rule-{i + 1}" for i in range(args.rules)]
 
     standards_version = read_standards_version()
+    meta_major, meta_minor, meta_patch = read_meta_version()
 
     ctx = {
         "name": args.name,
@@ -170,6 +202,10 @@ def main():
         "repo_owner": "TMHSDigital",
         "repo_name": slug,
         "standards_version": standards_version,
+        "meta_major": meta_major,
+        "meta_minor": meta_minor,
+        "meta_patch": meta_patch,
+        "meta_version": f"{meta_major}.{meta_minor}.{meta_patch}",
     }
 
     print(f"\nScaffolding '{args.name}' ({slug}) into {output_dir}\n")

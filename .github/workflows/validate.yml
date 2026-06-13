@@ -153,17 +153,27 @@ jobs:
 
       - name: Scaffold regression checks for DTD#41 patterns
         run: |
+          # Meta action pins are DERIVED from the meta VERSION at generation
+          # time, so assert against the derived train rather than a hardcoded
+          # literal (which would itself go stale on the next meta release).
+          VERSION=$(cat VERSION)
+          IFS='.' read -r META_MAJOR META_MINOR META_PATCH <<< "$VERSION"
+
           # validate-counts job present
           grep -q 'validate-counts' /tmp/scaffold-test/ci-test-plugin/.github/workflows/validate.yml \
             || { echo "::error::validate.yml missing validate-counts job"; exit 1; }
 
-          # drift-check pinned to @v1.9
-          grep -q 'drift-check@v1.9' /tmp/scaffold-test/ci-test-plugin/.github/workflows/drift-check.yml \
-            || { echo "::error::drift-check.yml not pinned to @v1.9"; exit 1; }
+          # drift-check pinned to @vMAJOR.MINOR (derived from meta VERSION)
+          grep -q "drift-check@v${META_MAJOR}.${META_MINOR}" /tmp/scaffold-test/ci-test-plugin/.github/workflows/drift-check.yml \
+            || { echo "::error::drift-check.yml not pinned to derived @v${META_MAJOR}.${META_MINOR}"; exit 1; }
 
-          # release.yml consumes release-doc-sync@v1
-          grep -q 'release-doc-sync@v1' /tmp/scaffold-test/ci-test-plugin/.github/workflows/release.yml \
-            || { echo "::error::release.yml does not consume release-doc-sync@v1"; exit 1; }
+          # release.yml consumes release-doc-sync@vMAJOR (derived from meta VERSION)
+          grep -q "release-doc-sync@v${META_MAJOR}" /tmp/scaffold-test/ci-test-plugin/.github/workflows/release.yml \
+            || { echo "::error::release.yml does not consume derived release-doc-sync@v${META_MAJOR}"; exit 1; }
+
+          # release.yml pins release-doc-sync meta-repo-ref to the full meta release tag
+          grep -q "meta-repo-ref: v${META_MAJOR}.${META_MINOR}.${META_PATCH}" /tmp/scaffold-test/ci-test-plugin/.github/workflows/release.yml \
+            || { echo "::error::release.yml meta-repo-ref not pinned to derived v${META_MAJOR}.${META_MINOR}.${META_PATCH}"; exit 1; }
 
           # release.yml has the initial-release version-handling branch
           grep -q 'Initial release' /tmp/scaffold-test/ci-test-plugin/.github/workflows/release.yml \
