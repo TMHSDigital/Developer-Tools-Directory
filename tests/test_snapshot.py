@@ -25,7 +25,10 @@ def test_clean_repo_full_snapshot():
         assert fs.signal.version is not None
 
 
-def test_mcp_repo_only_claude():
+def test_mcp_repo_detected_by_package_json():
+    # mcp-server is detected by its positive manifest marker (package.json),
+    # not by the absence of skills/rules. package.json is not one of the
+    # snapshotted agent files, so snap.files still contains only CLAUDE.md.
     snap = build_local_snapshot(FIXTURES / "mcp_repo", META, "HEAD", DEFAULT_CFG)
     assert snap.repo_type == "mcp-server"
     assert len(snap.files) == 1

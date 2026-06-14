@@ -48,7 +48,8 @@ SPARSE_PATHS = (
     "CLAUDE.md",
     "skills",
     "rules",
-    ".cursor-plugin",
+    ".cursor-plugin",  # plugin.json -> cursor-plugin positive marker
+    "package.json",  # mcp-server positive marker (see _detect_repo_type)
     ".github/workflows",  # workflow presence for the required-workflows check
 )
 
@@ -76,18 +77,31 @@ def list_meta_standards(meta_repo_path: Path) -> frozenset[str]:
 
 
 def _detect_repo_type(repo_path: Path) -> RepoType:
-    """Per the design doc's detection rules:
+    """Detect repo type from POSITIVE per-type manifest markers only.
+
+    Each type is keyed on a manifest file the scaffold always writes for
+    that type, never on incidental directory presence:
 
     * ``.cursor-plugin/plugin.json`` present -> ``cursor-plugin``
-    * no skills/ or rules/ directories but CLAUDE.md present -> ``mcp-server``
+    * else ``package.json`` present -> ``mcp-server`` (the mcp-server's own
+      manifest and version source of truth; ``publish.yml`` reads it)
     * otherwise -> ``unknown``
+
+    The order matters: a cursor-plugin that also ships a ``package.json``
+    (build tooling, an MCP companion) is still a cursor-plugin because its
+    ``plugin.json`` is checked first.
+
+    History (DTD, PR #74 follow-up): detection previously inferred
+    mcp-server from the ABSENCE of ``skills/`` and ``rules/`` plus a
+    ``CLAUDE.md`` (which both types carry). That negative heuristic
+    silently reclassified an mcp-server rendered WITH ``skills/`` as
+    ``unknown``, dropping required-workflow enforcement. Keying on a
+    positive manifest marker removes that fragility: an mcp-server is an
+    mcp-server regardless of which optional directories it happens to have.
     """
     if (repo_path / ".cursor-plugin" / "plugin.json").is_file():
         return "cursor-plugin"
-    has_skills = (repo_path / "skills").is_dir()
-    has_rules = (repo_path / "rules").is_dir()
-    has_claude = (repo_path / "CLAUDE.md").is_file()
-    if not has_skills and not has_rules and has_claude:
+    if (repo_path / "package.json").is_file():
         return "mcp-server"
     return "unknown"
 

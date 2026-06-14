@@ -15,6 +15,7 @@ Standards and conventions for building Cursor IDE plugins, MCP servers, and deve
 | [AGENTS.md Template](agents-template.md) | AI agent guidance file structure |
 | [Versioning](versioning.md) | Semver management and release flow |
 | [Release-doc-sync](release-doc-sync.md) | Composite action contract for keeping CHANGELOG, CLAUDE, and ROADMAP in sync after auto-release |
+| [Born-Green Contract](born-green-contract.md) | Acceptance criterion every repo generator must satisfy (positive-marker type, exact workflows, empty drift, current pins, consistent counts, registered in catalog) |
 | [Testing](testing.md) | Test frameworks, minimum coverage bar, CI wiring |
 | [Skills](skills.md) | `SKILL.md` structure, frontmatter, and conventions |
 | [Rules](rules.md) | `.mdc` structure, globs, and the secrets rule pattern |

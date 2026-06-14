@@ -1,104 +1,36 @@
 #!/usr/bin/env python3
 """
-Scaffold generator for TMHSDigital developer tool repositories.
+Scaffold generator CLI for TMHSDigital developer tool repositories.
+
+Thin command-line wrapper over the canonical generation library in
+``scaffold/generator.py``. Both this CLI and any second generator delegate to
+``generator.generate_repo`` so there is one source of truth for what a
+born-green repo looks like (see ``standards/born-green-contract.md``).
 
 Generates a fully standards-compliant repository with all required files,
-workflows, manifests, and documentation skeleton.
+workflows, manifests, and documentation skeleton, and (by default) registers
+it in the meta catalog so a repo cannot be born outside the registry.
 """
-
 import argparse
-import datetime
-import os
-import re
 import sys
 from pathlib import Path
 
+# When run as `python scaffold/create-tool.py`, sys.path[0] is the scaffold dir,
+# so a plain `import generator` resolves. When imported as part of the package,
+# fall back to the qualified path.
 try:
-    from jinja2 import Environment, FileSystemLoader
-except ImportError:
-    print("Error: Jinja2 is required. Install it with: pip install Jinja2")
-    sys.exit(1)
-
-
-TEMPLATES_DIR = Path(__file__).parent / "templates"
-STANDARDS_VERSION_FILE = Path(__file__).parent.parent / "STANDARDS_VERSION"
-VERSION_FILE = Path(__file__).parent.parent / "VERSION"
-
-LICENSE_FILES = {
-    "cc-by-nc-nd-4.0": "CC-BY-NC-ND-4.0",
-    "mit": "MIT",
-    "apache-2.0": "Apache-2.0",
-}
-
-SPDX = {
-    "cc-by-nc-nd-4.0": "CC-BY-NC-ND-4.0",
-    "mit": "MIT",
-    "apache-2.0": "Apache-2.0",
-}
-
-
-def slugify(name: str) -> str:
-    slug = name.lower().strip()
-    slug = re.sub(r"[^a-z0-9]+", "-", slug)
-    return slug.strip("-")
-
-
-def read_standards_version() -> str:
-    """Read the meta-repo STANDARDS_VERSION at generation time.
-
-    New tool repos are pre-aligned with the current standards version, so the
-    value here is not a runtime decision. If STANDARDS_VERSION is missing or
-    unreadable, fail loudly rather than silently substituting a default - a
-    wrong version would defeat the drift-checker invariant.
-    """
-    try:
-        raw = STANDARDS_VERSION_FILE.read_text(encoding="utf-8").strip()
-    except FileNotFoundError:
-        print(
-            f"Error: STANDARDS_VERSION file not found at {STANDARDS_VERSION_FILE}. "
-            "The scaffold must run from a working copy of Developer-Tools-Directory."
-        )
-        sys.exit(1)
-    except OSError as e:
-        print(f"Error: could not read {STANDARDS_VERSION_FILE}: {e}")
-        sys.exit(1)
-    if not re.fullmatch(r"\d+\.\d+\.\d+", raw):
-        print(
-            f"Error: VERSION contents '{raw}' are not a valid X.Y.Z semver string. "
-            "Refusing to emit a standards-version marker with a malformed value."
-        )
-        sys.exit(1)
-    return raw
-
-
-def read_meta_version() -> tuple[int, int, int]:
-    """Read the meta-repo VERSION at generation time, split into (major, minor, patch).
-
-    Workflow action pins in generated repos are DERIVED from this so a repo
-    scaffolded after any future meta release is born current instead of stale.
-    Hardcoding today's number in the templates only moves staleness forward one
-    release; deriving from the live VERSION removes it. If VERSION is missing or
-    malformed, fail loudly rather than emit a wrong pin.
-    """
-    try:
-        raw = VERSION_FILE.read_text(encoding="utf-8").strip()
-    except FileNotFoundError:
-        print(
-            f"Error: VERSION file not found at {VERSION_FILE}. "
-            "The scaffold must run from a working copy of Developer-Tools-Directory."
-        )
-        sys.exit(1)
-    except OSError as e:
-        print(f"Error: could not read {VERSION_FILE}: {e}")
-        sys.exit(1)
-    m = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", raw)
-    if not m:
-        print(
-            f"Error: VERSION contents '{raw}' are not a valid X.Y.Z semver string. "
-            "Refusing to derive workflow action pins from a malformed value."
-        )
-        sys.exit(1)
-    return int(m.group(1)), int(m.group(2)), int(m.group(3))
+    from generator import (
+        LICENSE_FILES,
+        ScaffoldError,
+        generate_repo,
+    )
+except ImportError:  # pragma: no cover - package-context fallback
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from generator import (  # type: ignore
+        LICENSE_FILES,
+        ScaffoldError,
+        generate_repo,
+    )
 
 
 def parse_args():
@@ -110,6 +42,7 @@ Examples:
   python create-tool.py --name "Unreal Developer Tools" --description "Cursor plugin for Unreal Engine"
   python create-tool.py --name "AWS MCP Server" --type mcp-server --mcp-server
   python create-tool.py --name "K8s Developer Tools" --mcp-server --skills 5 --rules 3
+  python create-tool.py --name "Throwaway" --description test --no-register
         """,
     )
     parser.add_argument("--name", required=True, help="Display name (e.g., 'Unreal Developer Tools')")
@@ -145,199 +78,61 @@ Examples:
         default="contact@users.noreply.github.com",
         help="Author email for plugin.json (default: GitHub no-reply placeholder)",
     )
+    parser.add_argument(
+        "--no-register",
+        action="store_true",
+        help=(
+            "Do NOT add the repo to registry.json. By default the scaffold "
+            "registers every generated repo so none is born outside the catalog. "
+            "Use this for throwaway/test generation only."
+        ),
+    )
+    parser.add_argument(
+        "--registry-root",
+        default=None,
+        help=(
+            "Override the directory whose registry.json (and derived artifacts) "
+            "registration targets. Defaults to the meta-repo root."
+        ),
+    )
     return parser.parse_args()
 
 
-def render_template(env, template_name: str, context: dict) -> str:
-    tmpl = env.get_template(template_name)
-    return tmpl.render(**context)
-
-
-def write_file(base: Path, rel_path: str, content: str):
-    full = base / rel_path
-    full.parent.mkdir(parents=True, exist_ok=True)
-    full.write_text(content, encoding="utf-8")
-    print(f"  created {rel_path}")
-
-
-def main():
+def main() -> int:
     args = parse_args()
-
-    slug = args.slug or slugify(args.name)
-    if not re.match(r"^[a-z0-9]+(-[a-z0-9]+)*$", slug):
-        print(f"Error: slug '{slug}' is not valid kebab-case")
-        sys.exit(1)
-
-    output_dir = Path(args.output) / slug
-    if output_dir.exists():
-        print(f"Error: output directory already exists: {output_dir}")
-        sys.exit(1)
-
-    env = Environment(
-        loader=FileSystemLoader(str(TEMPLATES_DIR)),
-        keep_trailing_newline=True,
-        lstrip_blocks=True,
-        trim_blocks=True,
-    )
-
-    skill_names = [f"skill-{i + 1}" for i in range(args.skills)]
-    rule_names = [f"rule-{i + 1}" for i in range(args.rules)]
-
-    standards_version = read_standards_version()
-    meta_major, meta_minor, meta_patch = read_meta_version()
-
-    ctx = {
-        "name": args.name,
-        "slug": slug,
-        "description": args.description,
-        "type": args.type,
-        "has_mcp": args.mcp_server,
-        "skills": skill_names,
-        "rules": rule_names,
-        "skill_count": args.skills,
-        "rule_count": args.rules,
-        "license_spdx": SPDX[args.license],
-        "license_key": args.license,
-        "author_name": args.author_name,
-        "author_email": args.author_email,
-        "repo_owner": "TMHSDigital",
-        "repo_name": slug,
-        "standards_version": standards_version,
-        "meta_major": meta_major,
-        "meta_minor": meta_minor,
-        "meta_patch": meta_patch,
-        "meta_version": f"{meta_major}.{meta_minor}.{meta_patch}",
-        "year": datetime.datetime.now(datetime.timezone.utc).year,
-    }
-
-    print(f"\nScaffolding '{args.name}' ({slug}) into {output_dir}\n")
-
-    # Plugin manifest
-    if args.type == "cursor-plugin":
-        write_file(output_dir, ".cursor-plugin/plugin.json", render_template(env, "plugin.json.j2", ctx))
-
-    # GitHub workflows - emitted set is type-specific and must match the
-    # per-type required_workflows in standards/drift-checker.config.json plus
-    # the two optional-for-both workflows (pages, label-sync). Do NOT emit
-    # cursor-plugin-specific workflows for mcp-server repos: validate.yml's
-    # checks all assume a plugin.json and publish.yml replaces release.yml
-    # (see standards/ci-cd.md "MCP-server Variations").
-    if args.type == "mcp-server":
-        # Required for mcp-server: drift-check, stale, publish.
-        write_file(output_dir, ".github/workflows/publish.yml", render_template(env, "publish.yml.j2", ctx))
-        # Optional-for-both: pages (mcp variant), label-sync.
-        write_file(output_dir, ".github/workflows/pages.yml", render_template(env, "pages.mcp.yml.j2", ctx))
-    else:
-        # Required for cursor-plugin: validate, release, stale, drift-check.
-        write_file(output_dir, ".github/workflows/validate.yml", render_template(env, "validate.yml.j2", ctx))
-        write_file(output_dir, ".github/workflows/release.yml", render_template(env, "release.yml.j2", ctx))
-        # Optional-for-both: pages, label-sync.
-        write_file(output_dir, ".github/workflows/pages.yml", render_template(env, "pages.yml.j2", ctx))
-    write_file(output_dir, ".github/workflows/stale.yml", render_template(env, "stale.yml.j2", ctx))
-    write_file(output_dir, ".github/workflows/drift-check.yml", render_template(env, "drift-check.yml.j2", ctx))
-    write_file(output_dir, ".github/workflows/label-sync.yml", render_template(env, "label-sync.yml.j2", ctx))
-
-    # Dependabot config (github-actions ecosystem standard, optional pip for MCP)
-    write_file(output_dir, ".github/dependabot.yml", render_template(env, "dependabot.yml.j2", ctx))
-
-    # Documentation files
-    write_file(output_dir, "README.md", render_template(env, "README.md.j2", ctx))
-    write_file(output_dir, "AGENTS.md", render_template(env, "AGENTS.md.j2", ctx))
-    write_file(output_dir, "CLAUDE.md", render_template(env, "CLAUDE.md.j2", ctx))
-    write_file(output_dir, "CONTRIBUTING.md", render_template(env, "CONTRIBUTING.md.j2", ctx))
-    write_file(output_dir, "CHANGELOG.md", render_template(env, "CHANGELOG.md.j2", ctx))
-    write_file(output_dir, "CODE_OF_CONDUCT.md", render_template(env, "CODE_OF_CONDUCT.md.j2", ctx))
-    write_file(output_dir, "SECURITY.md", render_template(env, "SECURITY.md.j2", ctx))
-    write_file(output_dir, "ROADMAP.md", render_template(env, "ROADMAP.md.j2", ctx))
-    write_file(output_dir, "LICENSE", render_template(env, "LICENSE.j2", ctx))
-
-    # Cursor config
-    write_file(output_dir, ".cursorrules", render_template(env, "cursorrules.j2", ctx))
-    write_file(output_dir, ".gitignore", render_template(env, "gitignore.j2", ctx))
-
-    # GitHub Pages data files
-    write_file(output_dir, "site.json", render_template(env, "site.json.j2", ctx))
-    write_file(output_dir, "mcp-tools.json", render_template(env, "mcp-tools.json.j2", ctx))
-
-    # Assets placeholder
-    (output_dir / "assets").mkdir(parents=True, exist_ok=True)
-    (output_dir / "assets" / ".gitkeep").touch()
-    print("  created assets/.gitkeep")
-
-    # MCP server specific files
-    if args.type == "mcp-server":
-        write_file(output_dir, "package.json", render_template(env, "package.json.j2", ctx))
-        write_file(output_dir, "docs/index.html", render_template(env, "docs/index.mcp.html.j2", ctx))
-
-    # Skills
-    for skill in skill_names:
-        skill_content = f"""---
-name: {skill}
-description: TODO - describe this skill
-globs: ["**/*"]
-alwaysApply: false
-standards-version: {standards_version}
----
-
-# {skill.replace('-', ' ').title()}
-
-TODO: Add skill content here.
-"""
-        write_file(output_dir, f"skills/{skill}/SKILL.md", skill_content)
-
-    # Rules
-    for rule in rule_names:
-        rule_content = f"""---
-description: TODO - describe this rule
-globs: ["**/*"]
-alwaysApply: false
-standards-version: {standards_version}
----
-
-# {rule.replace('-', ' ').title()}
-
-TODO: Add rule content here.
-"""
-        write_file(output_dir, f"rules/{rule}.mdc", rule_content)
-
-    # Tests placeholder
-    (output_dir / "tests").mkdir(parents=True, exist_ok=True)
-    (output_dir / "tests" / ".gitkeep").touch()
-    print("  created tests/.gitkeep")
-
-    # MCP server scaffold
-    if args.mcp_server:
-        write_file(
-            output_dir,
-            "mcp-server/server.py",
-            render_template(env, "mcp-server/server.py.j2", ctx),
+    try:
+        output_dir = generate_repo(
+            name=args.name,
+            description=args.description,
+            slug=args.slug,
+            repo_type=args.type,
+            mcp_server=args.mcp_server,
+            skills=args.skills,
+            rules=args.rules,
+            license_key=args.license,
+            output=args.output,
+            author_name=args.author_name,
+            author_email=args.author_email,
+            register=not args.no_register,
+            registry_root=Path(args.registry_root) if args.registry_root else None,
         )
-        write_file(
-            output_dir,
-            "mcp-server/requirements.txt",
-            render_template(env, "mcp-server/requirements.txt.j2", ctx),
-        )
-        (output_dir / "mcp-server" / "tools").mkdir(parents=True, exist_ok=True)
-        (output_dir / "mcp-server" / "tools" / ".gitkeep").touch()
-        print("  created mcp-server/tools/.gitkeep")
-        (output_dir / "mcp-server" / "data").mkdir(parents=True, exist_ok=True)
-        (output_dir / "mcp-server" / "data" / ".gitkeep").touch()
-        print("  created mcp-server/data/.gitkeep")
+    except ScaffoldError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
 
-        write_file(
-            output_dir,
-            ".cursor/mcp.json",
-            render_template(env, "mcp-server/mcp.json.j2", ctx),
-        )
-
+    slug = output_dir.name
     print(f"\nDone! Repository scaffolded at: {output_dir}")
-    print(f"\nNext steps:")
+    print("\nNext steps:")
     print(f"  1. cd {output_dir}")
-    print(f"  2. git init && git add -A && git commit -m 'feat: initial scaffold'")
+    print("  2. git init && git add -A && git commit -m 'feat: initial scaffold'")
     print(f"  3. Create GitHub repo: gh repo create TMHSDigital/{slug} --public --source .")
-    print(f"  4. Enable GitHub Pages in Settings > Pages > Source: GitHub Actions")
-    print(f"  5. Start adding skills, rules, and MCP tools!")
+    print("  4. Enable GitHub Pages in Settings > Pages > Source: GitHub Actions")
+    if args.no_register:
+        print("  5. Register in the catalog: add an entry to registry.json and run sync_from_registry.py")
+    else:
+        print("  5. Catalog entry added; commit registry.json and the regenerated artifacts")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
