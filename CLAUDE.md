@@ -47,7 +47,9 @@ Developer-Tools-Directory/
 
 ### registry.json
 
-Array of tool objects. Each entry has: `name`, `repo`, `slug`, `description`, `type` (cursor-plugin | mcp-server), `homepage`, `skills`, `rules`, `mcpTools`, `extras`, `topics`, `status`, `version`, `language`, `license`, `pagesType`, `hasCI`. `status` is one of `experimental`, `beta`, `active`, `maintenance`, `deprecated`, or `archived` (see [`standards/lifecycle.md`](standards/lifecycle.md)).
+Array of tool objects. Each entry has: `name`, `repo`, `slug`, `description`, `type` (cursor-plugin | mcp-server), `homepage`, `skills`, `rules`, `mcpTools`, `extras`, `topics`, `status`, `language`, `license`, `pagesType`, `hasCI`. `status` is one of `experimental`, `beta`, `active`, `maintenance`, `deprecated`, or `archived` (see [`standards/lifecycle.md`](standards/lifecycle.md)).
+
+There is intentionally no per-tool `version` field. Tool repos auto-bump patch on every content merge, so a catalog-pinned patch version re-stales on each tool's next content PR; the catalog tracks tools by repo and homepage instead. Do not reintroduce it.
 
 When updating, run `python scripts/sync_from_registry.py` to regenerate every derived artifact. The `sync-check` CI job blocks PRs that drift.
 

@@ -39,7 +39,6 @@ jobs:
             "extras": dict,
             "topics": list,
             "status": str,
-            "version": str,
             "language": str,
             "license": str,
             "pagesType": str,
