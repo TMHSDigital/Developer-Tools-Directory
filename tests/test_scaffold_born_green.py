@@ -59,6 +59,15 @@ REQUIRED_REFS_PATH = REPO_ROOT / "standards" / "required-refs.json"
 
 OPTIONAL_FOR_BOTH = frozenset({"label-sync.yml", "pages.yml"})
 
+# Workflows a type emits beyond its drift-required set and the
+# optional-for-both pair. mcp-server repos emit a build/test CI and an
+# auto-release workflow; these are intentionally NOT drift-required (a sibling
+# that lacks them must not go red), so they live here rather than in
+# drift-checker.config.json.
+EMITTED_EXTRA: dict[str, frozenset[str]] = {
+    "mcp-server": frozenset({"ci.yml", "release.yml"}),
+}
+
 # Each case is a distinct render. ``type`` is the intended repo type, ``args``
 # are extra CLI flags, ``detect`` is the type _detect_repo_type MUST return.
 # The "*-with-skills" / "*-empty" variants are the regression guards:
@@ -286,7 +295,11 @@ def test_emitted_workflow_set_exact(rendered, label):
         for p in (repo / ".github" / "workflows").iterdir()
         if p.suffix in (".yml", ".yaml")
     )
-    expected = _required_workflows(repo_type) | OPTIONAL_FOR_BOTH
+    expected = (
+        _required_workflows(repo_type)
+        | OPTIONAL_FOR_BOTH
+        | EMITTED_EXTRA.get(repo_type, frozenset())
+    )
     assert present == expected, (
         f"{label} emitted workflows {sorted(present)} != expected "
         f"{sorted(expected)} (required for {repo_type} union optional-for-both)"

@@ -20,5 +20,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - MCP server scaffold
 {% endif %}
 {% endif %}
+{% if type == 'cursor-plugin' %}
 - CI/CD workflows (validate, release, pages, stale)
+{% else %}
+- CI/CD workflows (ci, release, publish, drift-check, pages, stale, label-sync)
+{% endif %}
 - GitHub Pages documentation site

@@ -1,3 +1,4 @@
+{% if type == 'cursor-plugin' %}
 __pycache__/
 *.pyc
 *.pyo
@@ -11,3 +12,12 @@ build/
 Thumbs.db
 node_modules/
 *.log
+{% else %}
+node_modules/
+dist/
+build/
+.env
+.DS_Store
+Thumbs.db
+*.log
+{% endif %}
