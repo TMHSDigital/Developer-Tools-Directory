@@ -7,6 +7,7 @@ workflows, manifests, and documentation skeleton.
 """
 
 import argparse
+import datetime
 import os
 import re
 import sys
@@ -206,6 +207,7 @@ def main():
         "meta_minor": meta_minor,
         "meta_patch": meta_patch,
         "meta_version": f"{meta_major}.{meta_minor}.{meta_patch}",
+        "year": datetime.datetime.now(datetime.timezone.utc).year,
     }
 
     print(f"\nScaffolding '{args.name}' ({slug}) into {output_dir}\n")
@@ -214,15 +216,22 @@ def main():
     if args.type == "cursor-plugin":
         write_file(output_dir, ".cursor-plugin/plugin.json", render_template(env, "plugin.json.j2", ctx))
 
-    # GitHub workflows — branched by type
+    # GitHub workflows - emitted set is type-specific and must match the
+    # per-type required_workflows in standards/drift-checker.config.json plus
+    # the two optional-for-both workflows (pages, label-sync). Do NOT emit
+    # cursor-plugin-specific workflows for mcp-server repos: validate.yml's
+    # checks all assume a plugin.json and publish.yml replaces release.yml
+    # (see standards/ci-cd.md "MCP-server Variations").
     if args.type == "mcp-server":
-        write_file(output_dir, ".github/workflows/validate.yml", render_template(env, "validate.mcp.yml.j2", ctx))
-        write_file(output_dir, ".github/workflows/release.yml", render_template(env, "release.mcp.yml.j2", ctx))
-        write_file(output_dir, ".github/workflows/pages.yml", render_template(env, "pages.mcp.yml.j2", ctx))
+        # Required for mcp-server: drift-check, stale, publish.
         write_file(output_dir, ".github/workflows/publish.yml", render_template(env, "publish.yml.j2", ctx))
+        # Optional-for-both: pages (mcp variant), label-sync.
+        write_file(output_dir, ".github/workflows/pages.yml", render_template(env, "pages.mcp.yml.j2", ctx))
     else:
+        # Required for cursor-plugin: validate, release, stale, drift-check.
         write_file(output_dir, ".github/workflows/validate.yml", render_template(env, "validate.yml.j2", ctx))
         write_file(output_dir, ".github/workflows/release.yml", render_template(env, "release.yml.j2", ctx))
+        # Optional-for-both: pages, label-sync.
         write_file(output_dir, ".github/workflows/pages.yml", render_template(env, "pages.yml.j2", ctx))
     write_file(output_dir, ".github/workflows/stale.yml", render_template(env, "stale.yml.j2", ctx))
     write_file(output_dir, ".github/workflows/drift-check.yml", render_template(env, "drift-check.yml.j2", ctx))

@@ -10,8 +10,8 @@
   "license": "{{ license_spdx }}",
   "keywords": [
     "cursor-plugin",
-    "developer-tools",
-    "mcp"
+    "developer-tools"{% if has_mcp %},
+    "mcp"{% endif +%}
   ],
   "skills": [
 {% for skill in skills %}

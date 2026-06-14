@@ -204,9 +204,12 @@ jobs:
           grep -q '<!-- standards-version:' /tmp/scaffold-test/ci-test-plugin/AGENTS.md \
             || { echo "::error::AGENTS.md missing standards-version marker"; exit 1; }
 
-          # LICENSE has correct CC-BY-NC-ND-4.0 copyright (TM Hospitality Strategies, not TMHSDigital)
-          grep -q 'Copyright (c) 2026 TM Hospitality Strategies' /tmp/scaffold-test/ci-test-plugin/LICENSE \
-            || { echo "::error::LICENSE missing canonical 'TM Hospitality Strategies' copyright line"; exit 1; }
+          # LICENSE has correct CC-BY-NC-ND-4.0 copyright (TM Hospitality Strategies, not TMHSDigital).
+          # The year is DERIVED from the current UTC year at generation time, so assert against
+          # that rather than a hardcoded literal (which would itself go stale every January 1).
+          YEAR=$(date -u +%Y)
+          grep -q "Copyright (c) ${YEAR} TM Hospitality Strategies" /tmp/scaffold-test/ci-test-plugin/LICENSE \
+            || { echo "::error::LICENSE missing canonical 'Copyright (c) ${YEAR} TM Hospitality Strategies' line"; exit 1; }
           grep -q 'SPDX-License-Identifier: CC-BY-NC-ND-4.0' /tmp/scaffold-test/ci-test-plugin/LICENSE \
             || { echo "::error::LICENSE missing SPDX-License-Identifier"; exit 1; }
 
