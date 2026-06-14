@@ -65,6 +65,7 @@ flowchart LR
 | **Developer Tools MCP** | MCP Server | - | - | 7 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Developer-Tools-MCP) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Developer-Tools-MCP/) |
 | **CFX MCP** | MCP Server | - | - | 0 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/cfx-mcp) |
 | **Blender Developer Tools** | Plugin | 12 | 6 | 0 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Blender-Developer-Tools) |
+| **Local AI MCP** | MCP Server | - | - | 16 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/local-ai-mcp) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/local-ai-mcp/) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/local-ai-mcp) |
 <!-- registry:tools:end -->
 
 <details>
@@ -87,6 +88,7 @@ flowchart LR
 | **Developer Tools MCP** | MCP server providing agent-callable read and write access to the TMHSDigital developer-tools ecosystem: registry, fleet status, drift checking, and standards management |
 | **CFX MCP** | MCP server providing agent-callable tools for CFX/FiveM resource development, server management, and community platform integration. |
 | **Blender Developer Tools** | Cursor and Claude Code skills, rules, snippets, and templates for Blender Python add-on and scripting development |
+| **Local AI MCP** | Unified MCP server for managing local model runtimes (Ollama, LM Studio, and more): provider-agnostic discovery, lifecycle, hardware-fit, and delegated inference. |
 <!-- registry:descriptions:end -->
 
 </details>
