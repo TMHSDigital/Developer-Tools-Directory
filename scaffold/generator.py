@@ -192,6 +192,8 @@ def _render_repo(output_dir: Path, ctx: dict, *, verbose: bool) -> None:
     # repos do NOT get cursor-plugin-specific validate.yml / release.yml.
     if repo_type == "mcp-server":
         write_file(output_dir, ".github/workflows/publish.yml", render_template(env, "publish.yml.j2", ctx), verbose=verbose)
+        write_file(output_dir, ".github/workflows/ci.yml", render_template(env, "ci.yml.j2", ctx), verbose=verbose)
+        write_file(output_dir, ".github/workflows/release.yml", render_template(env, "release.mcp.yml.j2", ctx), verbose=verbose)
         write_file(output_dir, ".github/workflows/pages.yml", render_template(env, "pages.mcp.yml.j2", ctx), verbose=verbose)
     else:
         write_file(output_dir, ".github/workflows/validate.yml", render_template(env, "validate.yml.j2", ctx), verbose=verbose)
@@ -297,7 +299,7 @@ def build_registry_entry(
         "extras": {},
         "topics": [repo_type, "developer-tools"],
         "status": "active",
-        "language": "Python",
+        "language": "TypeScript" if repo_type == "mcp-server" else "Python",
         "license": SPDX[license_key],
         "pagesType": "static",
         "hasCI": True,

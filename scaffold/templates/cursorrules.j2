@@ -19,7 +19,14 @@ This is a {{ type }} repository for {{ name | replace(' Developer Tools', '') | 
 
 ## Conventions
 
+{% if type == 'cursor-plugin' %}
 - Use conventional commits (feat:, fix:, chore:, docs:)
 - Never manually edit the version -- CI handles it
 - Skills need YAML frontmatter: title, description, globs
 - Rules need frontmatter: description, globs, alwaysApply
+{% else %}
+- Use conventional commits (feat:, fix:, chore:, docs:)
+- Never manually edit the version -- CI auto-bumps package.json
+- Keep mcp-tools.json in sync with the registered tools
+- Provider adapters live in src/providers/; tools live in src/tools/
+{% endif %}

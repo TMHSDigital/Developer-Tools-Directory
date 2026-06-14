@@ -7,8 +7,14 @@
     "github": "https://github.com/{{ repo_owner }}/{{ repo_name }}"
   },
   "installSteps": [
+{% if type == 'cursor-plugin' %}
     "Open Cursor IDE and go to <code>Settings</code> > <code>Extensions</code>",
     "Search for <code>{{ name }}</code>",
     "Click <code>Install</code> and reload"
+{% else %}
+    "Install with <code>npx -y @{{ repo_owner | lower }}/{{ slug }}</code>",
+    "Add to your Claude Desktop or Cursor mcpServers config",
+    "Restart your MCP client"
+{% endif %}
   ]
 }
