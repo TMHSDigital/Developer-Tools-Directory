@@ -295,5 +295,30 @@
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "none",
     "hasCI": true
+  },
+  {
+    "name": "Local AI MCP",
+    "repo": "TMHSDigital/local-ai-mcp",
+    "slug": "local-ai-mcp",
+    "description": "Unified MCP server for managing local model runtimes (Ollama, LM Studio, and more): provider-agnostic discovery, lifecycle, hardware-fit, and delegated inference.",
+    "type": "mcp-server",
+    "homepage": "https://tmhsdigital.github.io/local-ai-mcp/",
+    "skills": 0,
+    "rules": 0,
+    "mcpTools": 16,
+    "extras": {},
+    "topics": [
+      "mcp",
+      "model-context-protocol",
+      "ollama",
+      "lm-studio",
+      "local-llm"
+    ],
+    "status": "experimental",
+    "language": "TypeScript",
+    "license": "CC-BY-NC-ND-4.0",
+    "pagesType": "static",
+    "hasCI": true,
+    "npm": "@tmhs/local-ai-mcp"
   }
 ]
