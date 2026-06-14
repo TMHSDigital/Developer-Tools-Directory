@@ -124,11 +124,12 @@ Array of tool objects. Required fields per entry:
 | `npm` | string | npm package name (empty string or omit if none) |
 | `topics` | string[] | Discovery tags |
 | `status` | string | `experimental`, `beta`, `active`, `maintenance`, `deprecated`, or `archived` (see [`standards/lifecycle.md`](standards/lifecycle.md)) |
-| `version` | string | Current semver version |
 | `language` | string | Primary language |
 | `license` | string | SPDX identifier |
 | `pagesType` | string | `static`, `mkdocs`, or `none` |
 | `hasCI` | bool | Whether the repo has CI workflows |
+
+There is intentionally no per-tool `version` field. Tool repos auto-bump patch on every content merge, so a catalog-pinned patch version re-stales on each tool's next content PR (and is never rendered anywhere - the sync generator and docs site ignore it). The catalog tracks tools by repo and homepage. Do not reintroduce it.
 
 ### `docs/index.html`
 

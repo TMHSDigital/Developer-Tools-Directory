@@ -33,7 +33,8 @@ Use conventional commits. Prefix determines changelog category:
 
 ## When editing registry.json
 
-- Every entry needs all required fields: name, repo, slug, description, type, homepage, skills, rules, mcpTools, extras, topics, status, version, language, license, pagesType, hasCI.
+- Every entry needs all required fields: name, repo, slug, description, type, homepage, skills, rules, mcpTools, extras, topics, status, language, license, pagesType, hasCI.
+- Do not add a per-tool `version` field. It was removed because tool repos auto-bump patch on every content merge, so a catalog-pinned version re-stales on each tool's next content PR. The catalog tracks tools by repo and homepage, not by patch version.
 - `type` must be `cursor-plugin` or `mcp-server`.
 - `skills`, `rules`, `mcpTools` must be integers.
 - After editing registry.json, also update:

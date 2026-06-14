@@ -23,7 +23,6 @@
       "game-development"
     ],
     "status": "active",
-    "version": "0.7.2",
     "language": "Python",
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "mkdocs",
@@ -51,7 +50,6 @@
       "hdrp"
     ],
     "status": "active",
-    "version": "1.2.1",
     "language": "Python",
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "mkdocs",
@@ -77,7 +75,6 @@
       "dockerfile"
     ],
     "status": "active",
-    "version": "1.0.0",
     "language": "Python",
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "static",
@@ -103,7 +100,6 @@
       "monitoring"
     ],
     "status": "active",
-    "version": "1.0.0",
     "language": "Python",
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "static",
@@ -129,7 +125,6 @@
       "typescript"
     ],
     "status": "active",
-    "version": "1.0.0",
     "language": "TypeScript",
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "static",
@@ -154,7 +149,6 @@
       "plaid-api"
     ],
     "status": "active",
-    "version": "1.0.0",
     "language": "Python",
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "static",
@@ -179,7 +173,6 @@
       "work-management"
     ],
     "status": "active",
-    "version": "1.0.0",
     "language": "TypeScript",
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "static",
@@ -204,7 +197,6 @@
       "steam-workshop"
     ],
     "status": "active",
-    "version": "1.0.0",
     "language": "TypeScript",
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "static",
@@ -230,7 +222,6 @@
       "npm"
     ],
     "status": "active",
-    "version": "1.0.0",
     "language": "TypeScript",
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "none",
@@ -255,7 +246,6 @@
       "typescript"
     ],
     "status": "active",
-    "version": "0.2.0",
     "language": "TypeScript",
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "static",
@@ -274,7 +264,6 @@
     "extras": {},
     "topics": [],
     "status": "experimental",
-    "version": "0.1.0",
     "language": "TypeScript",
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "none",
@@ -302,7 +291,6 @@
       "addon-development"
     ],
     "status": "active",
-    "version": "0.2.3",
     "language": "Python",
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "none",
