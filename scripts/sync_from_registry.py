@@ -39,8 +39,8 @@ TYPE_DISPLAY = {
 }
 
 
-def load_registry() -> list[dict[str, Any]]:
-    with REGISTRY_PATH.open("r", encoding="utf-8") as fh:
+def load_registry(registry_path: Path = REGISTRY_PATH) -> list[dict[str, Any]]:
+    with registry_path.open("r", encoding="utf-8") as fh:
         data = json.load(fh)
     if not isinstance(data, list):
         raise SystemExit("registry.json must be a JSON array")
@@ -172,69 +172,90 @@ def replace_script_block(text: str, new_body: str) -> str:
     return pattern.sub(replacement, text, count=1)
 
 
-def sync_readme(entries: list[dict[str, Any]], check: bool) -> bool:
-    current = README_PATH.read_text(encoding="utf-8")
+def sync_readme(entries: list[dict[str, Any]], check: bool, root: Path = REPO_ROOT) -> bool:
+    readme_path = root / "README.md"
+    current = readme_path.read_text(encoding="utf-8")
     new = current
     new = replace_between(
         new,
         "<!-- registry:tools:start -->",
         "<!-- registry:tools:end -->",
         render_readme_tools_table(entries),
-        README_PATH,
+        readme_path,
     )
     new = replace_between(
         new,
         "<!-- registry:descriptions:start -->",
         "<!-- registry:descriptions:end -->",
         render_readme_descriptions(entries),
-        README_PATH,
+        readme_path,
     )
     new = replace_between(
         new,
         "<!-- registry:stats:start -->",
         "<!-- registry:stats:end -->",
         render_readme_stats(entries),
-        README_PATH,
+        readme_path,
     )
-    return write_if_changed(README_PATH, current, new, check)
+    return write_if_changed(readme_path, current, new, check, root)
 
 
-def sync_claude(entries: list[dict[str, Any]], check: bool) -> bool:
-    current = CLAUDE_PATH.read_text(encoding="utf-8")
+def sync_claude(entries: list[dict[str, Any]], check: bool, root: Path = REPO_ROOT) -> bool:
+    claude_path = root / "CLAUDE.md"
+    current = claude_path.read_text(encoding="utf-8")
     new = current
     new = replace_between(
         new,
         "<!-- registry:tools:start -->",
         "<!-- registry:tools:end -->",
         render_claude_tools_table(entries),
-        CLAUDE_PATH,
+        claude_path,
     )
     new = replace_between(
         new,
         "<!-- registry:stats:start -->",
         "<!-- registry:stats:end -->",
         render_claude_stats(entries),
-        CLAUDE_PATH,
+        claude_path,
     )
-    return write_if_changed(CLAUDE_PATH, current, new, check)
+    return write_if_changed(claude_path, current, new, check, root)
 
 
-def sync_index(entries: list[dict[str, Any]], check: bool) -> bool:
-    current = INDEX_PATH.read_text(encoding="utf-8")
+def sync_index(entries: list[dict[str, Any]], check: bool, root: Path = REPO_ROOT) -> bool:
+    index_path = root / "docs" / "index.html"
+    current = index_path.read_text(encoding="utf-8")
     new = replace_script_block(current, render_embedded_registry(entries))
-    return write_if_changed(INDEX_PATH, current, new, check)
+    return write_if_changed(index_path, current, new, check, root)
 
 
-def write_if_changed(path: Path, current: str, new: str, check: bool) -> bool:
+def write_if_changed(
+    path: Path, current: str, new: str, check: bool, root: Path = REPO_ROOT
+) -> bool:
     if current == new:
         return False
-    rel = path.relative_to(REPO_ROOT)
+    try:
+        rel = path.relative_to(root)
+    except ValueError:
+        rel = path
     if check:
         print(f"DRIFT: {rel} is out of sync with registry.json", file=sys.stderr)
         return True
     path.write_text(new, encoding="utf-8")
     print(f"updated: {rel}")
     return True
+
+
+def sync_all(root: Path = REPO_ROOT, check: bool = False) -> bool:
+    """Regenerate (or check) every derived artifact under ``root`` from
+    ``root/registry.json``. Returns True if anything drifted (check mode)
+    or changed (write mode). Used by both the CLI and the scaffold's
+    auto-registration so there is a single sync code path."""
+    entries = load_registry(root / "registry.json")
+    drift = False
+    drift |= sync_readme(entries, check, root)
+    drift |= sync_claude(entries, check, root)
+    drift |= sync_index(entries, check, root)
+    return drift
 
 
 def about_command(entries: list[dict[str, Any]]) -> str:
@@ -276,10 +297,7 @@ def main() -> int:
         print(about_command(entries))
         return 0
 
-    drift = False
-    drift |= sync_readme(entries, args.check)
-    drift |= sync_claude(entries, args.check)
-    drift |= sync_index(entries, args.check)
+    drift = sync_all(REPO_ROOT, args.check)
 
     if args.check:
         if drift:

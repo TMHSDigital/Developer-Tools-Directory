@@ -2,4 +2,4 @@
 
 # CLAUDE.md
 
-MCP server pattern: CLAUDE.md only, no skills or rules.
+MCP server pattern: package.json manifest marker, no skills or rules.

@@ -1,0 +1,5 @@
+{
+  "name": "@tmhs/mcp-repo-fixture",
+  "version": "0.1.0",
+  "description": "mcp-server detection fixture: package.json is the positive type marker"
+}

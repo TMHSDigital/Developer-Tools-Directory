@@ -99,9 +99,12 @@ jobs:
         run: pip install Jinja2 PyYAML
 
       - name: Check scaffold syntax
-        run: python3 -m py_compile scaffold/create-tool.py
+        run: python3 -m py_compile scaffold/create-tool.py scaffold/generator.py
 
       - name: Test scaffold dry run
+        # --no-register: this is a throwaway probe; it must not mutate the
+        # checkout's registry.json (registration is covered hermetically by
+        # tests/test_scaffold_born_green.py against a temp registry root).
         run: |
           python3 scaffold/create-tool.py \
             --name "CI Test Plugin" \
@@ -109,6 +112,7 @@ jobs:
             --mcp-server \
             --skills 2 \
             --rules 1 \
+            --no-register \
             --output /tmp/scaffold-test
 
           test -f /tmp/scaffold-test/ci-test-plugin/.cursor-plugin/plugin.json

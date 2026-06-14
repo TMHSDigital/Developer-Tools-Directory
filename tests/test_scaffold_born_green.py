@@ -25,8 +25,8 @@ Run directly or with pytest::
 from __future__ import annotations
 
 import json
-import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -59,13 +59,56 @@ REQUIRED_REFS_PATH = REPO_ROOT / "standards" / "required-refs.json"
 
 OPTIONAL_FOR_BOTH = frozenset({"label-sync.yml", "pages.yml"})
 
-# Render parameters per type. mcp-server is rendered with zero skills/rules so
-# the no-plugin-manifest detection shape (no skills/, no rules/, CLAUDE.md
-# present) holds; rendering it with skills would create skills/ and make
-# _detect_repo_type return "unknown".
-_CASES = {
-    "cursor-plugin": ["--skills", "2", "--rules", "1"],
-    "mcp-server": [],
+# Each case is a distinct render. ``type`` is the intended repo type, ``args``
+# are extra CLI flags, ``detect`` is the type _detect_repo_type MUST return.
+# The "*-with-skills" / "*-empty" variants are the regression guards:
+#   - mcp-server-with-skills was the PR #74 latent fragility: the old detector
+#     keyed on directory presence and flipped it to "unknown", silently losing
+#     required-workflow enforcement. With positive-marker detection (package.json)
+#     it must classify as mcp-server.
+#   - cursor-plugin-empty proves born-green tolerates ZERO skill/rule content.
+_CASES: dict[str, dict] = {
+    "cursor-plugin": {
+        "type": "cursor-plugin",
+        "args": ["--skills", "2", "--rules", "1"],
+        "detect": "cursor-plugin",
+    },
+    "cursor-plugin-empty": {
+        "type": "cursor-plugin",
+        "args": [],
+        "detect": "cursor-plugin",
+    },
+    "mcp-server": {
+        "type": "mcp-server",
+        "args": [],
+        "detect": "mcp-server",
+    },
+    "mcp-server-with-skills": {
+        "type": "mcp-server",
+        "args": ["--skills", "3", "--rules", "2"],
+        "detect": "mcp-server",
+    },
+}
+
+# Registry schema mirrored from validate.yml's registry check, used by the
+# registration round-trip test to assert a generated entry is schema-valid.
+_REQUIRED_FIELDS = {
+    "name": str,
+    "repo": str,
+    "slug": str,
+    "description": str,
+    "type": str,
+    "homepage": str,
+    "skills": int,
+    "rules": int,
+    "mcpTools": int,
+    "extras": dict,
+    "topics": list,
+    "status": str,
+    "language": str,
+    "license": str,
+    "pagesType": str,
+    "hasCI": bool,
 }
 
 
@@ -85,22 +128,26 @@ def _required_workflows(repo_type: str) -> frozenset[str]:
     return frozenset(cfg["types"][repo_type]["required_workflows"])
 
 
-def _render(repo_type: str, dest: Path) -> Path:
-    slug = f"born-green-{repo_type}"
+def _render(label: str, dest: Path) -> Path:
+    """Render a case with --no-register (these assertions are about the
+    generated tree, not the catalog; registration is covered separately)."""
+    case = _CASES[label]
+    slug = f"born-green-{label}"
     cmd = [
         sys.executable,
         str(CREATE_TOOL),
         "--name",
-        f"Born Green {repo_type}",
+        f"Born Green {label}",
         "--description",
         "born green probe",
         "--type",
-        repo_type,
+        case["type"],
         "--slug",
         slug,
         "--output",
         str(dest),
-        *_CASES[repo_type],
+        "--no-register",
+        *case["args"],
     ]
     proc = subprocess.run(cmd, capture_output=True, text=True)
     assert proc.returncode == 0, f"scaffold failed:\n{proc.stdout}\n{proc.stderr}"
@@ -112,9 +159,9 @@ def _render(repo_type: str, dest: Path) -> Path:
 @pytest.fixture(scope="module")
 def rendered(tmp_path_factory) -> dict[str, Path]:
     out: dict[str, Path] = {}
-    for repo_type in _CASES:
-        dest = tmp_path_factory.mktemp(repo_type)
-        out[repo_type] = _render(repo_type, dest)
+    for label in _CASES:
+        dest = tmp_path_factory.mktemp(label)
+        out[label] = _render(label, dest)
     return out
 
 
@@ -145,29 +192,33 @@ def _run_drift_checks(repo: Path, slug: str):
     return snap, findings
 
 
-@pytest.mark.parametrize("repo_type", list(_CASES))
-def test_detected_type_matches(rendered, repo_type):
-    repo = rendered[repo_type]
-    assert _detect_repo_type(repo) == repo_type, (
-        f"{repo_type} scaffold detected as {_detect_repo_type(repo)!r}"
+@pytest.mark.parametrize("label", list(_CASES))
+def test_detected_type_matches(rendered, label):
+    repo = rendered[label]
+    expected = _CASES[label]["detect"]
+    got = _detect_repo_type(repo)
+    assert got == expected, (
+        f"case {label!r} ({_CASES[label]['type']}) detected as {got!r}, "
+        f"expected {expected!r}"
     )
 
 
-@pytest.mark.parametrize("repo_type", list(_CASES))
-def test_born_green_no_drift(rendered, repo_type):
-    repo = rendered[repo_type]
-    snap, findings = _run_drift_checks(repo, f"born-green-{repo_type}")
+@pytest.mark.parametrize("label", list(_CASES))
+def test_born_green_no_drift(rendered, label):
+    repo = rendered[label]
+    repo_type = _CASES[label]["type"]
+    snap, findings = _run_drift_checks(repo, f"born-green-{label}")
     assert snap.repo_type == repo_type
     actionable = [f for f in findings if f.severity in ("error", "warn")]
     assert actionable == [], (
-        "freshly scaffolded repo is not born green: "
+        f"freshly scaffolded {label} repo is not born green: "
         + "; ".join(f"{f.check}/{f.severity}: {f.message}" for f in actionable)
     )
 
 
-@pytest.mark.parametrize("repo_type", list(_CASES))
-def test_standards_markers_current(rendered, repo_type):
-    repo = rendered[repo_type]
+@pytest.mark.parametrize("label", list(_CASES))
+def test_standards_markers_current(rendered, label):
+    repo = rendered[label]
     expected = _standards_version()
     marker_files = [repo / "AGENTS.md", repo / "CLAUDE.md"]
     for skill_md in (repo / "skills").glob("*/SKILL.md"):
@@ -181,9 +232,10 @@ def test_standards_markers_current(rendered, repo_type):
         )
 
 
-@pytest.mark.parametrize("repo_type", list(_CASES))
-def test_action_pins_derived(rendered, repo_type):
-    repo = rendered[repo_type]
+@pytest.mark.parametrize("label", list(_CASES))
+def test_action_pins_derived(rendered, label):
+    repo = rendered[label]
+    repo_type = _CASES[label]["type"]
     major, minor, patch = _meta_version_parts()
     drift = (repo / ".github" / "workflows" / "drift-check.yml").read_text(encoding="utf-8")
     assert f"drift-check@v{major}.{minor}" in drift, (
@@ -199,9 +251,10 @@ def test_action_pins_derived(rendered, repo_type):
         )
 
 
-@pytest.mark.parametrize("repo_type", list(_CASES))
-def test_readme_counts_consistent(rendered, repo_type):
-    repo = rendered[repo_type]
+@pytest.mark.parametrize("label", list(_CASES))
+def test_readme_counts_consistent(rendered, label):
+    repo = rendered[label]
+    repo_type = _CASES[label]["type"]
     skills_dir = repo / "skills"
     rules_dir = repo / "rules"
     skill_count = (
@@ -224,9 +277,10 @@ def test_readme_counts_consistent(rendered, repo_type):
         )
 
 
-@pytest.mark.parametrize("repo_type", list(_CASES))
-def test_emitted_workflow_set_exact(rendered, repo_type):
-    repo = rendered[repo_type]
+@pytest.mark.parametrize("label", list(_CASES))
+def test_emitted_workflow_set_exact(rendered, label):
+    repo = rendered[label]
+    repo_type = _CASES[label]["type"]
     present = frozenset(
         p.name
         for p in (repo / ".github" / "workflows").iterdir()
@@ -234,9 +288,70 @@ def test_emitted_workflow_set_exact(rendered, repo_type):
     )
     expected = _required_workflows(repo_type) | OPTIONAL_FOR_BOTH
     assert present == expected, (
-        f"{repo_type} emitted workflows {sorted(present)} != expected "
-        f"{sorted(expected)} (required ∪ optional-for-both)"
+        f"{label} emitted workflows {sorted(present)} != expected "
+        f"{sorted(expected)} (required for {repo_type} union optional-for-both)"
     )
+
+
+def _make_temp_registry_root(tmp_path: Path) -> Path:
+    """Copy the catalog artifacts sync_all touches into a temp root so
+    registration can be exercised without mutating the live registry."""
+    root = tmp_path / "catalog"
+    (root / "docs").mkdir(parents=True)
+    for rel in ("registry.json", "README.md", "CLAUDE.md"):
+        shutil.copy2(REPO_ROOT / rel, root / rel)
+    shutil.copy2(REPO_ROOT / "docs" / "index.html", root / "docs" / "index.html")
+    return root
+
+
+@pytest.mark.parametrize("label", ["cursor-plugin", "mcp-server-with-skills"])
+def test_registration_round_trips(tmp_path, label):
+    """Generation-with-registration must produce a schema-valid registry
+    entry and leave the catalog sync-clean (sync --check passes), so a repo
+    cannot be born unregistered or born inconsistent. Exercised against a
+    TEMP registry root - the live registry.json is never touched."""
+    from scripts.sync_from_registry import sync_all  # noqa: E402
+
+    case = _CASES[label]
+    root = _make_temp_registry_root(tmp_path)
+    slug = f"reg-{label}"
+    cmd = [
+        sys.executable,
+        str(CREATE_TOOL),
+        "--name",
+        f"Reg {label}",
+        "--description",
+        "registration round-trip probe",
+        "--type",
+        case["type"],
+        "--slug",
+        slug,
+        "--output",
+        str(tmp_path / "out"),
+        "--registry-root",
+        str(root),
+        *case["args"],
+    ]
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    assert proc.returncode == 0, f"register failed:\n{proc.stdout}\n{proc.stderr}"
+
+    entries = json.loads((root / "registry.json").read_text(encoding="utf-8"))
+    matches = [e for e in entries if e["slug"] == slug]
+    assert len(matches) == 1, f"{slug} not registered exactly once"
+    entry = matches[0]
+
+    for field, typ in _REQUIRED_FIELDS.items():
+        assert field in entry, f"registry entry missing required field {field!r}"
+        assert isinstance(entry[field], typ), (
+            f"field {field!r} is {type(entry[field]).__name__}, expected {typ.__name__}"
+        )
+    assert "version" not in entry, "registry entry must not carry a version field"
+    assert entry["type"] == case["detect"], (
+        f"registered type {entry['type']!r} != detected {case['detect']!r}"
+    )
+
+    drift = sync_all(root, check=True)
+    assert drift is False, "catalog is not sync-clean after registration"
 
 
 if __name__ == "__main__":
