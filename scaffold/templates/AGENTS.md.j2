@@ -78,7 +78,7 @@ Builds and runs the test suite on Node 20 and 22:
 
 ### `release.yml` (runs on push to main)
 
-Conventional-commit auto-bump: determines the bump type from commit messages since the last tag, updates `package.json`, creates a git tag and GitHub Release.
+Reads the version from `package.json` and, if there is no matching tag yet, pushes the `v<version>` tag (plus the floating `vMAJOR` and `vMAJOR.MINOR` tags), creates a GitHub Release, and dispatches `publish.yml`. It only pushes tags and never writes to `main`; bump the version in your PR.
 
 ### `publish.yml` (runs on release published or workflow_dispatch)
 
@@ -105,11 +105,13 @@ Keeps repository labels in sync.
 
 {% if type == 'cursor-plugin' %}
 - The **source of truth** for the current version is `.cursor-plugin/plugin.json`.
-{% else %}
-- The **source of truth** for the current version is `package.json`.
-{% endif %}
 - The release workflow auto-bumps it and the README badge on every qualifying push to main.
 - Never manually change the version.
+{% else %}
+- The **source of truth** for the current version is `package.json`.
+- Bump it in your PR with `npm version <patch|minor|major> --no-git-tag-version` (keeps the lockfile in sync) and update the README badge, following conventional-commit intent.
+- On merge, `release.yml` tags that version and publishes it. `main` is protected and is never written to by CI.
+{% endif %}
 
 ## Code conventions
 

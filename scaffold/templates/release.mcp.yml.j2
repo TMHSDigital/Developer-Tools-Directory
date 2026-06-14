@@ -7,99 +7,60 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: release
   cancel-in-progress: false
 
 jobs:
-  release:
-    name: Version, tag, and release
+  tag-and-release:
+    name: Tag and release
     runs-on: ubuntu-latest
-    # Skip the release commit's own push (it carries [skip version]) so the
-    # job never re-triggers itself into a loop.
-    if: "!contains(github.event.head_commit.message, '[skip version]')"
     steps:
+      # The default GITHUB_TOKEN (contents: write) pushes tags and creates the
+      # release. main is protected and is NEVER written to by CI; bump the
+      # version in your PR. A GITHUB_TOKEN release does not trigger publish.yml,
+      # so this job dispatches it explicitly afterward.
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          # A PAT lets the release event trigger publish.yml. GITHUB_TOKEN
-          # pushes/releases do NOT trigger downstream workflows by design,
-          # which is why publish never fires without this. Falls back to
-          # GITHUB_TOKEN (publish.yml can then be run via workflow_dispatch).
-          token: ${{ secrets.RELEASE_PAT != '' && secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-
-      - name: Determine bump from conventional commits
-        id: bump
-        run: |
-          set -euo pipefail
-          last_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          if [ -z "$last_tag" ]; then
-            range_log=$(git log --pretty=format:'%s%n%b')
-          else
-            range_log=$(git log "${last_tag}..HEAD" --pretty=format:'%s%n%b')
-          fi
-          bump=patch
-          if printf '%s\n' "$range_log" | grep -qE 'BREAKING CHANGE' \
-             || printf '%s\n' "$range_log" | grep -qE '^[a-z]+(\([^)]*\))?!:'; then
-            bump=major
-          elif printf '%s\n' "$range_log" | grep -qE '^feat(\([^)]*\))?:'; then
-            bump=minor
-          fi
-          echo "bump=$bump" >> "$GITHUB_OUTPUT"
-          echo "Computed bump: $bump (since ${last_tag:-<initial>})"
-
-      - name: Apply version bump
+      - name: Read version from package.json
         id: ver
         run: |
-          set -euo pipefail
-          new=$(npm version "${{ steps.bump.outputs.bump }}" --no-git-tag-version)
-          new=${new#v}
-          echo "version=$new" >> "$GITHUB_OUTPUT"
-          echo "New version: $new"
+          v=$(node -p "require('./package.json').version")
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "package.json version: $v"
 
-      - name: Update README version badge
-        run: |
-          set -euo pipefail
-          v="${{ steps.ver.outputs.version }}"
-          if [ -f README.md ]; then
-            sed -i -E "s|(badge/version-)[0-9]+\.[0-9]+\.[0-9]+(-blue)|\1${v}\2|g" README.md || true
-          fi
-
-      - name: Guard against re-tagging an existing version
+      - name: Check if tag already exists
         id: check
         run: |
-          set -euo pipefail
-          v="${{ steps.ver.outputs.version }}"
-          if git rev-parse "v$v" >/dev/null 2>&1; then
+          if git rev-parse "v${{ steps.ver.outputs.version }}" >/dev/null 2>&1; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "Tag v$v already exists; skipping release."
+            echo "Tag v${{ steps.ver.outputs.version }} exists; nothing to release."
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Commit, tag, and create release
+      - name: Tag, release, and trigger publish
         if: steps.check.outputs.skip == 'false'
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_PAT != '' && secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           v="${{ steps.ver.outputs.version }}"
           IFS='.' read -r major minor _patch <<< "$v"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json README.md
-          git commit -m "chore(release): v$v [skip version]"
           git tag "v$v"
           git tag -f "v$major"
           git tag -f "v$major.$minor"
-          git push origin HEAD:main
           git push origin "v$v"
           git push origin "v$major" --force
           git push origin "v$major.$minor" --force
           gh release create "v$v" --title "v$v" --generate-notes
+          # publish.yml is idempotent (skips an already-published version), so a
+          # duplicate dispatch is harmless.
+          gh workflow run publish.yml --ref main
 {% endraw %}
