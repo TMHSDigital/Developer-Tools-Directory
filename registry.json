@@ -320,5 +320,29 @@
     "pagesType": "static",
     "hasCI": true,
     "npm": "@tmhs/local-ai-mcp"
+  },
+  {
+    "name": "Screencast MCP",
+    "repo": "TMHSDigital/screencast-mcp",
+    "slug": "screencast-mcp",
+    "description": "MCP server for Windows screen recording, frame sampling, and minimal ffmpeg edits (capture, watch, trim/concat/convert).",
+    "type": "mcp-server",
+    "homepage": "https://tmhsdigital.github.io/screencast-mcp/",
+    "skills": 0,
+    "rules": 0,
+    "mcpTools": 10,
+    "extras": {},
+    "topics": [
+      "mcp-server",
+      "developer-tools",
+      "screen-recording",
+      "ffmpeg",
+      "windows"
+    ],
+    "status": "beta",
+    "language": "TypeScript",
+    "license": "CC-BY-NC-ND-4.0",
+    "pagesType": "static",
+    "hasCI": true
   }
 ]
