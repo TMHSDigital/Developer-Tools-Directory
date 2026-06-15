@@ -57,7 +57,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 - Add it to `mcp-tools.json`
 - Add vitest tests
 
-Never hand-edit the version; CI auto-bumps `package.json`.
+Bump the version in `package.json` in your PR (e.g. `npm version <patch|minor|major> --no-git-tag-version`); CI tags and publishes it on merge.
 
 ## Pull Request Process
 
