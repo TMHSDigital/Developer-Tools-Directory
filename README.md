@@ -66,6 +66,7 @@ flowchart LR
 | **CFX MCP** | MCP Server | - | - | 0 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/cfx-mcp) |
 | **Blender Developer Tools** | Plugin | 12 | 6 | 0 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Blender-Developer-Tools) |
 | **Local AI MCP** | MCP Server | - | - | 16 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/local-ai-mcp) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/local-ai-mcp/) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/local-ai-mcp) |
+| **Screencast MCP** | MCP Server | - | - | 10 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/screencast-mcp) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/screencast-mcp/) |
 <!-- registry:tools:end -->
 
 <details>
@@ -89,6 +90,7 @@ flowchart LR
 | **CFX MCP** | MCP server providing agent-callable tools for CFX/FiveM resource development, server management, and community platform integration. |
 | **Blender Developer Tools** | Cursor and Claude Code skills, rules, snippets, and templates for Blender Python add-on and scripting development |
 | **Local AI MCP** | Unified MCP server for managing local model runtimes (Ollama, LM Studio, and more): provider-agnostic discovery, lifecycle, hardware-fit, and delegated inference. |
+| **Screencast MCP** | MCP server for Windows screen recording, frame sampling, and minimal ffmpeg edits (capture, watch, trim/concat/convert). |
 <!-- registry:descriptions:end -->
 
 </details>

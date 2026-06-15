@@ -89,6 +89,7 @@ Static HTML/CSS/JS. No build step. No external CDN. The `pages.yml` workflow cop
 | CFX MCP | MCP Server | 0 | 0 | 0 |
 | Blender Developer Tools | Plugin | 12 | 6 | 0 |
 | Local AI MCP | MCP Server | 0 | 0 | 16 |
+| Screencast MCP | MCP Server | 0 | 0 | 10 |
 <!-- registry:tools:end -->
 
 <!-- registry:stats:start -->
