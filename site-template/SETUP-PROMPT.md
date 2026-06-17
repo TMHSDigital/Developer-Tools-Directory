@@ -17,7 +17,8 @@ You are setting up this repo's GitHub Pages site to use the unified auto-sync te
 
 The template system works like this:
 - A Python build script (site-template/build_site.py) in Developer-Tools-Directory reads data from THIS repo and generates docs/index.html
-- It reads: .cursor-plugin/plugin.json, site.json, skills/*/SKILL.md, rules/*.mdc, and mcp-tools.json
+- It reads: site.json (required), .cursor-plugin/plugin.json OR package.json, skills/*/SKILL.md, rules/*.mdc, and mcp-tools.json
+- For a cursor plugin, plugin display metadata comes from .cursor-plugin/plugin.json. For an MCP server with no plugin manifest, it falls back to site.json + package.json (name, description, version, license, repository).
 - The pages.yml workflow clones Developer-Tools-Directory at deploy time, runs the build, and deploys docs/
 
 Your tasks:
@@ -25,7 +26,7 @@ Your tasks:
 1. Create `site.json` in the repo root (see schema below)
 2. Create `mcp-tools.json` in the repo root (see format below)
 3. Update `.github/workflows/pages.yml` to clone the template and run build_site.py
-4. Verify .cursor-plugin/plugin.json has all required fields
+4. Cursor plugins: verify .cursor-plugin/plugin.json has all required fields. MCP servers without a plugin manifest: verify package.json has name, description, version, and license, and set site.json `title` if you want a specific display name.
 5. Commit and push with message: feat: switch to unified auto-sync GitHub Pages template
 
 Do NOT modify existing skills/, rules/, or .cursor-plugin/plugin.json content.
@@ -134,7 +135,7 @@ When categories are present and there are multiple categories, tools are grouped
 The build script reads files from the tool repo and passes them as context to the Jinja2 template.
 
 ```
-.cursor-plugin/plugin.json  -->  plugin (dict)
+.cursor-plugin/plugin.json  -->  plugin (dict)   [if absent, falls back to package.json + site.json]
 site.json                   -->  site (dict)
 skills/*/SKILL.md           -->  parse_skills()   -->  skills (list), skill_count (int)
 rules/*.mdc|*.md            -->  parse_rules()    -->  rules (list), rule_count (int)
@@ -258,13 +259,13 @@ jobs:
 
 ## Troubleshooting
 
-### "ERROR: .cursor-plugin/plugin.json not found"
+### Missing or wrong display metadata
 
-The build script requires this file. Ensure your repo has `.cursor-plugin/plugin.json` with at least `displayName`, `description`, `version`, `author`, `repository`, and `license`.
+Cursor plugins read display metadata from `.cursor-plugin/plugin.json` (at least `displayName`, `description`, `version`, `author`, `repository`, `license`). MCP servers without a plugin manifest fall back to `package.json` (`name`, `description`, `version`, `license`, `repository`); the display name is derived from the package name, so set `title` in `site.json` to override it. The build no longer fails when `.cursor-plugin/plugin.json` is absent.
 
 ### "ERROR: site.json not found"
 
-Create a `site.json` in the repo root. At minimum it can be `{}` and the template will use default colors.
+Create a `site.json` in the repo root. `site.json` is the one required input. At minimum it can be `{}` and the template will use default colors (set `title` for an MCP server so the display name is not derived from the package name).
 
 ### Empty skills/rules sections
 

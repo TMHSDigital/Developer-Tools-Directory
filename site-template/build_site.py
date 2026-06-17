@@ -234,6 +234,72 @@ def load_mcp_tools(repo_root: Path) -> list[dict]:
     return []
 
 
+# Tokens that should render upper-case when humanizing a package name into a
+# display name (e.g. "screencast-mcp" -> "Screencast MCP").
+_ACRONYMS = {"mcp", "api", "ai", "ui", "cfx", "cli", "sdk", "id", "os", "npm"}
+
+
+def _humanize_package_name(name: str) -> str:
+    """Turn an npm package name into a display name. ``@tmhs/screencast-mcp``
+    becomes ``Screencast MCP``."""
+    base = name.split("/")[-1] if name else ""
+    words = [w for w in base.replace("_", "-").split("-") if w]
+    return " ".join(w.upper() if w.lower() in _ACRONYMS else w.capitalize() for w in words)
+
+
+def _clean_repo_url(url: str) -> str:
+    url = re.sub(r"^git\+", "", url or "")
+    url = re.sub(r"\.git$", "", url)
+    return url
+
+
+def load_plugin_meta(repo_root: Path, site: dict) -> dict:
+    """Return the plugin metadata the template needs.
+
+    Prefer ``.cursor-plugin/plugin.json`` when present (cursor plugins). When it
+    is absent (MCP server repos do not ship one) fall back to ``site.json`` plus
+    ``package.json`` for the display name, description, repository, version, and
+    license, so the shared template can build an MCP-server site without a
+    synthesized manifest."""
+    plugin_path = repo_root / ".cursor-plugin" / "plugin.json"
+    if plugin_path.is_file():
+        return load_json(plugin_path)
+
+    pkg_path = repo_root / "package.json"
+    pkg = load_json(pkg_path) if pkg_path.is_file() else {}
+    if not pkg and not site:
+        print(
+            f"ERROR: {plugin_path} not found and no package.json/site.json to "
+            "fall back to",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    links = site.get("links") or {}
+    repo = links.get("github", "")
+    if not repo:
+        repository = pkg.get("repository")
+        if isinstance(repository, dict):
+            repo = _clean_repo_url(repository.get("url", ""))
+        elif isinstance(repository, str):
+            repo = _clean_repo_url(repository)
+
+    display = (
+        site.get("title")
+        or site.get("displayName")
+        or _humanize_package_name(pkg.get("name", ""))
+        or "Tool"
+    )
+    return {
+        "displayName": display,
+        "description": site.get("description") or pkg.get("description", ""),
+        "repository": repo,
+        "version": pkg.get("version", "0.0.0"),
+        "license": pkg.get("license", "CC-BY-NC-ND-4.0"),
+        "logo": site.get("logo"),
+    }
+
+
 def group_by_category(items: list[dict]) -> dict[str, list[dict]]:
     groups: dict[str, list[dict]] = {}
     for item in items:
@@ -262,18 +328,13 @@ def main():
     out_dir = args.out.resolve()
     template_dir = Path(__file__).parent.resolve()
 
-    plugin_path = repo_root / ".cursor-plugin" / "plugin.json"
-    if not plugin_path.is_file():
-        print(f"ERROR: {plugin_path} not found", file=sys.stderr)
-        sys.exit(1)
-
     site_path = repo_root / "site.json"
     if not site_path.is_file():
         print(f"ERROR: {site_path} not found", file=sys.stderr)
         sys.exit(1)
 
-    plugin = load_json(plugin_path)
     site = load_json(site_path)
+    plugin = load_plugin_meta(repo_root, site)
 
     skills = parse_skills(repo_root)
     rules = parse_rules(repo_root)

@@ -3,12 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  {% set og_image = site.ogImage | default('https://tmhsdigital.github.io/Developer-Tools-Directory/assets/logo.png', true) %}
   <title>{{ plugin.displayName }}</title>
   <meta name="description" content="{{ plugin.description }}" />
+  {% if site.canonical %}<link rel="canonical" href="{{ site.canonical }}" />{% endif %}
   <meta property="og:title" content="{{ plugin.displayName }}" />
   <meta property="og:description" content="{{ plugin.description }}" />
   <meta property="og:type" content="website" />
-  {% if site.ogImage %}<meta property="og:image" content="{{ site.ogImage }}" />{% endif %}
+  {% if site.canonical %}<meta property="og:url" content="{{ site.canonical }}" />{% endif %}
+  <meta property="og:image" content="{{ og_image }}" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{{ plugin.displayName }}" />
+  <meta name="twitter:description" content="{{ plugin.description }}" />
+  <meta name="twitter:image" content="{{ og_image }}" />
   {% if site.favicon %}<link rel="icon" href="{{ site.favicon }}" />{% endif %}
   <link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/inter-regular.woff2" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/inter-bold.woff2" />
@@ -250,6 +257,10 @@
     /* SR ONLY */
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
 
+    /* SKIP LINK */
+    .skip-link { position: absolute; left: 0.5rem; top: -3rem; z-index: 300; background: var(--accent); color: #fff; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem; font-weight: 600; transition: top 0.15s; }
+    .skip-link:focus { top: 0.5rem; color: #fff; }
+
     /* REDUCED MOTION */
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
@@ -258,6 +269,8 @@
   </style>
 </head>
 <body>
+
+  <a href="#main" class="skip-link">Skip to content</a>
 
   <!-- Nav -->
   <nav class="nav">
@@ -282,6 +295,8 @@
       </ul>
     </div>
   </nav>
+
+  <main id="main">
 
   <!-- Hero -->
   <section class="hero">
@@ -550,6 +565,8 @@
 
   </div><!-- /.content-area -->
 
+  </main>
+
   <!-- Footer -->
   <footer>
     <div class="footer-inner">
@@ -604,13 +621,29 @@
       };
     })();
 
+    /* Parse an SVG string and append its children as real nodes. No HTML sink
+       used (parity with the catalog's DOMParser approach). */
+    function svgChildrenInto(target, svgString) {
+      while (target.firstChild) target.removeChild(target.firstChild);
+      var doc = new DOMParser().parseFromString(svgString, 'image/svg+xml');
+      var src = doc.documentElement;
+      if (src && src.nodeName === 'svg') {
+        Array.prototype.slice.call(src.childNodes).forEach(function (k) {
+          target.appendChild(document.importNode(k, true));
+        });
+      }
+    }
+
     /* Theme toggle (dark / light / auto) */
     (function () {
+      var SVG_NS = 'http://www.w3.org/2000/svg';
       var btn = document.getElementById('themeToggle');
       var icon = document.getElementById('themeIcon');
-      var sunSvg = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
-      var moonSvg = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
-      var autoSvg = '<circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20V2z"/>';
+      var iconSvgs = {
+        light: '<svg xmlns="' + SVG_NS + '"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',
+        dark: '<svg xmlns="' + SVG_NS + '"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+        auto: '<svg xmlns="' + SVG_NS + '"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20V2z"/></svg>'
+      };
       var states = ['dark', 'light', 'auto'];
       function getState() { return localStorage.getItem('theme') || 'auto'; }
       function apply(state) {
@@ -622,10 +655,9 @@
         updateIcon(state);
       }
       function updateIcon(state) {
-        if (state === 'light') icon.innerHTML = sunSvg;
-        else if (state === 'dark') icon.innerHTML = moonSvg;
-        else icon.innerHTML = autoSvg;
+        svgChildrenInto(icon, iconSvgs[state] || iconSvgs.auto);
         btn.title = 'Theme: ' + state;
+        btn.setAttribute('aria-label', 'Theme: ' + state + ' (click to change)');
       }
       btn.addEventListener('click', function () {
         var cur = getState();
@@ -673,11 +705,12 @@
 
     /* Auto-add copy buttons next to <code> in install steps */
     (function () {
+      var COPY_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"/></svg>';
       document.querySelectorAll('.install-steps code').forEach(function (code) {
         var btn = document.createElement('span');
         btn.className = 'copy-icon';
         btn.title = 'Copy';
-        btn.innerHTML = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"/></svg>';
+        svgChildrenInto(btn, COPY_SVG);
         btn.addEventListener('click', function () { copyText(code.textContent); });
         code.parentNode.insertBefore(btn, code.nextSibling);
       });
