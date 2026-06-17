@@ -8,6 +8,13 @@ Regenerated artifacts:
   - README.md tool descriptions   (between registry:descriptions:start / :end markers)
   - README.md aggregate stats     (between registry:stats:start / :end markers)
   - docs/index.html embedded JSON (inside <script id="registry-data">)
+  - docs/index.html search index  (inside <script id="search-index">)
+  - docs/index.html footer version (element id="footerVersion", from VERSION)
+  - docs/index.html standards grid (<div class="standards-grid">, from standards/*.md)
+  - docs/index.html standards count (element id="standardsCount")
+  - docs/search-index.json         (registry-driven; skill/rule/MCP names are
+                                    preserved and refreshed out-of-band by
+                                    site-template/aggregate_search.py)
   - CLAUDE.md cataloged tools     (between registry:tools:start / :end markers)
   - CLAUDE.md totals              (between registry:stats:start / :end markers)
 
@@ -32,11 +39,70 @@ REGISTRY_PATH = REPO_ROOT / "registry.json"
 README_PATH = REPO_ROOT / "README.md"
 CLAUDE_PATH = REPO_ROOT / "CLAUDE.md"
 INDEX_PATH = REPO_ROOT / "docs" / "index.html"
+SEARCH_INDEX_PATH = REPO_ROOT / "docs" / "search-index.json"
+VERSION_PATH = REPO_ROOT / "VERSION"
+STANDARDS_DIR = REPO_ROOT / "standards"
 
 TYPE_DISPLAY = {
     "cursor-plugin": "Plugin",
     "mcp-server": "MCP Server",
 }
+
+STANDARDS_REPO_BLOB = (
+    "https://github.com/TMHSDigital/Developer-Tools-Directory/blob/main/standards"
+)
+
+# Curated display order and short descriptions for the standards grid. The grid
+# is generated from the actual standards/*.md listing (README excluded), so a
+# new standard file always gets a card and the count badge tracks the directory.
+# A file missing from this map still renders, using its filename and a fallback.
+STANDARDS_ORDER = [
+    "folder-structure",
+    "plugin-manifest",
+    "ci-cd",
+    "github-pages",
+    "commit-conventions",
+    "readme-template",
+    "agents-template",
+    "versioning",
+    "release-doc-sync",
+    "testing",
+    "skills",
+    "rules",
+    "mcp-server",
+    "security",
+    "licensing",
+    "scope",
+    "born-green-contract",
+    "lifecycle",
+    "writing-style",
+]
+STANDARDS_META = {
+    "folder-structure": ("Folder Structure", "Canonical repository layout for plugins and MCP servers"),
+    "plugin-manifest": ("Plugin Manifest", "plugin.json specification and required fields"),
+    "ci-cd": ("CI/CD", "GitHub Actions workflows every repo must have"),
+    "github-pages": ("GitHub Pages", "Documentation site setup and deployment"),
+    "commit-conventions": ("Commit Conventions", "Conventional commits and version bumping rules"),
+    "readme-template": ("README Template", "Standard README structure and required sections"),
+    "agents-template": ("AGENTS.md Template", "AI agent guidance file structure"),
+    "versioning": ("Versioning", "Semver management and automated release flow"),
+    "release-doc-sync": ("Release Doc Sync", "Composite action contract for keeping CHANGELOG, CLAUDE, and ROADMAP in sync after a release"),
+    "testing": ("Testing", "Test frameworks, minimum coverage bar, and CI wiring"),
+    "skills": ("Skills", "SKILL.md structure and frontmatter conventions"),
+    "rules": ("Rules", ".mdc structure, globs, and the secrets rule pattern"),
+    "mcp-server": ("MCP Server", "Tool naming, runtime, transport, and destructive operation handling"),
+    "security": ("Security", "Vulnerability disclosure, secrets handling, and workflow supply chain"),
+    "licensing": ("Licensing", "DCO + inbound license grant model"),
+    "scope": ("Scope", "What belongs in the directory and what does not"),
+    "born-green-contract": ("Born-Green Contract", "Acceptance criterion that any generator must produce a release-ready repo"),
+    "lifecycle": ("Lifecycle", "Tool status transitions from experimental to archived"),
+    "writing-style": ("Writing Style", "Prose conventions across all repos"),
+}
+
+# Search-index entry fields that come from the registry. Skill/rule/MCP-tool
+# name arrays are preserved from the existing index (refreshed out-of-band by
+# site-template/aggregate_search.py against local repo checkouts).
+SEARCH_ARRAY_FIELDS = ("skills", "rules", "mcpTools")
 
 
 def load_registry(registry_path: Path = REGISTRY_PATH) -> list[dict[str, Any]]:
@@ -144,6 +210,99 @@ def render_embedded_registry(entries: list[dict[str, Any]]) -> str:
     return json.dumps(entries, separators=(",", ":"), ensure_ascii=False)
 
 
+def list_standards(standards_dir: Path = STANDARDS_DIR) -> list[str]:
+    """Return standard slugs present on disk (``*.md`` minus ``README``)."""
+    return sorted(
+        p.stem for p in standards_dir.glob("*.md") if p.stem.lower() != "readme"
+    )
+
+
+def ordered_standards(present: list[str]) -> list[str]:
+    """Curated order first, then any unmapped files alphabetically."""
+    known = [s for s in STANDARDS_ORDER if s in present]
+    extra = sorted(s for s in present if s not in STANDARDS_ORDER)
+    return known + extra
+
+
+def standard_title_desc(slug: str) -> tuple[str, str]:
+    if slug in STANDARDS_META:
+        return STANDARDS_META[slug]
+    # Fallback for an unmapped standard: parse H1 + first paragraph.
+    title = slug.replace("-", " ").title()
+    desc = ""
+    md = STANDARDS_DIR / f"{slug}.md"
+    if md.is_file():
+        lines = md.read_text(encoding="utf-8").splitlines()
+        for i, line in enumerate(lines):
+            if line.startswith("# "):
+                title = line[2:].strip()
+                for nxt in lines[i + 1:]:
+                    s = nxt.strip()
+                    if s and not s.startswith("#"):
+                        desc = s[:120]
+                        break
+                break
+    return title, desc
+
+
+def render_standards_grid(present: list[str]) -> str:
+    cards = []
+    for slug in ordered_standards(present):
+        title, desc = standard_title_desc(slug)
+        cards.append(
+            f'          <a href="{STANDARDS_REPO_BLOB}/{slug}.md" '
+            f'class="standard-card" target="_blank" rel="noopener">'
+            f"<h3>{title}</h3><p>{desc}</p></a>"
+        )
+    return "\n" + "\n".join(cards) + "\n        "
+
+
+def read_version(version_path: Path = VERSION_PATH) -> str:
+    return "v" + version_path.read_text(encoding="utf-8").strip()
+
+
+def build_search_index(
+    entries: list[dict[str, Any]], existing: dict[str, dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Registry-driven search index. Basic fields come from the registry;
+    skill/rule/MCP-tool name arrays are preserved from *existing* so the
+    out-of-band aggregate_search refresh is not clobbered by a sync."""
+    index = []
+    for e in entries:
+        slug = e.get("slug", "")
+        prior = existing.get(slug, {})
+        entry = {
+            "name": e["name"],
+            "slug": slug,
+            "description": e.get("description", ""),
+            "type": e.get("type", ""),
+            "topics": e.get("topics", []),
+            "npm": e.get("npm", "") or "",
+            "url": f"https://github.com/{e['repo']}",
+            "homepage": e.get("homepage", ""),
+        }
+        for field in SEARCH_ARRAY_FIELDS:
+            entry[field] = list(prior.get(field, []))
+        index.append(entry)
+    return index
+
+
+def render_search_index(index: list[dict[str, Any]]) -> str:
+    return json.dumps(index, separators=(",", ":"), ensure_ascii=False)
+
+
+def load_existing_search_index(
+    path: Path = SEARCH_INDEX_PATH,
+) -> dict[str, dict[str, Any]]:
+    if not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (ValueError, OSError):
+        return {}
+    return {e["slug"]: e for e in data if isinstance(e, dict) and e.get("slug")}
+
+
 def replace_between(
     text: str, start_marker: str, end_marker: str, new_body: str, path: Path
 ) -> str:
@@ -159,17 +318,39 @@ def replace_between(
     return pattern.sub(replacement, text, count=1)
 
 
-def replace_script_block(text: str, new_body: str) -> str:
+def replace_script_block(text: str, new_body: str, block_id: str = "registry-data") -> str:
     pattern = re.compile(
-        r'(<script id="registry-data" type="application/json">)(.*?)(</script>)',
+        r'(<script id="' + re.escape(block_id) + r'" type="application/json">)(.*?)(</script>)',
         re.DOTALL,
     )
     if not pattern.search(text):
         raise SystemExit(
-            "Could not find <script id=\"registry-data\" ...> in docs/index.html"
+            f'Could not find <script id="{block_id}" ...> in docs/index.html'
         )
-    replacement = r"\g<1>\n" + new_body + r"\n\g<3>"
-    return pattern.sub(replacement, text, count=1)
+    return pattern.sub(
+        lambda m: m.group(1) + "\n" + new_body + "\n" + m.group(3), text, count=1
+    )
+
+
+def replace_element_text_by_id(text: str, elem_id: str, new_text: str, path: Path) -> str:
+    """Replace the inner text of the first element carrying ``id="elem_id"``."""
+    pattern = re.compile(
+        r'(<[a-zA-Z][\w-]*\b[^>]*\bid="' + re.escape(elem_id) + r'"[^>]*>)(.*?)(</[a-zA-Z][\w-]*>)',
+        re.DOTALL,
+    )
+    if not pattern.search(text):
+        raise SystemExit(f'Element id="{elem_id}" not found in {path}')
+    return pattern.sub(lambda m: m.group(1) + new_text + m.group(3), text, count=1)
+
+
+def replace_standards_grid(text: str, new_body: str, path: Path) -> str:
+    pattern = re.compile(
+        r'(<div class="standards-grid">)(.*?)(</div>)',
+        re.DOTALL,
+    )
+    if not pattern.search(text):
+        raise SystemExit(f'<div class="standards-grid"> not found in {path}')
+    return pattern.sub(lambda m: m.group(1) + new_body + m.group(3), text, count=1)
 
 
 def sync_readme(entries: list[dict[str, Any]], check: bool, root: Path = REPO_ROOT) -> bool:
@@ -222,10 +403,48 @@ def sync_claude(entries: list[dict[str, Any]], check: bool, root: Path = REPO_RO
 
 
 def sync_index(entries: list[dict[str, Any]], check: bool, root: Path = REPO_ROOT) -> bool:
+    """Reconcile every registry-derived region of docs/index.html, plus the
+    docs/search-index.json companion file.
+
+    The embedded registry block is always required. The search index, footer
+    version, and standards grid/count are best-effort: each is rewritten only
+    when its anchor (and, for the version/standards, its source) is present, so
+    a minimal catalog without a VERSION file or standards/ directory is left
+    untouched rather than crashing or being blanked."""
     index_path = root / "docs" / "index.html"
+    search_path = root / "docs" / "search-index.json"
     current = index_path.read_text(encoding="utf-8")
     new = replace_script_block(current, render_embedded_registry(entries))
-    return write_if_changed(index_path, current, new, check, root)
+
+    # Search index: reconcile the companion file and mirror it into the inline
+    # fallback block. Skip entirely when the catalog has no inline block.
+    search_drift = False
+    if '<script id="search-index"' in new:
+        existing = load_existing_search_index(search_path)
+        search_index = build_search_index(entries, existing)
+        new = replace_script_block(new, render_search_index(search_index), "search-index")
+        file_current = search_path.read_text(encoding="utf-8") if search_path.is_file() else ""
+        file_new = render_search_index(search_index) + "\n"
+        search_drift = write_if_changed(search_path, file_current, file_new, check, root)
+
+    # Footer version, sourced from the VERSION file.
+    version_path = root / "VERSION"
+    if version_path.is_file() and 'id="footerVersion"' in new:
+        new = replace_element_text_by_id(
+            new, "footerVersion", read_version(version_path), index_path
+        )
+
+    # Standards grid and count, sourced from the standards/*.md listing.
+    present = list_standards(root / "standards")
+    if present and 'class="standards-grid"' in new:
+        new = replace_standards_grid(new, render_standards_grid(present), index_path)
+        if 'id="standardsCount"' in new:
+            new = replace_element_text_by_id(
+                new, "standardsCount", str(len(present)), index_path
+            )
+
+    html_drift = write_if_changed(index_path, current, new, check, root)
+    return html_drift or search_drift
 
 
 def write_if_changed(

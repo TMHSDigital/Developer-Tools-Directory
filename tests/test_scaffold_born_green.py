@@ -311,9 +311,11 @@ def _make_temp_registry_root(tmp_path: Path) -> Path:
     registration can be exercised without mutating the live registry."""
     root = tmp_path / "catalog"
     (root / "docs").mkdir(parents=True)
-    for rel in ("registry.json", "README.md", "CLAUDE.md"):
+    for rel in ("registry.json", "README.md", "CLAUDE.md", "VERSION"):
         shutil.copy2(REPO_ROOT / rel, root / rel)
     shutil.copy2(REPO_ROOT / "docs" / "index.html", root / "docs" / "index.html")
+    shutil.copy2(REPO_ROOT / "docs" / "search-index.json", root / "docs" / "search-index.json")
+    shutil.copytree(REPO_ROOT / "standards", root / "standards")
     return root
 
 
