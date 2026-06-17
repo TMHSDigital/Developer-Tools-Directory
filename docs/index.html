@@ -5,10 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Developer Tools Directory - TMHSDigital</title>
   <meta name="description" content="Centralized directory of TMHSDigital developer tools, Cursor IDE plugins, and MCP servers." />
+  <link rel="canonical" href="https://tmhsdigital.github.io/Developer-Tools-Directory/" />
   <meta property="og:title" content="Developer Tools Directory - TMHSDigital" />
   <meta property="og:description" content="Centralized directory of TMHSDigital developer tools, Cursor IDE plugins, and MCP servers." />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://tmhsdigital.github.io/Developer-Tools-Directory/" />
   <meta property="og:image" content="assets/logo.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Developer Tools Directory - TMHSDigital" />
+  <meta name="twitter:description" content="Centralized directory of TMHSDigital developer tools, Cursor IDE plugins, and MCP servers." />
+  <meta name="twitter:image" content="assets/logo.png" />
   <link rel="icon" href="assets/logo.png" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/inter-regular.woff2" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/inter-bold.woff2" />
@@ -21,6 +27,9 @@
 
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
+    /* Shared design tokens mirror site-template/tokens.css (the canonical
+       source). tests/test_design_tokens.py enforces the mirror. The themeable
+       --accent / --accent-light / --bg / --nav-bg are catalog-specific. */
     :root{
       --accent:#7c3aed;--accent-light:#a78bfa;--accent-glow:rgba(124,58,237,0.15);
       --bg:#0d1117;--bg2:#161b22;--bg3:#1c2128;--bg-hover:#22272e;
@@ -30,27 +39,30 @@
       --font-sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
       --font-mono:'JetBrains Mono','Fira Code',Consolas,monospace;
       --radius:8px;--radius-lg:12px;
+      --hero-h1:2.5rem;--stat-size:1.75rem;--link-hover:#c4b5fd;
     }
 
     @media(prefers-color-scheme:light){
       html:not([data-theme="dark"]){
         --bg:#f6f8fa;--bg2:#ffffff;--bg3:#f0f2f5;--bg-hover:#e8ebef;
-        --border:#d0d7de;--text:#1f2328;--text-dim:#656d76;--text-muted:#8b949e;
+        --border:#d0d7de;--text:#1f2328;--text-dim:#656d76;--text-muted:#5b6470;
         --nav-bg:rgba(255,255,255,0.88);--accent-glow:rgba(124,58,237,0.08);
       }
     }
     [data-theme="light"]{
       --bg:#f6f8fa;--bg2:#ffffff;--bg3:#f0f2f5;--bg-hover:#e8ebef;
-      --border:#d0d7de;--text:#1f2328;--text-dim:#656d76;--text-muted:#8b949e;
+      --border:#d0d7de;--text:#1f2328;--text-dim:#656d76;--text-muted:#5b6470;
       --nav-bg:rgba(255,255,255,0.88);--accent-glow:rgba(124,58,237,0.08);
     }
 
     html{scroll-behavior:smooth}
     body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
     a{color:var(--accent-light);text-decoration:none;transition:color .2s}
-    a:hover{color:#c4b5fd}
+    a:hover{color:var(--link-hover)}
+    /* Light mode: hovered links use the darker accent for WCAG AA contrast. */
     [data-theme="light"] a{color:var(--accent)}
-    @media(prefers-color-scheme:light){html:not([data-theme="dark"]) a{color:var(--accent)}}
+    [data-theme="light"] a:hover{color:var(--accent)}
+    @media(prefers-color-scheme:light){html:not([data-theme="dark"]) a{color:var(--accent)}html:not([data-theme="dark"]) a:hover{color:var(--accent)}}
 
     /* NAV */
     .nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 1.5rem}
@@ -70,12 +82,12 @@
     .hero{text-align:center;padding:4rem 1.5rem 3rem;background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 70%,var(--bg) 100%);position:relative}
     .hero-inner{max-width:800px;margin:0 auto}
     .hero-logo{width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:1.25rem;box-shadow:0 4px 24px rgba(0,0,0,.3);border:2px solid var(--border)}
-    .hero h1{font-size:2.5rem;font-weight:700;margin-bottom:1rem;background:linear-gradient(135deg,var(--text),var(--accent-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero h1{font-size:var(--hero-h1);font-weight:700;margin-bottom:1rem;background:linear-gradient(135deg,var(--text),var(--accent-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     .hero p{font-size:1.125rem;color:var(--text-dim);margin-bottom:2rem;max-width:600px;margin-left:auto;margin-right:auto}
 
     .stats-bar{display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;margin-bottom:1rem}
     .stat-item{text-align:center}
-    .stat-value{font-size:1.75rem;font-weight:700;color:var(--accent-light);font-family:var(--font-mono)}
+    .stat-value{font-size:var(--stat-size);font-weight:700;color:var(--accent-light);font-family:var(--font-mono)}
     .stat-label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
 
     .search-bar{max-width:480px;margin:0 auto 1.5rem;padding:0 1.5rem;position:relative}
@@ -147,6 +159,8 @@
     details.cat-group>.cat-body{overflow:hidden}
     .cat-body-anim{transition:max-height .25s ease,opacity .2s ease;overflow:hidden}
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+    .skip-link{position:absolute;left:.5rem;top:-3rem;z-index:300;background:var(--accent);color:#fff;padding:.5rem 1rem;border-radius:6px;font-size:.875rem;font-weight:600;transition:top .15s}
+    .skip-link:focus{top:.5rem;color:#fff}
 
     /* TOAST */
     .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(100%);background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.5rem 1.25rem;border-radius:8px;font-size:.8125rem;font-weight:500;opacity:0;transition:transform .3s,opacity .3s;z-index:200;pointer-events:none}
@@ -198,6 +212,8 @@
 </head>
 <body>
 
+  <a href="#main" class="skip-link">Skip to content</a>
+
   <nav class="nav">
     <div class="nav-inner">
       <a href="#" class="nav-brand">
@@ -220,6 +236,8 @@
       </ul>
     </div>
   </nav>
+
+  <main id="main">
 
   <section class="hero">
     <div class="hero-inner">
@@ -317,6 +335,8 @@
 
   </div>
 
+  </main>
+
   <footer>
     <div class="footer-inner">
       <div class="footer-links">
@@ -388,6 +408,7 @@
       function updateIcon(s){
         setIconChildren(iconSvgs[s]||iconSvgs.auto);
         btn.title='Theme: '+s;
+        btn.setAttribute('aria-label','Theme: '+s+' (click to change)');
       }
       btn.addEventListener('click',function(){var c=getState();apply(states[(states.indexOf(c)+1)%states.length])});
       updateIcon(getState());

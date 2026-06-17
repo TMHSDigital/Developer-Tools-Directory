@@ -30,18 +30,15 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* Shared design tokens, single source of truth (see tokens.css). */
+{% include 'tokens.css' %}
+
+    /* Per-tool themeable values; the rest come from tokens.css above. */
     :root {
       --accent: {{ site.accent | default('#7c3aed') }};
       --accent-light: {{ site.accentLight | default('#a78bfa') }};
       --bg: {{ site.heroGradientFrom | default('#0d1117') }};
-      --bg2: #161b22;
-      --bg3: #1c2128;
-      --border: #30363d;
-      --text: #e6edf3;
-      --text-dim: #8b949e;
       --nav-bg: rgba(13,17,23,0.85);
-      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-      --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
       --hero-from: {{ site.heroGradientFrom | default('#0d1117') }};
       --hero-to: {{ site.heroGradientTo | default('#161b22') }};
     }
@@ -55,7 +52,7 @@
         --hero-from: #f0f2f5; --hero-to: #f6f8fa;
       }
       html:not([data-theme="dark"]) a { color: var(--accent); }
-      html:not([data-theme="dark"]) a:hover { color: var(--accent-light); }
+      html:not([data-theme="dark"]) a:hover { color: var(--accent); }
       html:not([data-theme="dark"]) .hero h1 { background: linear-gradient(135deg, var(--text), var(--accent)); -webkit-background-clip: text; background-clip: text; }
       html:not([data-theme="dark"]) .data-table tr:hover td { background: rgba(0,0,0,0.03); }
       html:not([data-theme="dark"]) .search-input { background: var(--bg3); }
@@ -69,7 +66,7 @@
       --hero-from: #f0f2f5; --hero-to: #f6f8fa;
     }
     [data-theme="light"] a { color: var(--accent); }
-    [data-theme="light"] a:hover { color: var(--accent-light); }
+    [data-theme="light"] a:hover { color: var(--accent); }
     [data-theme="light"] .hero h1 { background: linear-gradient(135deg, var(--text), var(--accent)); -webkit-background-clip: text; background-clip: text; }
     [data-theme="light"] .data-table tr:hover td { background: rgba(0,0,0,0.03); }
     [data-theme="light"] .search-input { background: var(--bg3); }
@@ -78,7 +75,7 @@
     html { scroll-behavior: smooth; }
     body { font-family: var(--font-sans); background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }
     a { color: var(--accent-light); text-decoration: none; transition: color 0.2s; }
-    a:hover { color: #fff; }
+    a:hover { color: var(--link-hover); }
 
     /* NAV */
     .nav { position: sticky; top: 0; z-index: 100; background: var(--nav-bg); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 1.5rem; }
@@ -97,11 +94,11 @@
     .hero { text-align: center; padding: 4rem 1.5rem 4.5rem; background: linear-gradient(180deg, var(--hero-from) 0%, var(--hero-to) 70%, var(--bg) 100%); position: relative; }
     .hero-inner { max-width: 720px; margin: 0 auto; }
     .hero-logo { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 1.25rem; box-shadow: 0 4px 24px rgba(0,0,0,0.3); border: 2px solid var(--border); }
-    .hero h1 { font-size: 2.75rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, var(--text), var(--accent-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero h1 { font-size: var(--hero-h1); font-weight: 700; margin-bottom: 1rem; background: linear-gradient(135deg, var(--text), var(--accent-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .hero p { font-size: 1.125rem; color: var(--text-dim); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; }
     .stats { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; margin-bottom: 2rem; }
     .stat { text-align: center; }
-    .stat-val { font-size: 2rem; font-weight: 700; color: var(--accent-light); font-family: var(--font-mono); }
+    .stat-val { font-size: var(--stat-size); font-weight: 700; color: var(--accent-light); font-family: var(--font-mono); }
     .stat-lbl { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem; }
     .hero-badges { display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem; }
     .badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.875rem; font-weight: 500; transition: border-color 0.2s, background 0.2s; }
