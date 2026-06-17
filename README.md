@@ -31,7 +31,7 @@
 
 <!-- registry:stats:start -->
 <p align="center">
- 11 repos &nbsp;&bull;&nbsp; 189 skills &nbsp;&bull;&nbsp; 77 rules &nbsp;&bull;&nbsp; 378 MCP tools
+ 14 repos &nbsp;&bull;&nbsp; 189 skills &nbsp;&bull;&nbsp; 77 rules &nbsp;&bull;&nbsp; 419 MCP tools
 </p>
 <!-- registry:stats:end -->
 
@@ -66,7 +66,7 @@ flowchart LR
 | **CFX MCP** | MCP Server | - | - | 0 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/cfx-mcp) |
 | **Blender Developer Tools** | Plugin | 12 | 6 | 0 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Blender-Developer-Tools) |
 | **Local AI MCP** | MCP Server | - | - | 16 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/local-ai-mcp) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/local-ai-mcp/) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/local-ai-mcp) |
-| **Screencast MCP** | MCP Server | - | - | 10 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/screencast-mcp) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/screencast-mcp/) |
+| **Screencast MCP** | MCP Server | - | - | 25 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/screencast-mcp) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/screencast-mcp/) |
 <!-- registry:tools:end -->
 
 <details>

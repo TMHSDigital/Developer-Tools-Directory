@@ -162,8 +162,13 @@ def render_readme_descriptions(entries: list[dict[str, Any]]) -> str:
 
 
 def aggregate_stats(entries: list[dict[str, Any]]) -> dict[str, int]:
-    counted_statuses = {"active", "maintenance"}
-    visible = [e for e in entries if e.get("status", "active") in counted_statuses]
+    # Count every non-archived tool. Experimental, beta, and deprecated tools
+    # are real and visible in the catalog, so they count toward the totals; the
+    # hero JS in docs/index.html applies the same rule. Keep the two in sync.
+    excluded_statuses = {"archived"}
+    visible = [
+        e for e in entries if e.get("status", "active") not in excluded_statuses
+    ]
     return {
         "repos": len(visible),
         "skills": sum(int(e.get("skills") or 0) for e in visible),

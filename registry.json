@@ -330,7 +330,7 @@
     "homepage": "https://tmhsdigital.github.io/screencast-mcp/",
     "skills": 0,
     "rules": 0,
-    "mcpTools": 10,
+    "mcpTools": 25,
     "extras": {},
     "topics": [
       "mcp-server",
