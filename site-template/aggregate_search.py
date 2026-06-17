@@ -14,13 +14,26 @@ from pathlib import Path
 from build_site import load_json, load_mcp_tools, parse_rules, parse_skills
 
 
-def build_index(registry_path: Path, repo_dirs: dict[str, Path]) -> list[dict]:
-    """Build search index entries from registry + local repo data."""
+def build_index(
+    registry_path: Path,
+    repo_dirs: dict[str, Path],
+    existing: dict[str, dict] | None = None,
+) -> list[dict]:
+    """Build search index entries from registry + local repo data.
+
+    Basic fields (name, description, type, topics, npm, url, homepage) always
+    come from the registry. Skill/rule/MCP-tool names come from a local repo
+    checkout when one is available; otherwise they are preserved from
+    *existing* (a prior index keyed by slug) so refreshing without a full
+    fleet checkout does not discard data that was scanned earlier.
+    """
     registry = load_json(registry_path)
+    existing = existing or {}
     index = []
 
     for tool in registry:
         slug = tool.get("slug", "")
+        prior = existing.get(slug, {})
         entry = {
             "name": tool["name"],
             "slug": slug,
@@ -30,9 +43,9 @@ def build_index(registry_path: Path, repo_dirs: dict[str, Path]) -> list[dict]:
             "npm": tool.get("npm", ""),
             "url": f"https://github.com/{tool['repo']}",
             "homepage": tool.get("homepage", ""),
-            "skills": [],
-            "rules": [],
-            "mcpTools": [],
+            "skills": list(prior.get("skills", [])),
+            "rules": list(prior.get("rules", [])),
+            "mcpTools": list(prior.get("mcpTools", [])),
         }
 
         repo_root = repo_dirs.get(slug)
@@ -100,7 +113,16 @@ def main():
                 if slug and slug not in repo_dirs:
                     repo_dirs[slug] = child
 
-    index = build_index(args.registry, repo_dirs)
+    existing: dict[str, dict] = {}
+    if args.out.is_file():
+        try:
+            for e in load_json(args.out):
+                if isinstance(e, dict) and e.get("slug"):
+                    existing[e["slug"]] = e
+        except (ValueError, OSError):
+            existing = {}
+
+    index = build_index(args.registry, repo_dirs, existing)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as f:
