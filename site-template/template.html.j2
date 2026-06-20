@@ -205,13 +205,21 @@
 
     /* SKILL DETAIL ROWS */
     details.skill-row { border-bottom: 1px solid rgba(48,54,61,0.5); }
-    details.skill-row > summary { display: flex; align-items: center; gap: 0.75rem; padding: 0.625rem 0.75rem; cursor: pointer; list-style: none; transition: background 0.15s; }
+    details.skill-row > summary { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.625rem 0.75rem; cursor: pointer; list-style: none; transition: background 0.15s; }
     details.skill-row > summary::-webkit-details-marker { display: none; }
-    details.skill-row > summary::before { content: ''; display: inline-block; width: 0; height: 0; border-left: 5px solid var(--accent-light); border-top: 4px solid transparent; border-bottom: 4px solid transparent; transition: transform 0.2s; flex-shrink: 0; }
+    details.skill-row > summary::before { content: ''; display: inline-block; width: 0; height: 0; margin-top: 0.4rem; border-left: 5px solid var(--accent-light); border-top: 4px solid transparent; border-bottom: 4px solid transparent; transition: transform 0.2s; flex-shrink: 0; }
     details.skill-row[open] > summary::before { transform: rotate(90deg); }
     details.skill-row > summary:hover { background: var(--bg3); }
-    .skill-name { font-weight: 500; color: var(--text); white-space: nowrap; min-width: 140px; }
-    .skill-desc { color: var(--text-dim); font-size: 0.875rem; }
+    .skill-name { font-weight: 500; color: var(--text); flex: 0 1 12rem; min-width: 0; }
+    .skill-desc { color: var(--text-dim); font-size: 0.875rem; flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+    /* Narrow screens: stack name above description (the two-column flex row leaves the name
+       too cramped). flex-wrap + a full-width basis on .skill-desc drops it to its own line
+       under the triangle+name; indent it to align under the name. */
+    @media (max-width: 620px) {
+      details.skill-row > summary { flex-wrap: wrap; }
+      .skill-name { flex: 1 1 0; }
+      .skill-desc { flex: 1 0 100%; margin-left: 1.1rem; }
+    }
     .skill-detail { padding: 0.5rem 0.75rem 1rem 1.75rem; }
     .skill-detail-group { margin-bottom: 0.75rem; }
     .skill-detail-group strong { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); margin-bottom: 0.35rem; }
