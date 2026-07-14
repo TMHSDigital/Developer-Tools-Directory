@@ -354,16 +354,20 @@
     "homepage": "https://tmhsdigital.github.io/tailscale-mcp/",
     "skills": 0,
     "rules": 0,
-    "mcpTools": 0,
+    "mcpTools": 6,
     "extras": {},
     "topics": [
-      "mcp-server",
-      "developer-tools"
+      "mcp",
+      "model-context-protocol",
+      "tailscale",
+      "tailnet",
+      "ssh"
     ],
-    "status": "active",
+    "status": "experimental",
     "language": "TypeScript",
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "static",
-    "hasCI": true
+    "hasCI": true,
+    "npm": "@tmhs/tailscale-mcp"
   }
 ]
