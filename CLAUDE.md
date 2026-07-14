@@ -90,10 +90,11 @@ Static HTML/CSS/JS. No build step. No external CDN. The `pages.yml` workflow cop
 | Blender Developer Tools | Plugin | 12 | 6 | 0 |
 | Local AI MCP | MCP Server | 0 | 0 | 16 |
 | Screencast MCP | MCP Server | 0 | 0 | 25 |
+| Tailscale MCP | MCP Server | 0 | 0 | 0 |
 <!-- registry:tools:end -->
 
 <!-- registry:stats:start -->
-**Totals:** 189 skills, 77 rules, 419 MCP tools across 14 repos
+**Totals:** 189 skills, 77 rules, 419 MCP tools across 15 repos
 <!-- registry:stats:end -->
 
 ## Development Workflow

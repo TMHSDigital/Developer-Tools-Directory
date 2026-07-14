@@ -344,5 +344,26 @@
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "static",
     "hasCI": true
+  },
+  {
+    "name": "Tailscale MCP",
+    "repo": "TMHSDigital/tailscale-mcp",
+    "slug": "tailscale-mcp",
+    "description": "MCP server for safe programmatic access to the local Tailscale daemon: tailnet discovery, SSH config generation, port sharing via Serve/Funnel, and latency matrices.",
+    "type": "mcp-server",
+    "homepage": "https://tmhsdigital.github.io/tailscale-mcp/",
+    "skills": 0,
+    "rules": 0,
+    "mcpTools": 0,
+    "extras": {},
+    "topics": [
+      "mcp-server",
+      "developer-tools"
+    ],
+    "status": "active",
+    "language": "TypeScript",
+    "license": "CC-BY-NC-ND-4.0",
+    "pagesType": "static",
+    "hasCI": true
   }
 ]
