@@ -23,7 +23,7 @@ jobs:
       tag: ${{ steps.compare.outputs.tag }}
       previous-tag: ${{ steps.compare.outputs.previous-tag }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -112,7 +112,7 @@ jobs:
       contents: write
       pull-requests: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
