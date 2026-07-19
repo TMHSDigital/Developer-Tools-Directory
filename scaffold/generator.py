@@ -217,6 +217,7 @@ def _render_repo(output_dir: Path, ctx: dict, *, verbose: bool) -> None:
         ("LICENSE", "LICENSE.j2"),
         (".cursorrules", "cursorrules.j2"),
         (".gitignore", "gitignore.j2"),
+        (".gitattributes", "gitattributes.j2"),
         ("site.json", "site.json.j2"),
         ("mcp-tools.json", "mcp-tools.json.j2"),
     ):
