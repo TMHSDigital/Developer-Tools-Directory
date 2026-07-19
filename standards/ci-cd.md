@@ -141,6 +141,19 @@ The companion `Check VERSION vs latest tag` job in `release.yml` is a post-merge
 
 Required approvals are a per-repo decision: solo-maintainer repos may set 0 approvals provided all other gates pass; multi-maintainer repos should require at least 1.
 
+## Workflow trigger pitfalls
+
+Every scaffolded CI workflow (`ci.yml` for mcp-server repos, `validate.yml` for cursor-plugin repos) declares `workflow_dispatch` so it can be re-run manually on any ref. This is a deliberate operational lever for the pitfalls below; it is additive and inert.
+
+**Path-filter trap (by design).** `release.yml` triggers on push to `main` with `paths-ignore` for docs, markdown, and `.github/` changes. A merge that touches only ignored paths will not start `release.yml`, so no tag is cut. This is intended: docs-only merges should not release. Just be aware that a `VERSION` bump landed in a docs-only-classified change will not tag until a subsequent non-ignored push.
+
+**Push-trigger drop (non-deterministic, watch item).**
+
+- *Symptom:* a squash-merge to `main` produces **zero** push-triggered workflow runs (no CI, no release, no drift-check on the merge commit), even though PR checks passed and no path filter applies. `gh api repos/<owner>/<repo>/commits/<sha>/check-runs` returns `total_count: 0`.
+- *First observed:* `godot-correctness-mcp` PR #7 (2026-07-19). Actions was enabled, the repo was public (unlimited minutes), and the immediately preceding and following merges triggered normally — i.e. a transient GitHub delivery drop, not a config error.
+- *Immediate remedy:* dispatch the CI workflow manually and confirm it is green before treating `main` as verified: `gh workflow run CI --ref main` (or `Validate` for cursor-plugin repos), then `gh run watch <id> --exit-status`. The `workflow_dispatch` trigger exists for exactly this.
+- *Escalation rule:* one occurrence is a watch item. A **second** occurrence on any fleet repo promotes this from an operational note to a fleet-standards change — investigate a structural cause (e.g. concurrency/`paths` interaction), apply the fix fleet-wide, and cut a proper `STANDARDS_VERSION` bump with a retrofit. Do not retrofit existing repos before that threshold.
+
 **Configuration lives in repo settings, not in git.** Document the current ruleset in `.github/workflows/README.md` so the state is discoverable without admin access.
 
 > Note: the tool-repo release model described in `release.yml` above uses conventional-commit auto-bumps and does not currently require the `VERSION`/`version-bump-check` gates. The meta-repo deviates intentionally. A decision on whether to propagate the `VERSION`-file model to tool repos is deferred; see `ROADMAP.md`.
