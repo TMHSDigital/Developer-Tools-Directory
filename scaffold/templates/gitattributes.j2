@@ -1,0 +1,13 @@
+# Normalize line endings
+* text=auto
+*.ts eol=lf
+*.js eol=lf
+*.json eol=lf
+*.md eol=lf
+*.yml eol=lf
+*.yaml eol=lf
+
+# Committed binary artifacts (e.g. symbol databases, tree-sitter grammars) must
+# never be line-ending converted or diffed as text.
+*.gz binary
+*.wasm binary
