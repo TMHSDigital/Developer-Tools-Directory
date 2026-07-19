@@ -369,5 +369,30 @@
     "pagesType": "static",
     "hasCI": true,
     "npm": "@tmhs/tailscale-mcp"
+  },
+  {
+    "name": "Godot Correctness MCP",
+    "repo": "TMHSDigital/godot-correctness-mcp",
+    "slug": "godot-correctness-mcp",
+    "description": "Offline static correctness for Godot 4.x GDScript projects: anti-pattern linting via tree-sitter, cross-version API lookup and diff (4.4/4.5), and scene/resource/registry validation. Headless, offline, CI-first.",
+    "type": "mcp-server",
+    "homepage": "https://tmhsdigital.github.io/godot-correctness-mcp/",
+    "skills": 0,
+    "rules": 0,
+    "mcpTools": 10,
+    "extras": {},
+    "topics": [
+      "mcp",
+      "model-context-protocol",
+      "godot",
+      "gdscript",
+      "static-analysis"
+    ],
+    "status": "experimental",
+    "language": "TypeScript",
+    "license": "CC-BY-NC-ND-4.0",
+    "pagesType": "static",
+    "hasCI": true,
+    "npm": "@tmhs/godot-correctness-mcp"
   }
 ]

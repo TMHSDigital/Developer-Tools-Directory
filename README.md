@@ -31,7 +31,7 @@
 
 <!-- registry:stats:start -->
 <p align="center">
- 15 repos &nbsp;&bull;&nbsp; 189 skills &nbsp;&bull;&nbsp; 77 rules &nbsp;&bull;&nbsp; 425 MCP tools
+ 16 repos &nbsp;&bull;&nbsp; 189 skills &nbsp;&bull;&nbsp; 77 rules &nbsp;&bull;&nbsp; 435 MCP tools
 </p>
 <!-- registry:stats:end -->
 
@@ -68,6 +68,7 @@ flowchart LR
 | **Local AI MCP** | MCP Server | - | - | 16 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/local-ai-mcp) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/local-ai-mcp/) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/local-ai-mcp) |
 | **Screencast MCP** | MCP Server | - | - | 25 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/screencast-mcp) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/screencast-mcp/) |
 | **Tailscale MCP** | MCP Server | - | - | 6 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/tailscale-mcp) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/tailscale-mcp/) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/tailscale-mcp) |
+| **Godot Correctness MCP** | MCP Server | - | - | 10 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/godot-correctness-mcp) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/godot-correctness-mcp/) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/godot-correctness-mcp) |
 <!-- registry:tools:end -->
 
 <details>
@@ -93,6 +94,7 @@ flowchart LR
 | **Local AI MCP** | Unified MCP server for managing local model runtimes (Ollama, LM Studio, and more): provider-agnostic discovery, lifecycle, hardware-fit, and delegated inference. |
 | **Screencast MCP** | MCP server for Windows screen recording, frame sampling, and minimal ffmpeg edits (capture, watch, trim/concat/convert). |
 | **Tailscale MCP** | MCP server for safe programmatic access to the local Tailscale daemon: tailnet discovery, SSH config generation, port sharing via Serve/Funnel, and latency matrices. |
+| **Godot Correctness MCP** | Offline static correctness for Godot 4.x GDScript projects: anti-pattern linting via tree-sitter, cross-version API lookup and diff (4.4/4.5), and scene/resource/registry validation. Headless, offline, CI-first. |
 <!-- registry:descriptions:end -->
 
 </details>
