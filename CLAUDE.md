@@ -92,10 +92,11 @@ Static HTML/CSS/JS. No build step. No external CDN. The `pages.yml` workflow cop
 | Screencast MCP | MCP Server | 0 | 0 | 25 |
 | Tailscale MCP | MCP Server | 0 | 0 | 6 |
 | Godot Correctness MCP | MCP Server | 0 | 0 | 10 |
+| Bounty Radar MCP | MCP Server | 0 | 0 | 1 |
 <!-- registry:tools:end -->
 
 <!-- registry:stats:start -->
-**Totals:** 189 skills, 77 rules, 435 MCP tools across 16 repos
+**Totals:** 189 skills, 77 rules, 436 MCP tools across 17 repos
 <!-- registry:stats:end -->
 
 ## Development Workflow

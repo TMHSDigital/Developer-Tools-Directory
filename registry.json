@@ -394,5 +394,29 @@
     "pagesType": "static",
     "hasCI": true,
     "npm": "@tmhs/godot-correctness-mcp"
+  },
+  {
+    "name": "Bounty Radar MCP",
+    "repo": "TMHSDigital/bounty-radar-mcp",
+    "slug": "bounty-radar-mcp",
+    "description": "Paid MCP server exposing a GitHub bounty radar tool. One tool, github_bounty_radar, priced at $0.05 USDC on Base and settled over x402 via the CDP facilitator.",
+    "type": "mcp-server",
+    "homepage": "https://tmhsdigital.github.io/bounty-radar-mcp/",
+    "skills": 0,
+    "rules": 0,
+    "mcpTools": 1,
+    "extras": {},
+    "topics": [
+      "mcp",
+      "model-context-protocol",
+      "x402",
+      "bounty",
+      "base"
+    ],
+    "status": "experimental",
+    "language": "TypeScript",
+    "license": "CC-BY-NC-ND-4.0",
+    "pagesType": "static",
+    "hasCI": true
   }
 ]
