@@ -338,6 +338,9 @@ def test_deployed_service_shape(rendered):
     assert "gh workflow run publish.yml" in (
         library / ".github" / "workflows" / "release.yml"
     ).read_text(encoding="utf-8")
+    dep = (library / ".github" / "dependabot.yml").read_text(encoding="utf-8")
+    assert 'dependency-name: "vitest"' in dep
+    assert "version-update:semver-major" in dep
 
 
 def _make_temp_registry_root(tmp_path: Path) -> Path:
