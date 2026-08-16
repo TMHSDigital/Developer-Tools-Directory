@@ -22,6 +22,10 @@ updates:
       # of the supported runtimes.
       - dependency-name: "@types/node"
         versions: [">=23"]
+      # Hold vitest 3.x. A 4.x bump rewrote the lockfile without optional
+      # esbuild platform packages, so npm ci failed. Major upgrades stay manual.
+      - dependency-name: "vitest"
+        update-types: ["version-update:semver-major"]
 {% endif %}
 {% if has_mcp %}
   - package-ecosystem: "pip"
