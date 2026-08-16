@@ -22,13 +22,14 @@ inspection.
 from __future__ import annotations
 
 import contextlib
+import json
 import os
 import shutil
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import Dict, Iterator, Optional
+from typing import Dict, Iterator, Optional, Tuple
 
 from .pragma import extract_pragmas
 from .signals import detect_signal
@@ -51,7 +52,10 @@ SPARSE_PATHS = (
     ".cursor-plugin",  # plugin.json -> cursor-plugin positive marker
     "package.json",  # mcp-server positive marker (see _detect_repo_type)
     ".github/workflows",  # workflow presence for the required-workflows check
+    ".drift-check.json",  # optional deployed-service archetype declaration
 )
+
+KNOWN_ARCHETYPES = frozenset({"deployed-service"})
 
 
 class RemoteSnapshotError(RuntimeError):
@@ -104,6 +108,37 @@ def _detect_repo_type(repo_path: Path) -> RepoType:
     if (repo_path / "package.json").is_file():
         return "mcp-server"
     return "unknown"
+
+
+def _load_archetype(repo_path: Path) -> Tuple[Optional[str], Optional[str]]:
+    """Read `.drift-check.json` if present.
+
+    Missing file -> ``(None, None)`` (library default). Unknown archetype,
+    invalid JSON, or a non-object document -> ``(None, error)``. Do not
+    infer an archetype from Dockerfile, ``private: true``, or absent npm
+    ``name``.
+    """
+    path = repo_path / ".drift-check.json"
+    if not path.is_file():
+        return None, None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return None, f"invalid .drift-check.json: {exc}"
+    if not isinstance(data, dict):
+        return None, ".drift-check.json must be a JSON object"
+    if "archetype" not in data:
+        return None, ".drift-check.json is missing required key 'archetype'"
+    value = data["archetype"]
+    if not isinstance(value, str) or not value.strip():
+        return None, ".drift-check.json 'archetype' must be a non-empty string"
+    if value not in KNOWN_ARCHETYPES:
+        known = ", ".join(sorted(KNOWN_ARCHETYPES))
+        return None, (
+            f"unknown archetype {value!r} in .drift-check.json "
+            f"(known: {known})"
+        )
+    return value, None
 
 
 def _collect_workflow_names(repo_path: Path) -> frozenset[str]:
@@ -163,6 +198,8 @@ def _build_snapshot_from_path(
             f"classifying as 'unknown'.\n"
         )
 
+    archetype, archetype_error = _load_archetype(repo_path)
+
     files: Dict[Path, FileSnapshot] = {}
     for path in _collect_paths(repo_path):
         try:
@@ -188,6 +225,8 @@ def _build_snapshot_from_path(
         meta_standards=meta_standards,
         meta_required_refs=meta_required_refs,
         present_workflows=_collect_workflow_names(repo_path),
+        archetype=archetype,
+        archetype_error=archetype_error,
     )
 
 

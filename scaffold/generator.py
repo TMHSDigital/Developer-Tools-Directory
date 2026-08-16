@@ -128,6 +128,7 @@ def build_context(
     license_key: str,
     author_name: str,
     author_email: str,
+    deployed_service: bool = False,
 ) -> dict[str, Any]:
     standards_version = read_standards_version()
     meta_major, meta_minor, meta_patch = read_meta_version()
@@ -153,6 +154,7 @@ def build_context(
         "meta_patch": meta_patch,
         "meta_version": f"{meta_major}.{meta_minor}.{meta_patch}",
         "year": datetime.datetime.now(datetime.timezone.utc).year,
+        "deployed_service": deployed_service,
     }
 
 
@@ -191,7 +193,15 @@ def _render_repo(output_dir: Path, ctx: dict, *, verbose: bool) -> None:
     # plus the two optional-for-both workflows (pages, label-sync). mcp-server
     # repos do NOT get cursor-plugin-specific validate.yml / release.yml.
     if repo_type == "mcp-server":
-        write_file(output_dir, ".github/workflows/publish.yml", render_template(env, "publish.yml.j2", ctx), verbose=verbose)
+        if ctx.get("deployed_service"):
+            write_file(
+                output_dir,
+                ".drift-check.json",
+                json.dumps({"archetype": "deployed-service"}, indent=2) + "\n",
+                verbose=verbose,
+            )
+        else:
+            write_file(output_dir, ".github/workflows/publish.yml", render_template(env, "publish.yml.j2", ctx), verbose=verbose)
         write_file(output_dir, ".github/workflows/ci.yml", render_template(env, "ci.yml.j2", ctx), verbose=verbose)
         write_file(output_dir, ".github/workflows/release.yml", render_template(env, "release.mcp.yml.j2", ctx), verbose=verbose)
         write_file(output_dir, ".github/workflows/pages.yml", render_template(env, "pages.mcp.yml.j2", ctx), verbose=verbose)
@@ -279,6 +289,7 @@ def build_registry_entry(
     skill_count: int,
     rule_count: int,
     license_key: str,
+    deployed_service: bool = False,
 ) -> dict[str, Any]:
     """Build a schema-valid registry.json entry for a generated repo.
 
@@ -287,7 +298,7 @@ def build_registry_entry(
     a fresh repo has no MCP tools yet so ``mcpTools`` is 0.
     """
     homepage = f"https://{REPO_OWNER.lower()}.github.io/{slug}/"
-    return {
+    entry: dict[str, Any] = {
         "name": name,
         "repo": f"{REPO_OWNER}/{slug}",
         "slug": slug,
@@ -305,6 +316,12 @@ def build_registry_entry(
         "pagesType": "static",
         "hasCI": True,
     }
+    if repo_type == "mcp-server":
+        if deployed_service:
+            entry["archetype"] = "deployed-service"
+        else:
+            entry["npm"] = f"@tmhs/{slug}"
+    return entry
 
 
 def register_in_registry(
@@ -375,6 +392,7 @@ def generate_repo(
     register: bool = True,
     registry_root: Optional[Path] = None,
     verbose: bool = True,
+    deployed_service: bool = False,
 ) -> Path:
     """Render a complete, standards-compliant repo and (by default) register
     it in the meta catalog. Returns the path to the generated repo.
@@ -385,6 +403,8 @@ def generate_repo(
     """
     if repo_type not in ("cursor-plugin", "mcp-server"):
         raise ScaffoldError(f"unknown repo type: {repo_type!r}")
+    if deployed_service and repo_type != "mcp-server":
+        raise ScaffoldError("--deployed-service requires --type mcp-server")
     if license_key not in LICENSE_FILES:
         raise ScaffoldError(f"unknown license: {license_key!r}")
 
@@ -410,6 +430,7 @@ def generate_repo(
         license_key=license_key,
         author_name=author_name,
         author_email=author_email,
+        deployed_service=deployed_service,
     )
 
     if verbose:
@@ -432,6 +453,7 @@ def generate_repo(
             skill_count=len(skill_names),
             rule_count=len(rule_names),
             license_key=license_key,
+            deployed_service=deployed_service,
         )
         register_in_registry(Path(root), entry, run_sync=True, verbose=verbose)
 

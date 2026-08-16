@@ -12,9 +12,15 @@
     "Search for <code>{{ name }}</code>",
     "Click <code>Install</code> and reload"
 {% else %}
+{% if deployed_service %}
+    "Deploy the HTTP service and point your MCP client at its /mcp endpoint",
+    "Add the remote URL to your Claude Desktop or Cursor mcpServers config",
+    "Restart your MCP client"
+{% else %}
     "Install with <code>npx -y @tmhs/{{ slug }}</code>",
     "Add to your Claude Desktop or Cursor mcpServers config",
     "Restart your MCP client"
+{% endif %}
 {% endif %}
   ]
 }

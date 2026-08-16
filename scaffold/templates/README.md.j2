@@ -54,9 +54,13 @@ pip install -r requirements.txt
 
 ## Installation
 
+{% if deployed_service %}
+This is a deployed HTTP service, not an npm package. Run it from source or a container; there is no `npm install`.
+{% else %}
 ```bash
 npm install {{ slug }}
 ```
+{% endif %}
 {% endif %}
 
 ## Project Structure

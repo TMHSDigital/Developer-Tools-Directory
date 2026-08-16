@@ -166,6 +166,11 @@ class RepoSnapshot:
     # Populated at snapshot time; the required-workflows check reads this.
     # Default frozenset() so existing snapshot constructions remain valid.
     present_workflows: frozenset[str] = frozenset()
+    # Repo-local archetype from `.drift-check.json`. None means the file is
+    # absent (library default). `archetype_error` is a load failure (invalid
+    # JSON, unknown value); when set, no required-workflow exemption applies.
+    archetype: Optional[str] = None
+    archetype_error: Optional[str] = None
 
 
 @dataclass(frozen=True)

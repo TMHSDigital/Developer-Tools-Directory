@@ -44,10 +44,11 @@ jobs:
             "pagesType": str,
             "hasCI": bool,
           }
-          OPTIONAL = {"npm": str}
+          OPTIONAL = {"npm": str, "archetype": str}
           VALID_TYPES = {"cursor-plugin", "mcp-server"}
           VALID_STATUS = {"experimental", "beta", "active", "maintenance", "deprecated", "archived"}
           VALID_PAGES = {"static", "mkdocs", "none"}
+          VALID_ARCHETYPES = {"deployed-service"}
           errors = []
           for i, tool in enumerate(data):
             label = "Entry %d (%s)" % (i, tool.get("name", "?"))
@@ -69,6 +70,19 @@ jobs:
               pass
             elif not all(isinstance(t, str) for t in tool.get("topics", [])):
               errors.append("%s: topics must be array of strings" % label)
+            archetype = tool.get("archetype")
+            if "archetype" in tool:
+              if archetype not in VALID_ARCHETYPES:
+                errors.append("%s: archetype must be one of %s" % (label, VALID_ARCHETYPES))
+              if tool.get("type") != "mcp-server":
+                errors.append("%s: archetype is only valid for mcp-server entries" % label)
+            if tool.get("type") == "mcp-server":
+              npm = tool.get("npm")
+              if archetype == "deployed-service":
+                if "npm" in tool:
+                  errors.append("%s: deployed-service must omit npm" % label)
+              elif not (isinstance(npm, str) and npm.strip()):
+                errors.append("%s: mcp-server entries must have a non-empty npm field" % label)
           if errors:
             for e in errors:
               print("::error::" + e, file=sys.stderr)
@@ -127,6 +141,21 @@ jobs:
           test -f /tmp/scaffold-test/ci-test-plugin/mcp-tools.json
           test -f /tmp/scaffold-test/ci-test-plugin/mcp-server/server.py
           echo "Scaffold test passed"
+
+          python3 scaffold/create-tool.py \
+            --name "CI Deployed Service" \
+            --description "Automated deployed-service test" \
+            --type mcp-server \
+            --deployed-service \
+            --no-register \
+            --output /tmp/scaffold-service
+
+          test -f /tmp/scaffold-service/ci-deployed-service/.drift-check.json
+          test ! -f /tmp/scaffold-service/ci-deployed-service/.github/workflows/publish.yml
+          test -f /tmp/scaffold-service/ci-deployed-service/.github/workflows/release.yml
+          grep -q '"private": true' /tmp/scaffold-service/ci-deployed-service/package.json
+          grep -qv 'gh workflow run publish.yml' /tmp/scaffold-service/ci-deployed-service/.github/workflows/release.yml
+          echo "Deployed-service scaffold test passed"
 
       - name: Scaffold YAML well-formed
         run: |

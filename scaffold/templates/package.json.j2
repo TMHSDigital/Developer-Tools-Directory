@@ -1,15 +1,22 @@
 {
+  {% if deployed_service %}
+  "name": "{{ slug }}",
+  "private": true,
+  {% else %}
   "name": "@tmhs/{{ slug }}",
+  {% endif %}
   "version": "0.1.0",
   "description": "{{ description }}",
   "type": "module",
   "main": "dist/index.js",
+  {% if not deployed_service %}
   "bin": {"{{ slug }}": "dist/index.js"},
   "files": ["dist", "README.md", "LICENSE"],
+  {% endif %}
   "scripts": {
     "build": "echo 'No build target yet'",
-    "test": "echo 'No tests yet' && exit 0",
-    "prepublishOnly": "npm run build"
+    "test": "echo 'No tests yet' && exit 0"{% if not deployed_service %},
+    "prepublishOnly": "npm run build"{% endif %}
   },
   "author": "{{ author_name }}",
   "license": "{{ license_spdx }}",

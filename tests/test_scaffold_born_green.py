@@ -97,6 +97,12 @@ _CASES: dict[str, dict] = {
         "args": ["--skills", "3", "--rules", "2"],
         "detect": "mcp-server",
     },
+    "mcp-server-deployed-service": {
+        "type": "mcp-server",
+        "args": ["--deployed-service"],
+        "detect": "mcp-server",
+        "deployed_service": True,
+    },
 }
 
 # Registry schema mirrored from validate.yml's registry check, used by the
@@ -300,10 +306,38 @@ def test_emitted_workflow_set_exact(rendered, label):
         | OPTIONAL_FOR_BOTH
         | EMITTED_EXTRA.get(repo_type, frozenset())
     )
+    if _CASES[label].get("deployed_service"):
+        expected = expected - {"publish.yml"}
     assert present == expected, (
         f"{label} emitted workflows {sorted(present)} != expected "
         f"{sorted(expected)} (required for {repo_type} union optional-for-both)"
     )
+
+
+def test_deployed_service_shape(rendered):
+    """Deployed-service mcp-servers omit publish/npm and declare the archetype."""
+    repo = rendered["mcp-server-deployed-service"]
+    assert not (repo / ".github" / "workflows" / "publish.yml").exists()
+    assert (repo / ".github" / "workflows" / "release.yml").is_file()
+    manifest = json.loads((repo / ".drift-check.json").read_text(encoding="utf-8"))
+    assert manifest == {"archetype": "deployed-service"}
+    pkg = json.loads((repo / "package.json").read_text(encoding="utf-8"))
+    assert pkg.get("private") is True
+    assert not str(pkg.get("name", "")).startswith("@tmhs/")
+    readme = (repo / "README.md").read_text(encoding="utf-8")
+    assert f"npm install {repo.name}" not in readme
+    assert "not an npm package" in readme
+    release = (repo / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+    assert "gh workflow run publish.yml" not in release
+
+    library = rendered["mcp-server"]
+    assert (library / ".github" / "workflows" / "publish.yml").is_file()
+    assert not (library / ".drift-check.json").exists()
+    lib_pkg = json.loads((library / "package.json").read_text(encoding="utf-8"))
+    assert lib_pkg["name"].startswith("@tmhs/")
+    assert "gh workflow run publish.yml" in (
+        library / ".github" / "workflows" / "release.yml"
+    ).read_text(encoding="utf-8")
 
 
 def _make_temp_registry_root(tmp_path: Path) -> Path:
@@ -319,7 +353,7 @@ def _make_temp_registry_root(tmp_path: Path) -> Path:
     return root
 
 
-@pytest.mark.parametrize("label", ["cursor-plugin", "mcp-server-with-skills"])
+@pytest.mark.parametrize("label", ["cursor-plugin", "mcp-server-with-skills", "mcp-server-deployed-service"])
 def test_registration_round_trips(tmp_path, label):
     """Generation-with-registration must produce a schema-valid registry
     entry and leave the catalog sync-clean (sync --check passes), so a repo
@@ -364,6 +398,13 @@ def test_registration_round_trips(tmp_path, label):
     assert entry["type"] == case["detect"], (
         f"registered type {entry['type']!r} != detected {case['detect']!r}"
     )
+    if case["type"] == "mcp-server":
+        if case.get("deployed_service"):
+            assert entry.get("archetype") == "deployed-service"
+            assert "npm" not in entry
+        else:
+            assert entry.get("npm", "").startswith("@tmhs/")
+            assert "archetype" not in entry
 
     drift = sync_all(root, check=True)
     assert drift is False, "catalog is not sync-clean after registration"

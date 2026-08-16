@@ -18,10 +18,17 @@ jobs:
     name: Tag and release
     runs-on: ubuntu-latest
     steps:
+{% endraw %}
+{% if deployed_service %}
+      # Deployed services have no npm artifact; tagging is the release.
+      # main is protected and is NEVER written to by CI; bump the version in your PR.
+{% else %}
       # The default GITHUB_TOKEN (contents: write) pushes tags and creates the
       # release. main is protected and is NEVER written to by CI; bump the
       # version in your PR. A GITHUB_TOKEN release does not trigger publish.yml,
       # so this job dispatches it explicitly afterward.
+{% endif %}
+{% raw %}
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
@@ -43,7 +50,9 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Tag, release, and trigger publish
+{% endraw %}
+      - name: {% if deployed_service %}Tag and release{% else %}Tag, release, and trigger publish{% endif %}
+{% raw %}
         if: steps.check.outputs.skip == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -60,7 +69,9 @@ jobs:
           git push origin "v$major" --force
           git push origin "v$major.$minor" --force
           gh release create "v$v" --title "v$v" --generate-notes
+{% endraw %}
+{% if not deployed_service %}
           # publish.yml is idempotent (skips an already-published version), so a
           # duplicate dispatch is harmless.
           gh workflow run publish.yml --ref main
-{% endraw %}
+{% endif %}

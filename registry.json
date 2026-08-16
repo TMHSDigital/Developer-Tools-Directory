@@ -249,7 +249,8 @@
     "language": "TypeScript",
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "static",
-    "hasCI": true
+    "hasCI": true,
+    "npm": "@tmhs/devtools-mcp"
   },
   {
     "name": "CFX MCP",
@@ -267,7 +268,8 @@
     "language": "TypeScript",
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "none",
-    "hasCI": true
+    "hasCI": true,
+    "npm": "@tmhsdigital/cfx-mcp"
   },
   {
     "name": "Blender Developer Tools",
@@ -343,7 +345,8 @@
     "language": "TypeScript",
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "static",
-    "hasCI": true
+    "hasCI": true,
+    "npm": "@tmhs/screencast-mcp"
   },
   {
     "name": "Tailscale MCP",
@@ -417,6 +420,7 @@
     "language": "TypeScript",
     "license": "CC-BY-NC-ND-4.0",
     "pagesType": "static",
-    "hasCI": true
+    "hasCI": true,
+    "archetype": "deployed-service"
   }
 ]
