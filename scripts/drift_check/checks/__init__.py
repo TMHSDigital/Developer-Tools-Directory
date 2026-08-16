@@ -2,7 +2,7 @@
 
 Session A shipped ``version_signal``. Session B adds ``broken_refs``,
 ``required_refs``, and ``stale_counts``. ``required_workflows`` was added
-in v1.10.0.
+in v1.10.0. Deployed-service archetype support landed in v1.11.0.
 """
 from .broken_refs import BrokenRefsCheck
 from .required_refs import RequiredRefsCheck

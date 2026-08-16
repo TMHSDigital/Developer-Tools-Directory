@@ -150,6 +150,25 @@ See [testing.md](testing.md) for the full matrix. Summary:
 | Python package | `<tool>_mcp` (PyPI not currently published) |
 | Server folder in repo | `mcp-server/` |
 
+## Deployed-service archetype
+
+Most mcp-servers are libraries: they publish to npm and keep `publish.yml` in the required-workflow set. A **deployed service** is an mcp-server that runs as a remote HTTP process and has no npm artifact.
+
+Declare it explicitly in repo-local `.drift-check.json`:
+
+```json
+{ "archetype": "deployed-service" }
+```
+
+That file is the only signal. Do not infer the archetype from a Dockerfile, `"private": true` in `package.json`, or an absent package `name`. Missing `.drift-check.json` is the library default. Unknown `archetype` values are errors (no silent ignore).
+
+The archetype exempts **only**:
+
+- required workflow `publish.yml`
+- catalog field `npm` (a `deployed-service` registry entry must omit `npm`; every other mcp-server entry must have a non-empty `npm`)
+
+It does not relax `drift-check.yml`, `stale.yml`, transport rules, or tool-naming rules. Scaffold with `--type mcp-server --deployed-service`.
+
 ## Migration
 
 Existing tools that deviate from this standard (e.g. mixed camelCase/snake_case) should correct on their next minor version bump. Breaking tool renames require a major bump and a deprecation shim (keep the old name, log a warning, remove one minor version later).

@@ -31,7 +31,7 @@ Detection MUST key only on these positive markers, never on the presence or abse
 
 ### C2. Exact workflow set
 
-The emitted `.github/workflows/` set EXACTLY equals the per-type required set in [`drift-checker.config.json`](drift-checker.config.json) plus the two optional-for-both workflows (`label-sync.yml`, `pages.yml`) - no more, no less. See [`ci-cd.md`](ci-cd.md) for the per-type matrix. mcp-server repos MUST NOT emit `validate.yml` or `release.yml` (their jobs assume a plugin manifest; `publish.yml` replaces `release.yml`).
+The emitted `.github/workflows/` set EXACTLY equals the per-type required set in [`drift-checker.config.json`](drift-checker.config.json) plus the two optional-for-both workflows (`label-sync.yml`, `pages.yml`) - no more, no less. See [`ci-cd.md`](ci-cd.md) for the per-type matrix. mcp-server repos MUST NOT emit plugin `validate.yml` (its jobs assume a plugin manifest). Library mcp-servers emit `publish.yml`. Deployed-service mcp-servers (`--deployed-service`) MUST omit `publish.yml` and MUST emit `.drift-check.json` with `{"archetype": "deployed-service"}`.
 
 ### C3. Empty drift
 

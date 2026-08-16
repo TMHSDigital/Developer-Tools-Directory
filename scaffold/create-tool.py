@@ -41,6 +41,7 @@ def parse_args():
 Examples:
   python create-tool.py --name "Unreal Developer Tools" --description "Cursor plugin for Unreal Engine"
   python create-tool.py --name "AWS MCP Server" --type mcp-server --mcp-server
+  python create-tool.py --name "Hosted Radar" --type mcp-server --deployed-service
   python create-tool.py --name "K8s Developer Tools" --mcp-server --skills 5 --rules 3
   python create-tool.py --name "Throwaway" --description test --no-register
         """,
@@ -55,6 +56,14 @@ Examples:
         help="Repository type (default: cursor-plugin)",
     )
     parser.add_argument("--mcp-server", action="store_true", help="Include MCP server scaffold")
+    parser.add_argument(
+        "--deployed-service",
+        action="store_true",
+        help=(
+            "mcp-server archetype: deployed HTTP service. Omits publish.yml and "
+            "the registry npm field; writes .drift-check.json. Requires --type mcp-server."
+        ),
+    )
     parser.add_argument("--skills", type=int, default=0, help="Number of placeholder skill directories to create")
     parser.add_argument("--rules", type=int, default=0, help="Number of placeholder rule files to create")
     parser.add_argument(
@@ -115,6 +124,7 @@ def main() -> int:
             author_email=args.author_email,
             register=not args.no_register,
             registry_root=Path(args.registry_root) if args.registry_root else None,
+            deployed_service=args.deployed_service,
         )
     except ScaffoldError as exc:
         print(f"Error: {exc}", file=sys.stderr)

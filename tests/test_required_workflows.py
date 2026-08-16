@@ -29,7 +29,7 @@ from drift_check.types import (
 # Helpers
 # ---------------------------------------------------------------------------
 
-_META = Version(major=1, minor=10, patch=0, raw="1.10.0")
+_META = Version(major=1, minor=11, patch=0, raw="1.11.0")
 
 
 def _snap(
@@ -39,6 +39,8 @@ def _snap(
     present: frozenset[str] = frozenset(),
     required: frozenset[str] = frozenset(),
     skip_checks: frozenset[str] = frozenset(),
+    archetype: str | None = None,
+    archetype_error: str | None = None,
 ) -> RepoSnapshot:
     cfg = RepoConfig(
         slug=slug,
@@ -54,6 +56,8 @@ def _snap(
         meta_commit="abc1234",
         config=cfg,
         present_workflows=present,
+        archetype=archetype,
+        archetype_error=archetype_error,
     )
 
 
@@ -141,6 +145,55 @@ def test_mcp_server_type_respected() -> None:
     # stale.yml missing -> one error
     assert len(findings) == 1, findings
     assert "stale.yml" in findings[0].message
+
+
+def test_deployed_service_drops_publish_yml() -> None:
+    """mcp-server + deployed-service does not require publish.yml."""
+    required = frozenset({"drift-check.yml", "stale.yml", "publish.yml"})
+    present = frozenset({"drift-check.yml", "stale.yml"})
+    findings = _run(_snap(
+        repo_type="mcp-server",
+        required=required,
+        present=present,
+        archetype="deployed-service",
+    ))
+    assert findings == [], findings
+
+
+def test_library_mcp_server_still_requires_publish() -> None:
+    """Missing .drift-check.json keeps the library publish.yml requirement."""
+    findings = _run(_snap(
+        repo_type="mcp-server",
+        required=frozenset({"drift-check.yml", "stale.yml", "publish.yml"}),
+        present=frozenset({"drift-check.yml", "stale.yml"}),
+    ))
+    assert len(findings) == 1, findings
+    assert "publish.yml" in findings[0].message
+
+
+def test_unknown_archetype_is_error_without_exemption() -> None:
+    """Unknown archetype errors and does not drop publish.yml."""
+    findings = _run(_snap(
+        repo_type="mcp-server",
+        required=frozenset({"drift-check.yml", "stale.yml", "publish.yml"}),
+        present=frozenset({"drift-check.yml", "stale.yml"}),
+        archetype_error="unknown archetype 'hosted' in .drift-check.json (known: deployed-service)",
+    ))
+    messages = [f.message for f in findings]
+    assert any("unknown archetype" in m for m in messages), findings
+    assert any("publish.yml" in m for m in messages), findings
+
+
+def test_deployed_service_on_cursor_plugin_is_error() -> None:
+    """deployed-service is invalid on cursor-plugin repos."""
+    findings = _run(_snap(
+        repo_type="cursor-plugin",
+        required=frozenset({"validate.yml"}),
+        present=frozenset({"validate.yml"}),
+        archetype="deployed-service",
+    ))
+    assert len(findings) == 1, findings
+    assert "only valid for mcp-server" in findings[0].message
 
 
 def test_config_tier_merge_adds_requirements() -> None:
