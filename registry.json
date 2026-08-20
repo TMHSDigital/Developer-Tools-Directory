@@ -187,7 +187,7 @@
     "homepage": "https://tmhsdigital.github.io/Steam-Cursor-Plugin/",
     "skills": 30,
     "rules": 9,
-    "mcpTools": 25,
+    "mcpTools": 26,
     "extras": {},
     "topics": [
       "steam",
@@ -211,7 +211,7 @@
     "homepage": "https://www.npmjs.com/package/@tmhs/steam-mcp",
     "skills": 0,
     "rules": 0,
-    "mcpTools": 25,
+    "mcpTools": 26,
     "extras": {},
     "npm": "@tmhs/steam-mcp",
     "topics": [

@@ -31,7 +31,7 @@
 
 <!-- registry:stats:start -->
 <p align="center">
- 17 repos &nbsp;&bull;&nbsp; 189 skills &nbsp;&bull;&nbsp; 77 rules &nbsp;&bull;&nbsp; 436 MCP tools
+ 17 repos &nbsp;&bull;&nbsp; 189 skills &nbsp;&bull;&nbsp; 77 rules &nbsp;&bull;&nbsp; 438 MCP tools
 </p>
 <!-- registry:stats:end -->
 
@@ -60,8 +60,8 @@ flowchart LR
 | **Mobile App Developer Tools** | Plugin | 43 | 12 | 36 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Mobile-App-Developer-Tools) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Mobile-App-Developer-Tools/) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/mobile-mcp) |
 | **Plaid Developer Tools** | Plugin | 17 | 7 | 30 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Plaid-Developer-Tools) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Plaid-Developer-Tools/) |
 | **Monday Cursor Plugin** | Plugin | 21 | 8 | 45 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Monday-Cursor-Plugin) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Monday-Cursor-Plugin/) |
-| **Steam Cursor Plugin** | Plugin | 30 | 9 | 25 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Steam-Cursor-Plugin) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Steam-Cursor-Plugin/) |
-| **Steam MCP Server** | MCP Server | - | - | 25 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/steam-mcp) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/steam-mcp) |
+| **Steam Cursor Plugin** | Plugin | 30 | 9 | 26 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Steam-Cursor-Plugin) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Steam-Cursor-Plugin/) |
+| **Steam MCP Server** | MCP Server | - | - | 26 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/steam-mcp) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/steam-mcp) |
 | **Developer Tools MCP** | MCP Server | - | - | 7 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Developer-Tools-MCP) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Developer-Tools-MCP/) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/devtools-mcp) |
 | **CFX MCP** | MCP Server | - | - | 0 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/cfx-mcp) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhsdigital/cfx-mcp) |
 | **Blender Developer Tools** | Plugin | 12 | 6 | 0 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Blender-Developer-Tools) |
