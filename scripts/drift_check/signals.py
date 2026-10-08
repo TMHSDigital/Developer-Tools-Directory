@@ -2,20 +2,20 @@
 
 Two file formats, two position rules:
 
-* prose files (``AGENTS.md``, ``CLAUDE.md``) — first non-BOM line must be
+* prose files (``AGENTS.md``, ``CLAUDE.md``) - first non-BOM line must be
   an HTML comment of the form ``<!-- standards-version: X.Y.Z -->``.
   Internal whitespace is flexible; canonical form has single spaces.
-* metadata files (``SKILL.md``, ``.mdc``) — the ``standards-version`` key
+* metadata files (``SKILL.md``, ``.mdc``) - the ``standards-version`` key
   must live inside the first ``---``-fenced YAML block.
 
 Return semantics:
 
-* ``None`` — no signal at the strict position. The file may still contain
+* ``None`` - no signal at the strict position. The file may still contain
   the literal string ``standards-version`` somewhere else, but we do not
   consider that a signal. That distinction is important for the check:
   "no signal" is error, "signal found but malformed" is also error but
   with a different message and a location.
-* ``SignalResult(malformed=True, version=None)`` — something at the right
+* ``SignalResult(malformed=True, version=None)`` - something at the right
   position that looks like our marker but does not parse as a version.
 
 We deliberately do not import ``yaml`` here. The first-field ``key: value``
@@ -123,7 +123,7 @@ def _detect_yaml_frontmatter(body: bytes) -> Optional[SignalResult]:
             close_idx = i
             break
     if close_idx is None:
-        # Unclosed frontmatter — still scan; treat up to EOF as the block.
+        # Unclosed frontmatter - still scan; treat up to EOF as the block.
         close_idx = len(lines)
     for i in range(1, close_idx):
         line = lines[i].rstrip(b"\r")

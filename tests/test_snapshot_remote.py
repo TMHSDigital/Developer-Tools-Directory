@@ -210,7 +210,7 @@ def test_remote_matches_local_for_cfx():
     )
 
     # Same files, same repo_type. Content may differ if local has
-    # uncommitted changes — compare file paths and signal counts only.
+    # uncommitted changes - compare file paths and signal counts only.
     assert remote.repo_type == local.repo_type
     assert set(remote.files.keys()) == set(local.files.keys())
     assert sum(1 for f in remote.files.values() if f.signal) == \

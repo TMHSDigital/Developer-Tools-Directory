@@ -158,7 +158,7 @@ class RepoSnapshot:
     # Meta-repo facts captured at snapshot time. ``meta_standards`` is the
     # set of filenames under ``standards/`` (relative, no leading path) as
     # observed by the snapshot builder. Consumed by ``broken_refs`` and
-    # ``required_refs``. Empty means "unknown" — Session C will populate
+    # ``required_refs``. Empty means "unknown" - Session C will populate
     # this in remote mode via sparse-checkout.
     meta_standards: frozenset[str] = frozenset()
     meta_required_refs: Mapping[str, Mapping[str, Sequence[str]]] = field(default_factory=dict)

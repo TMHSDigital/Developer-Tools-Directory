@@ -5,13 +5,13 @@ Flags any occurrence of aggregate-count narrative like "177 skills" or
 these in sync with the registry; the correct remediation is removal, so
 the check is a warn-and-suggest-removal only.
 
-This check is regex-based and intentionally over-warns — a human reviewing
+This check is regex-based and intentionally over-warns - a human reviewing
 the warnings decides which are genuine stale narrative (e.g.,
 ``25 MCP tools``) and which are coincidental (e.g., ``UFW is active with
 12 rules`` in a firewall skill). False positives here cost less than
 missing a genuine stale count.
 
-We do NOT scan inside YAML frontmatter blocks — those carry structured
+We do NOT scan inside YAML frontmatter blocks - those carry structured
 data like ``globs:`` and never contain aggregate narrative. We DO still
 scan inside fenced code blocks, by design: even in an example block, a
 stale count is stale information that will confuse readers once the real

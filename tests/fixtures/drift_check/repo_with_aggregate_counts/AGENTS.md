@@ -8,7 +8,7 @@ A Cursor IDE plugin providing widget workflows. 17 skills, 10 rules, and
 skills/ contains 17 skill directories.
 rules/ contains 10 rule files.
 
-In a code block, we still warn — even stale narrative in examples is
+In a code block, we still warn - even stale narrative in examples is
 still stale:
 
 ```

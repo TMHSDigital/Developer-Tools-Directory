@@ -151,9 +151,9 @@ Every scaffolded CI workflow (`ci.yml` for mcp-server repos, `validate.yml` for 
 **Push-trigger drop (non-deterministic, watch item).**
 
 - *Symptom:* a squash-merge to `main` produces **zero** push-triggered workflow runs (no CI, no release, no drift-check on the merge commit), even though PR checks passed and no path filter applies. `gh api repos/<owner>/<repo>/commits/<sha>/check-runs` returns `total_count: 0`.
-- *First observed:* `godot-correctness-mcp` PR #7 (2026-07-19). Actions was enabled, the repo was public (unlimited minutes), and the immediately preceding and following merges triggered normally — i.e. a transient GitHub delivery drop, not a config error.
+- *First observed:* `godot-correctness-mcp` PR #7 (2026-07-19). Actions was enabled, the repo was public (unlimited minutes), and the immediately preceding and following merges triggered normally - i.e. a transient GitHub delivery drop, not a config error.
 - *Immediate remedy:* dispatch the CI workflow manually and confirm it is green before treating `main` as verified: `gh workflow run CI --ref main` (or `Validate` for cursor-plugin repos), then `gh run watch <id> --exit-status`. The `workflow_dispatch` trigger exists for exactly this.
-- *Escalation rule:* one occurrence is a watch item. A **second** occurrence on any fleet repo promotes this from an operational note to a fleet-standards change — investigate a structural cause (e.g. concurrency/`paths` interaction), apply the fix fleet-wide, and cut a proper `STANDARDS_VERSION` bump with a retrofit. Do not retrofit existing repos before that threshold.
+- *Escalation rule:* one occurrence is a watch item. A **second** occurrence on any fleet repo promotes this from an operational note to a fleet-standards change - investigate a structural cause (e.g. concurrency/`paths` interaction), apply the fix fleet-wide, and cut a proper `STANDARDS_VERSION` bump with a retrofit. Do not retrofit existing repos before that threshold.
 
 **Configuration lives in repo settings, not in git.** Document the current ruleset in `.github/workflows/README.md` so the state is discoverable without admin access.
 

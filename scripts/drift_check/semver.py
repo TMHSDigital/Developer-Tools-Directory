@@ -1,8 +1,8 @@
 """Version parsing and policy-tier classification.
 
-Decision 1 policy: ``same-major-minor`` — patch bumps are ignored, anything
+Decision 1 policy: ``same-major-minor`` - patch bumps are ignored, anything
 above patch is drift. The Q7 adjustment makes ``tool_newer`` a ``warn``
-rather than an ``info`` — see ``compare_policy``.
+rather than an ``info`` - see ``compare_policy``.
 
 This module does NOT map tiers to Finding severity. That is the caller's
 job (see ``checks/version_signal.py``). Keeping the mapping out of here

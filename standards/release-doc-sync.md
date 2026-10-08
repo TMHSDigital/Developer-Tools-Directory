@@ -10,10 +10,10 @@ The `release-doc-sync` composite action keeps `CHANGELOG.md`, `CLAUDE.md`, and `
 
 ## Pinning
 
-Tool repos MUST consume this action via `@v1.0` (or a full commit SHA), never `@main`. The pinning rule matches the `drift-check@v1.7` precedent in this repo: `@main` from a tool repo means every meta-repo PR can break every tool-repo release. The `v1.0` floating tag points at the latest `1.x.y` of this repo and is updated by the maintainer when a relevant change ships. Floating-tag automation is tracked in DTD#14.
+Tool repos MUST consume this action via the floating major tag `@v1` (or a full commit SHA), never `@main`: `@main` from a tool repo means every meta-repo PR can break every tool-repo release. The meta-repo's `release.yml` moves `v1` (and the `v1.MINOR` tag) to each new `1.x.y` release automatically, so `@v1` always runs the latest compatible version. The scaffold emits this pin, derived from the meta `VERSION`.
 
 ```yaml
-uses: TMHSDigital/Developer-Tools-Directory/.github/actions/release-doc-sync@v1.0
+uses: TMHSDigital/Developer-Tools-Directory/.github/actions/release-doc-sync@v1
 ```
 
 ## Inputs
@@ -81,7 +81,7 @@ Insert one step between the existing `Update version files` step (which bumps `p
 
 - name: Sync doc version references
   if: steps.check.outputs.skip == 'false'
-  uses: TMHSDigital/Developer-Tools-Directory/.github/actions/release-doc-sync@v1.0
+  uses: TMHSDigital/Developer-Tools-Directory/.github/actions/release-doc-sync@v1
   with:
     plugin-version: ${{ steps.new.outputs.version }}
     previous-version: ${{ steps.current.outputs.version }}

@@ -24,7 +24,7 @@ Thank you for your interest in contributing. This guide covers everything you ne
 ```
 Developer-Tools-Directory/
   registry.json              # Tool catalog (source of truth)
-  standards/                 # Convention documentation (18 docs)
+  standards/                 # Convention documentation (see standards/README.md)
   scaffold/
     create-tool.py           # Repo generator script
     templates/               # Jinja2 templates for new repos
@@ -48,15 +48,14 @@ Developer-Tools-Directory/
   "slug": "your-tool-repo",
   "description": "One-line description of the tool",
   "type": "cursor-plugin",
+  "category": "developer-tooling",
   "homepage": "https://tmhsdigital.github.io/Your-Tool-Repo/",
   "skills": 0,
   "rules": 0,
   "mcpTools": 0,
   "extras": {},
-  "npm": "",
   "topics": ["topic-1", "topic-2"],
   "status": "active",
-  "version": "0.1.0",
   "language": "Python",
   "license": "CC-BY-NC-ND-4.0",
   "pagesType": "static",
@@ -198,9 +197,8 @@ Templates use Jinja2. Available context variables:
 
 The catalog site lives in `docs/` and is vanilla HTML/CSS/JS with zero dependencies.
 
-- `docs/index.html` - page structure, embedded registry fallback
-- `docs/style.css` - dark theme, responsive cards
-- `docs/script.js` - fetches registry.json, renders stats and tool cards, filtering
+- `docs/index.html` - the whole site: markup, inline CSS, and inline JS (search, filters, URL state)
+- Generated regions (tool cards, filter chips, hero stats, embedded registry and search JSON) come from `scripts/sync_from_registry.py`; do not edit them by hand
 
 The `pages.yml` workflow copies `registry.json` and `assets/` into `docs/` at deploy time, so you don't need to manually copy files.
 

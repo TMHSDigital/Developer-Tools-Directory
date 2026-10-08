@@ -1,6 +1,6 @@
 # Performance
 
-> Lighthouse audit results for all TMHSDigital developer tool sites.
+> Historical baseline: a Lighthouse audit from 2026-04-09 covering the five tool sites that existed then. It predates the v1.4.0 site changes and the catalog's growth to 17 tools, so treat the numbers as a reference point, not current scores. Re-run Lighthouse against the live sites before relying on them.
 
 ## Audit Date
 

@@ -53,7 +53,7 @@ Create a **fine-grained** PAT (not classic) at
 The drift checker does NOT need `Issues: Write` on `DRIFT_CHECK_TOKEN`.
 Sticky-issue upsert uses the workflow's auto-issued `GITHUB_TOKEN` (with
 `issues: write` granted in the workflow's `permissions:` block) instead,
-because fine-grained PATs can have inconsistent GraphQL access — the
+because fine-grained PATs can have inconsistent GraphQL access - the
 `updateIssue` mutation has been observed to fail with "Resource not
 accessible" even when the REST `createIssue` succeeds. Two-token model:
 
@@ -108,7 +108,7 @@ do NOT need `DRIFT_CHECK_TOKEN`; their own `GITHUB_TOKEN` is enough.
 When the PAT nears expiration:
 
 1. Create the new token with the same scopes.
-2. `gh secret set DRIFT_CHECK_TOKEN --body "<new>"` — overwrites in place.
+2. `gh secret set DRIFT_CHECK_TOKEN --body "<new>"` - overwrites in place.
 3. Trigger one `workflow_dispatch` run to confirm.
 4. Revoke the old token at
    <https://github.com/settings/personal-access-tokens>.

@@ -74,7 +74,7 @@ def test_file_links_to_matches_inline_and_ref():
 
 
 def test_empty_requirements_is_silent():
-    # With zero requirements, no findings anywhere — matching Q2 resolution.
+    # With zero requirements, no findings anywhere - matching Q2 resolution.
     findings = _run("repo_missing_required_refs", reqs={"cursor-plugin": {}})
     assert findings == []
 

@@ -3,7 +3,7 @@
 Writes a GitHub-flavored-markdown report to the file path in
 ``$GITHUB_STEP_SUMMARY`` (set by the Actions runner). Consumers that want
 both stdout and step-summary output call ``render()`` and
-``write_summary()`` separately — keeping the pure render logic
+``write_summary()`` separately - keeping the pure render logic
 independent of the env-var side effect.
 
 Not imported from ``cli.py`` by default; it is wired in when
@@ -62,7 +62,7 @@ def render(
         errs = sum(1 for f in repo_findings if f.severity == "error")
         warns = sum(1 for f in repo_findings if f.severity == "warn")
         icon = "✅" if not repo_findings else ("❌" if errs else "⚠️")
-        title = f"{icon} {snap.slug} — {errs} errors, {warns} warnings"
+        title = f"{icon} {snap.slug} - {errs} errors, {warns} warnings"
         if not repo_findings:
             lines.append(f"- {title} (clean)")
             continue

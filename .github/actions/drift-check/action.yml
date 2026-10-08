@@ -20,11 +20,13 @@
 #   5. Writes a step summary and exposes counts as outputs so the calling
 #      workflow can branch on them.
 #
-# Pinning rule: tool repos MUST consume this action via @v1.7 (or a SHA),
-# never @main. The drift checker's release pipeline maintains the v1.7 tag
-# pointing at the latest 1.7.x. Q9 of the design doc explains why @main is
-# forbidden for tool-repo callers (would break every tool-repo PR on
-# unrelated meta-repo changes).
+# Pinning rule: tool repos MUST consume this action via a floating
+# @vMAJOR.MINOR tag (or a SHA), never @main. The meta-repo's release.yml
+# moves vMAJOR and vMAJOR.MINOR to each release; the scaffold emits the pin
+# derived from the meta VERSION at generation time. A minor tag stops moving
+# once the next minor ships, so bump older pins (for example @v1.9) to pick
+# up checker fixes. @main is forbidden for tool-repo callers because it would
+# break every tool-repo PR on unrelated meta-repo changes.
 # =============================================================================
 
 name: 'Agent-file drift check'

@@ -4,7 +4,7 @@ Scans every markdown file in the snapshot for links whose targets live
 under ``standards/``. Resolves each target against the meta-repo's
 ``standards/`` directory at snapshot time. Missing target -> ``error``.
 
-Zero surface today — the design-doc preflight found 0 ``standards/*.md``
+Zero surface today - the design-doc preflight found 0 ``standards/*.md``
 links across 13 agent-context files in 9 repos. The check is implemented
 anyway so the plumbing is in place the moment tool repos start linking
 to standards.
@@ -12,11 +12,11 @@ to standards.
 Link shapes we care about:
 
 * ``[text](standards/foo.md)``
-* ``[text](standards/foo.md#anchor)`` — fragment checking deferred; we
+* ``[text](standards/foo.md#anchor)`` - fragment checking deferred; we
   only verify the file exists for now
-* ``[text](../Developer-Tools-Directory/standards/foo.md)`` — tolerated
+* ``[text](../Developer-Tools-Directory/standards/foo.md)`` - tolerated
   by stripping to the trailing ``standards/foo.md``
-* reference-style ``[text][label]`` + ``[label]: standards/foo.md`` —
+* reference-style ``[text][label]`` + ``[label]: standards/foo.md``  - 
   the label-definition regex below catches these
 * bare URLs to GitHub-hosted standards are NOT checked; contribute
   a separate check for those when/if they appear

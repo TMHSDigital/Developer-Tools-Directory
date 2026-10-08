@@ -9,7 +9,7 @@ For each repo, look up the per-type requirements from
 
 Today the requirements block is empty (zero tool repos link to
 ``standards/*.md``), so this check is silent in practice. The plumbing is
-ready for the moment that changes — at that point, add entries to
+ready for the moment that changes - at that point, add entries to
 ``required-refs.json`` and the check immediately starts enforcing them
 without any code change.
 

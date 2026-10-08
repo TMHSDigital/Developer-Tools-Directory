@@ -111,7 +111,7 @@ def test_pragma_suppresses_broken_refs(tmp_path: Path):
 
 
 def test_skip_checks_suppresses_entirely(tmp_path: Path):
-    """If config says skip broken-refs, zero findings — even for real
+    """If config says skip broken-refs, zero findings - even for real
     broken references."""
     (tmp_path / "AGENTS.md").write_text(
         "<!-- standards-version: 1.6.3 -->\n"

@@ -29,15 +29,15 @@ This produces `../cloudflare-developer-tools/` with the full standards-compliant
 ## Step 2: Push the new repo
 
 ```bash
-cd ../Cloudflare-Developer-Tools
+cd ../cloudflare-developer-tools
 git init -b main
 git add .
 git commit -s -m "feat: initial scaffold"
-gh repo create TMHSDigital/Cloudflare-Developer-Tools \
+gh repo create TMHSDigital/cloudflare-developer-tools \
   --public \
   --description "Cursor IDE plugin for Cloudflare Workers, Pages, and edge platform workflows" \
-  --homepage "https://tmhsdigital.github.io/Cloudflare-Developer-Tools/"
-git remote add origin https://github.com/TMHSDigital/Cloudflare-Developer-Tools.git
+  --homepage "https://tmhsdigital.github.io/cloudflare-developer-tools/"
+git remote add origin https://github.com/TMHSDigital/cloudflare-developer-tools.git
 git push -u origin main
 ```
 
@@ -67,7 +67,7 @@ git commit -s --allow-empty -m "feat: first public release"
 git push
 ```
 
-The release workflow tags `v1.0.0` and publishes a GitHub Release. The Pages workflow deploys `https://tmhsdigital.github.io/Cloudflare-Developer-Tools/`.
+The release workflow tags `v1.0.0` and publishes a GitHub Release. The Pages workflow deploys `https://tmhsdigital.github.io/cloudflare-developer-tools/`.
 
 ## Step 5: Register the tool in the directory
 
@@ -77,29 +77,31 @@ Back in your Developer-Tools-Directory checkout:
 git checkout -b feat/register-cloudflare
 ```
 
-Edit `registry.json`. Add a new entry at the bottom of the array:
+The scaffold already appended an entry for the tool to `registry.json` in Step 1. Update it now that the tool has real content: counts, topics, status, and category. It should look like this (there is intentionally no `version` field; the catalog tracks tools by repo and homepage):
 
 ```json
 {
   "name": "Cloudflare Developer Tools",
-  "repo": "TMHSDigital/Cloudflare-Developer-Tools",
+  "repo": "TMHSDigital/cloudflare-developer-tools",
   "slug": "cloudflare-developer-tools",
   "description": "Cursor IDE plugin for Cloudflare Workers, Pages, and edge platform workflows",
   "type": "cursor-plugin",
-  "homepage": "https://tmhsdigital.github.io/Cloudflare-Developer-Tools/",
+  "category": "infrastructure",
+  "homepage": "https://tmhsdigital.github.io/cloudflare-developer-tools/",
   "skills": 6,
   "rules": 4,
   "mcpTools": 20,
   "extras": {},
   "topics": ["cloudflare", "workers", "pages", "edge", "serverless"],
   "status": "beta",
-  "version": "1.0.0",
   "language": "TypeScript",
   "license": "CC-BY-NC-ND-4.0",
   "pagesType": "static",
   "hasCI": true
 }
 ```
+
+`category` picks the catalog filter chip; allowed values are listed in `CATEGORIES` in [`scripts/validate_registry.py`](../../scripts/validate_registry.py), which also enforces the rest of the schema (`python scripts/validate_registry.py`).
 
 Status is `beta` on first registration unless the tool meets the `active` graduation checklist in [`standards/lifecycle.md`](../../standards/lifecycle.md).
 
@@ -112,7 +114,8 @@ python scripts/sync_from_registry.py
 This updates:
 - `README.md` tools table, descriptions, and stats
 - `CLAUDE.md` cataloged tools and totals
-- `docs/index.html` embedded registry block
+- `docs/index.html` embedded registry, tool cards, filter chips, and stats
+- `docs/search-index.json` (names for new skills and tools appear after `python site-template/aggregate_search.py --clone`)
 
 Confirm the sync check is clean:
 

@@ -4,7 +4,7 @@ The config has three tiers (globals, types, repos). ``DriftConfig.resolve``
 in ``types.py`` merges them for a given slug/type; this module is just the
 loader.
 
-Missing file is not an error — the whole point of the config is to
+Missing file is not an error - the whole point of the config is to
 override defaults, so a missing config yields a permissive empty
 ``DriftConfig`` with ``signal_policy=same-major-minor``. Malformed JSON
 IS an error; the caller (CLI) surfaces that as exit code 2.

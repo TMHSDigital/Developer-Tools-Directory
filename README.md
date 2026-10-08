@@ -214,7 +214,7 @@ Developer-Tools-Directory/
     template.html.j2       Jinja2 HTML template with configurable branding
     fonts/                 Self-hosted Inter + JetBrains Mono woff2
     SETUP-PROMPT.md        Copy-paste prompt for applying template to a repo
-  standards/               Convention documentation (9 docs)
+  standards/               Convention documentation (index in standards/README.md)
   registry.json            Tool registry (source of truth)
   AGENTS.md                AI agent guidance
   CLAUDE.md                Claude Code project docs

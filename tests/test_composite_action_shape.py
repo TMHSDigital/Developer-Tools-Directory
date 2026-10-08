@@ -139,7 +139,7 @@ def test_action_sticky_step_does_not_swallow_rc(action_doc):
     sticky = next((s for s in steps if s.get("id") == "sticky"), None)
     assert sticky is not None, "missing sticky step"
     body = sticky.get("run", "")
-    # No `exit "$RC"` or `exit $RC` in sticky — those would gate the
+    # No `exit "$RC"` or `exit $RC` in sticky - those would gate the
     # action on a transient gh-API hiccup.
     assert "exit \"$RC\"" not in body and "exit $RC" not in body, (
         "sticky step must not propagate its own RC; that's the propagate step's job"

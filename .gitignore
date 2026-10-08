@@ -62,3 +62,6 @@ site-audit-evidence/pr4-sc-light.png
 site-audit-evidence/sc-dark-390.png
 site-audit-evidence/sc-dark-1280.png
 site-audit-evidence/sc-light-1280.png
+
+# Personal, machine-specific assistant instructions (not project docs)
+CLAUDE.local.md

@@ -7,9 +7,9 @@ the snapshot commit:
 
 - See [the glossary](standards/glossary-that-does-not-exist.md) for
   definitions.
-- Also [agent template](standards/agents-template.md) — which DOES exist
+- Also [agent template](standards/agents-template.md) - which DOES exist
   in our fixture meta; this should not be a finding.
 - Fragment link: [specific section](standards/glossary-that-does-not-exist.md#acronyms)
-  — still broken because the file is missing.
+  - still broken because the file is missing.
 
 [ref]: standards/another-missing-standard.md

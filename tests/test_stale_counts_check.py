@@ -55,7 +55,7 @@ def test_iter_counts_case_insensitive():
 
 
 def test_iter_counts_avoids_non_word_boundary():
-    """\\b\\d+\\s+rules\\b — 'ruleset' should NOT match."""
+    """\\b\\d+\\s+rules\\b - 'ruleset' should NOT match."""
     assert list(_iter_counts(b"the ruleset defines 12 entries")) == []
 
 
@@ -96,7 +96,7 @@ def test_agents_md_is_hardcoded_skipped(tmp_path: Path):
 
 
 def test_claude_md_is_hardcoded_skipped(tmp_path: Path):
-    """Same policy as AGENTS.md — CLAUDE.md is the alternate agent-context
+    """Same policy as AGENTS.md - CLAUDE.md is the alternate agent-context
     file and shares the narrative-aggregate convention."""
     (tmp_path / "CLAUDE.md").write_text(
         "<!-- standards-version: 1.6.3 -->\n\n"
@@ -216,7 +216,7 @@ def test_example_dialogue_lines_marks_section_and_markers():
 
 
 def test_code_block_still_warns(tmp_path: Path):
-    """Counts inside fenced code blocks are still flagged — stale narrative
+    """Counts inside fenced code blocks are still flagged - stale narrative
     in examples is still stale information. Uses SKILL.md because AGENTS.md
     is now hardcoded-skipped."""
     skill_dir = tmp_path / "skills" / "sample"
@@ -253,7 +253,7 @@ def test_pragma_suppresses(tmp_path: Path):
 
 
 def test_skip_checks_disables(tmp_path: Path):
-    """Global ``skip_checks`` still suppresses the entire check — the
+    """Global ``skip_checks`` still suppresses the entire check - the
     emergency hatch is preserved even after the v1.9.0 policy refactor."""
     skill_dir = tmp_path / "skills" / "sample"
     skill_dir.mkdir(parents=True)

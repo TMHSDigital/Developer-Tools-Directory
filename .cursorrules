@@ -3,11 +3,11 @@ You are working on Developer Tools Directory, a meta-repository that catalogs, s
 ## Repo structure
 
 - `registry.json` -- single source of truth for all 9 tool repos (name, type, counts, links, status)
-- `standards/` -- 18 Markdown docs defining conventions (folder structure, CI/CD, manifests, pages, commits, README, AGENTS.md, versioning, and more)
+- `standards/` -- Markdown docs defining conventions (folder structure, CI/CD, manifests, pages, commits, README, AGENTS.md, versioning, and more)
 - `scaffold/create-tool.py` -- Python repo generator using Jinja2 templates
 - `scaffold/templates/` -- Jinja2 templates producing a standards-compliant repo
 - `site-template/` -- shared GitHub Pages build system for tool repos (build_site.py + template.html.j2 + fonts)
-- `docs/` -- static GitHub Pages catalog site (index.html, style.css, script.js)
+- `docs/` -- static GitHub Pages catalog site (single index.html with inline CSS and JS)
 - `assets/` -- logo image
 - `.github/workflows/` -- CI/CD for this repo (validate, pages, stale, codeql, dependency-review, release, release-drafter, label-sync)
 - `AGENTS.md` -- AI agent guidance for this repo
@@ -66,8 +66,7 @@ Use conventional commits. Prefix determines changelog category:
 ## When editing docs/
 
 - `docs/index.html` is the catalog site entry point.
-- `docs/script.js` fetches `registry.json` at runtime and renders tool cards. It also has an embedded fallback copy.
-- `docs/style.css` is the full stylesheet -- dark theme, responsive, card layout.
+- All CSS and JS are inline in `docs/index.html`. Cards, filters, and stats are pre-rendered by `scripts/sync_from_registry.py`; the inline script adds search and filtering.
 - No external dependencies (CDNs, frameworks). Vanilla HTML/CSS/JS only.
 - The `pages.yml` workflow copies `registry.json` and `assets/` into `docs/` at deploy time.
 

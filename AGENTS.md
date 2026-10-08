@@ -9,7 +9,7 @@ This file tells AI coding agents how the Developer Tools Directory repo works an
 This is a **meta-repository** -- it does not contain a Cursor plugin or MCP server itself. It catalogs, standardizes, and scaffolds other TMHSDigital developer tool repos. It contains:
 
 - **`registry.json`** -- single source of truth for all tool repos. README, CLAUDE.md, and the catalog site's embedded registry are generated from it by `scripts/sync_from_registry.py`.
-- **`standards/`** -- 18 Markdown docs defining conventions for folder structure, CI/CD, plugin manifests, GitHub Pages, commits, README format, AGENTS.md format, versioning, release-doc-sync, testing, skills, rules, MCP servers, security, licensing, scope, lifecycle, and writing style.
+- **`standards/`** -- Markdown docs defining conventions for folder structure, CI/CD, plugin manifests, GitHub Pages, commits, README format, AGENTS.md format, versioning, release-doc-sync, testing, skills, rules, MCP servers, security, licensing, scope, lifecycle, and writing style.
 - **`scaffold/`** -- Python repo generator (`create-tool.py`) with Jinja2 templates that produce a fully standards-compliant new tool repo.
 - **`scripts/`** -- automation utilities. `sync_from_registry.py` regenerates all derived artifacts from `registry.json`.
 - **`site-template/`** -- shared GitHub Pages build system for tool repos. `build_site.py` reads `.cursor-plugin/plugin.json`, `site.json`, `skills/`, `rules/`, and `mcp-tools.json` from a tool repo and renders `docs/index.html` via `template.html.j2`. Self-hosts Inter and JetBrains Mono fonts. Tool repos clone this directory in CI and run the build script at deploy time.
@@ -50,7 +50,7 @@ Every PR must pass these 7 checks before it can be merged:
 
 Checks:
 - `registry.json` is valid JSON with correct schema (required fields, valid types, integer counts)
-- `docs/index.html`, `docs/style.css`, `docs/script.js` exist
+- `docs/index.html` exists
 - `scaffold/create-tool.py` compiles without syntax errors
 - Scaffold dry-run test: generates a test repo and verifies key files exist
 
@@ -61,7 +61,7 @@ Checks:
 3. Uploads `docs/` as a Pages artifact
 4. Deploys to GitHub Pages via `actions/deploy-pages`
 
-### `release.yml` (runs on push to main, ignores docs/md/standards changes)
+### `release.yml` (runs on every push to main)
 
 1. `check-version` reads `VERSION` at the repo root and compares it with the latest git tag
 2. If they match, the workflow exits cleanly - no release needed
@@ -233,8 +233,8 @@ Pure documentation -- no code. Each file documents a convention derived from ana
 ## When editing docs/ (catalog site)
 
 - `docs/index.html` is the single-page catalog site. It embeds a copy of `registry.json` inside a `<script type="application/json" id="registry-data">` tag as a fallback for when the direct fetch fails.
-- `docs/script.js` fetches `registry.json` at runtime. If the fetch fails, it reads the embedded copy. It renders aggregate stats (total skills, rules, MCP tools) and tool cards with filtering by type and topic.
-- `docs/style.css` contains all styling -- dark theme, responsive layout, card design. No CSS framework.
+- All CSS and JS are inline in `docs/index.html`; there is no separate stylesheet or script file. The inline script fetches `registry.json` at runtime (falling back to the embedded copy) and adds search, category and status filters, and URL state on top of cards that `sync_from_registry.py` pre-renders.
+- Never edit the generated regions by hand (`registry:cards`, `registry:filters`, the embedded JSON blocks, hero stats); change `registry.json` and run `python scripts/sync_from_registry.py`.
 - **No external CDN dependencies.** The site must work fully offline except for badge images. No jQuery, no Bootstrap, no Google Fonts.
 - The `pages.yml` workflow copies `registry.json` and `assets/` into `docs/` at deploy time. You do not need to manually place these files in `docs/`.
 - When testing locally, open `docs/index.html` directly in a browser. The embedded fallback will kick in since `registry.json` won't be in `docs/` locally.
