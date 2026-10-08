@@ -40,6 +40,19 @@ VALID_PAGES = {"static", "mkdocs", "none"}
 VALID_ARCHETYPES = {"deployed-service"}
 VALID_LICENSES = {"CC-BY-NC-ND-4.0", "CC-BY-NC-ND-4.0 AND MIT", "MIT", "Apache-2.0"}
 NPM_SCOPE = "@tmhs/"
+# Catalog filter categories, in display order. The catalog site renders one
+# filter chip per category in use (scripts/sync_from_registry.py).
+CATEGORIES: dict[str, str] = {
+    "game-dev": "Game Dev",
+    "3d-media": "3D & Media",
+    "infrastructure": "Infrastructure",
+    "ai": "Local AI",
+    "mobile": "Mobile",
+    "fintech": "Fintech",
+    "productivity": "Productivity",
+    "developer-tooling": "Developer Tooling",
+}
+DEFAULT_CATEGORY = "developer-tooling"
 COUNT_FIELDS = ("skills", "rules", "mcpTools")
 
 
@@ -85,6 +98,9 @@ def validate(data: Any) -> list[str]:
             errors.append("%s: pagesType must be one of %s" % (label, sorted(VALID_PAGES)))
         if tool.get("license") not in VALID_LICENSES:
             errors.append("%s: license must be one of %s" % (label, sorted(VALID_LICENSES)))
+
+        if "category" in tool and tool["category"] not in CATEGORIES:
+            errors.append("%s: category must be one of %s" % (label, list(CATEGORIES)))
 
         topics = tool.get("topics", [])
         if isinstance(topics, list) and not all(isinstance(t, str) for t in topics):

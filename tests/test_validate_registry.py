@@ -70,6 +70,16 @@ def test_negative_and_bool_counts_rejected(field):
     assert vr.validate([_entry(**{field: True})])
 
 
+def test_every_real_entry_has_a_known_category():
+    """Each tool must land under a catalog filter chip (DTD#115)."""
+    missing = [e["slug"] for e in _real() if e.get("category") not in vr.CATEGORIES]
+    assert not missing, missing
+
+
+def test_unknown_category_rejected():
+    assert any("category" in e for e in vr.validate([_entry(category="nope")]))
+
+
 def test_unknown_license_rejected():
     assert any("license" in e for e in vr.validate([_entry(license="GPL-3.0")]))
 

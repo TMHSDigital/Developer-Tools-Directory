@@ -34,6 +34,15 @@ jobs:
           mkdir -p docs/assets
           cp -r assets/* docs/assets/ 2>/dev/null || true
 
+      # The footer date is the date of the deployed commit, stamped at deploy
+      # time. It is never computed in the browser, so it cannot claim the
+      # catalog is fresher than it is.
+      - name: Stamp footer with deployed commit date
+        run: |
+          updated="$(git log -1 --format=%cs)"
+          sed -i "s|<span id=\"buildDate\"></span>|<span id=\"buildDate\">Updated ${updated}</span>|" docs/index.html
+          grep -q "Updated ${updated}" docs/index.html
+
       - uses: actions/configure-pages@v6
 
       - uses: actions/upload-pages-artifact@v5

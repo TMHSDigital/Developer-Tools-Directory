@@ -142,3 +142,53 @@ def test_writes_lf_only(catalog):
     sync.sync_all(root=root, check=False)
     for name in ("README.md", "CLAUDE.md", "docs/index.html"):
         assert b"\r\n" not in (root / name).read_bytes()
+
+
+INDEX_WITH_MARKERS = """<!doctype html>
+<html><body>
+<div class="stat-value" id="stat-repos">0</div>
+<div id="filters">
+<!-- registry:filters:start -->
+<!-- registry:filters:end -->
+</div>
+<div id="card-grid">
+<!-- registry:cards:start -->
+<!-- registry:cards:end -->
+</div>
+<script id="registry-data" type="application/json">
+[]
+</script>
+</body></html>
+"""
+
+
+def test_static_cards_filters_and_stats_render(catalog):
+    root = catalog([
+        _entry(category="game-dev", description="Tools & <tricks>"),
+        _entry(name="Other", repo="TMHSDigital/Other", slug="other",
+               type="mcp-server", category="ai", status="experimental",
+               npm="@tmhs/other"),
+    ])
+    (root / "docs" / "index.html").write_text(INDEX_WITH_MARKERS, encoding="utf-8")
+    sync.sync_all(root=root, check=False)
+    page = (root / "docs" / "index.html").read_text(encoding="utf-8")
+
+    assert page.count('class="tool-card"') == 2
+    assert "Tools &amp; &lt;tricks&gt;" in page
+    assert 'data-category="game-dev"' in page
+    assert 'data-filter="game-dev"' in page and 'data-filter="ai"' in page
+    # Categories not in use get no chip.
+    assert 'data-filter="fintech"' not in page
+    assert '<option value="experimental">' in page
+    assert 'id="stat-repos">2<' in page
+    assert "https://www.npmjs.com/package/@tmhs/other" in page
+    assert sync.sync_all(root=root, check=True) is False
+
+
+def test_crawler_files_managed_when_present(catalog):
+    root = catalog([_entry()])
+    (root / "docs" / "robots.txt").write_text("", encoding="utf-8")
+    assert sync.sync_all(root=root, check=True) is True
+    sync.sync_all(root=root, check=False)
+    assert "Sitemap:" in (root / "docs" / "robots.txt").read_text(encoding="utf-8")
+    assert not (root / "docs" / "sitemap.xml").exists()

@@ -28,11 +28,17 @@ No third-party dependencies.
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import re
 import sys
 from pathlib import Path
 from typing import Any
+
+try:  # imported as scripts.sync_from_registry (tests, scaffold)
+    from scripts.validate_registry import CATEGORIES
+except ImportError:  # run directly as scripts/sync_from_registry.py
+    from validate_registry import CATEGORIES
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 REGISTRY_PATH = REPO_ROOT / "registry.json"
@@ -223,6 +229,116 @@ def script_safe_json(data: Any) -> str:
 
 def render_embedded_registry(entries: list[dict[str, Any]]) -> str:
     return script_safe_json(entries)
+
+
+STATUS_ORDER = ("active", "beta", "experimental", "maintenance", "deprecated", "archived")
+
+
+def render_filters(entries: list[dict[str, Any]]) -> str:
+    """Filter chips: type chips, then one chip per category in use (in
+    CATEGORIES order), then a status select. Generated so a new category or
+    tool can never be left without a filter (DTD#115)."""
+    esc = html.escape
+    used = {e.get("category") for e in entries}
+    chips = [
+        ("all", "All"),
+        ("cursor-plugin", "Plugins"),
+        ("mcp-server", "MCP Servers"),
+    ] + [(slug, label) for slug, label in CATEGORIES.items() if slug in used]
+    lines = []
+    for value, label in chips:
+        active = value == "all"
+        lines.append(
+            f'    <button type="button" class="filter-btn{" active" if active else ""}" '
+            f'data-filter="{esc(value)}" aria-pressed="{"true" if active else "false"}">'
+            f"{esc(label)}</button>"
+        )
+    statuses = [s for s in STATUS_ORDER if any(e.get("status") == s for e in entries)]
+    lines.append('    <label class="sr-only" for="statusFilter">Filter by status</label>')
+    lines.append('    <select id="statusFilter" class="status-filter">')
+    lines.append('      <option value="all">Any status</option>')
+    for s in statuses:
+        lines.append(f'      <option value="{esc(s)}">{esc(s.capitalize())}</option>')
+    lines.append("    </select>")
+    return "\n".join(lines) + "\n"
+
+
+def render_static_cards(entries: list[dict[str, Any]]) -> str:
+    """Server-rendered tool cards so crawlers, link unfurlers, and visitors
+    without JavaScript see the full catalog. The page script rebuilds the
+    grid from the same registry data and layers filtering on top."""
+    esc = html.escape
+    out = []
+    for e in entries:
+        status = e.get("status", "active")
+        is_mcp = e["type"] == "mcp-server"
+        attrs = (
+            f'data-type="{esc(e["type"])}" data-category="{esc(e.get("category", ""))}" '
+            f'data-status="{esc(status)}" data-slug="{esc(e["slug"])}"'
+        )
+        parts = [f'      <div class="tool-card" {attrs}>']
+        badges = [
+            f'<span class="card-badge {"badge-mcp" if is_mcp else "badge-plugin"}">'
+            f'{"MCP Server" if is_mcp else "Plugin"}</span>'
+        ]
+        if status != "active":
+            badges.append(
+                f'<span class="card-badge badge-status badge-status-{esc(status)}">{esc(status)}</span>'
+            )
+        parts.append(
+            f'        <div class="card-header"><span class="card-title">{esc(e["name"])}</span>'
+            f'<div class="card-badges">{"".join(badges)}</div></div>'
+        )
+        parts.append(f'        <p class="card-description">{esc(e.get("description", ""))}</p>')
+        stats = []
+        for field, label in (("skills", "skills"), ("rules", "rules"), ("mcpTools", "MCP tools")):
+            if int(e.get(field) or 0) > 0:
+                stats.append(
+                    f'<span class="card-stat"><strong>{int(e[field])}</strong> {label}</span>'
+                )
+        for key, value in (e.get("extras") or {}).items():
+            if isinstance(value, int) and value > 0:
+                stats.append(
+                    f'<span class="card-stat"><strong>{value:,}</strong> {esc(key)}</span>'
+                )
+        parts.append(f'        <div class="card-stats">{"".join(stats)}</div>')
+        topics = "".join(
+            f'<span class="topic-tag">{esc(t)}</span>' for t in (e.get("topics") or [])[:5]
+        )
+        parts.append(f'        <div class="card-topics">{topics}</div>')
+        links = [
+            f'<a class="card-link" href="https://github.com/{esc(e["repo"])}" '
+            f'target="_blank" rel="noopener">Repository</a>'
+        ]
+        if e.get("homepage"):
+            links.append(
+                f'<a class="card-link" href="{esc(e["homepage"])}" target="_blank" rel="noopener">Docs</a>'
+            )
+        if e.get("npm"):
+            links.append(
+                f'<a class="card-link" href="https://www.npmjs.com/package/{esc(e["npm"])}" '
+                f'target="_blank" rel="noopener">npm</a>'
+            )
+        parts.append(f'        <div class="card-links">{"".join(links)}</div>')
+        parts.append("      </div>")
+        out.append("\n".join(parts))
+    return "\n".join(out) + "\n"
+
+
+SITEMAP_URL = "https://tmhsdigital.github.io/Developer-Tools-Directory/"
+
+
+def render_sitemap() -> str:
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        f"  <url><loc>{SITEMAP_URL}</loc></url>\n"
+        "</urlset>\n"
+    )
+
+
+def render_robots() -> str:
+    return f"User-agent: *\nAllow: /\n\nSitemap: {SITEMAP_URL}sitemap.xml\n"
 
 
 def list_standards(standards_dir: Path = STANDARDS_DIR) -> list[str]:
@@ -459,8 +575,37 @@ def sync_index(entries: list[dict[str, Any]], check: bool, root: Path = REPO_ROO
                 new, "standardsCount", str(len(present)), index_path
             )
 
+    # Server-rendered filters, cards, and hero stats (no-JS / crawler view).
+    if "<!-- registry:filters:start -->" in new:
+        new = replace_between(
+            new, "<!-- registry:filters:start -->", "<!-- registry:filters:end -->",
+            render_filters(entries), index_path,
+        )
+    if "<!-- registry:cards:start -->" in new:
+        new = replace_between(
+            new, "<!-- registry:cards:start -->", "<!-- registry:cards:end -->",
+            render_static_cards(entries), index_path,
+        )
+    stats = aggregate_stats(entries)
+    for elem_id, key in (
+        ("stat-repos", "repos"), ("stat-skills", "skills"),
+        ("stat-rules", "rules"), ("stat-mcp", "mcpTools"),
+    ):
+        if f'id="{elem_id}"' in new:
+            new = replace_element_text_by_id(new, elem_id, str(stats[key]), index_path)
+
     html_drift = write_if_changed(index_path, current, new, check, root)
-    return html_drift or search_drift
+
+    # Crawler files live next to the page; only managed when already present
+    # so a minimal catalog is not forced to carry them.
+    seo_drift = False
+    for name, body in (("sitemap.xml", render_sitemap()), ("robots.txt", render_robots())):
+        path = root / "docs" / name
+        if path.is_file():
+            seo_drift |= write_if_changed(
+                path, path.read_text(encoding="utf-8"), body, check, root
+            )
+    return html_drift or search_drift or seo_drift
 
 
 def write_if_changed(

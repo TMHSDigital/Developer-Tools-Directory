@@ -10,15 +10,17 @@
   <meta property="og:description" content="Centralized directory of TMHSDigital developer tools, Cursor IDE plugins, and MCP servers." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://tmhsdigital.github.io/Developer-Tools-Directory/" />
-  <meta property="og:image" content="assets/logo.png" />
-  <meta name="twitter:card" content="summary_large_image" />
+  <meta property="og:image" content="https://tmhsdigital.github.io/Developer-Tools-Directory/assets/logo.png" />
+  <meta property="og:image:alt" content="Developer Tools Directory logo" />
+  <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Developer Tools Directory - TMHSDigital" />
   <meta name="twitter:description" content="Centralized directory of TMHSDigital developer tools, Cursor IDE plugins, and MCP servers." />
-  <meta name="twitter:image" content="assets/logo.png" />
-  <link rel="icon" href="assets/logo.png" />
+  <meta name="twitter:image" content="https://tmhsdigital.github.io/Developer-Tools-Directory/assets/logo.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/inter-regular.woff2" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/inter-bold.woff2" />
-  <script>(function(){var t=localStorage.getItem('theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');else if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
+  <script>(function(){var t=null;try{t=localStorage.getItem('theme')}catch(e){}if(t==='light')document.documentElement.setAttribute('data-theme','light');else if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
   <style>
     @font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/inter-regular.woff2') format('woff2')}
     @font-face{font-family:'Inter';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/inter-medium.woff2') format('woff2')}
@@ -94,7 +96,7 @@
     .search-input{width:100%;padding:.6rem .75rem .6rem 2.25rem;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.875rem;font-family:var(--font-sans);outline:none;transition:border-color .2s}
     .search-input:focus{border-color:var(--accent)}
     .search-input::placeholder{color:var(--text-dim)}
-    .search-icon{position:absolute;left:calc(50% - 228px);top:50%;transform:translateY(-50%);color:var(--text-dim);pointer-events:none}
+    .search-icon{position:absolute;left:2.25rem;top:50%;transform:translateY(-50%);color:var(--text-dim);pointer-events:none}
     .search-icon svg{width:16px;height:16px}
     .search-shortcut{position:absolute;right:calc(50% - 228px);top:50%;transform:translateY(-50%);font-size:.625rem;color:var(--text-dim);background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:.1rem .4rem;font-family:var(--font-mono);pointer-events:none}
     .search-meta{font-size:.75rem;color:var(--text-dim);margin-top:.35rem;text-align:center}
@@ -104,6 +106,8 @@
     .filter-btn{background:var(--bg2);border:1px solid var(--border);color:var(--text-dim);padding:.375rem .875rem;border-radius:100px;font-size:.8125rem;font-family:var(--font-sans);cursor:pointer;transition:all .2s}
     .filter-btn:hover{border-color:var(--accent);color:var(--text)}
     .filter-btn.active{background:var(--accent);border-color:var(--accent);color:white}
+    .status-filter{background:var(--bg2);border:1px solid var(--border);color:var(--text-dim);padding:.375rem .875rem;border-radius:100px;font-size:.8125rem;font-family:var(--font-sans);cursor:pointer}
+    .status-filter:hover,.status-filter:focus{border-color:var(--accent);color:var(--text)}
 
     .card-grid{max-width:1200px;margin:0 auto;padding:0 1.5rem 4rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.25rem}
     .tool-card{background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:var(--radius-lg);padding:1.5rem;transition:all .25s;display:flex;flex-direction:column;box-shadow:0 -2px 20px color-mix(in srgb,var(--accent) 8%,transparent)}
@@ -220,10 +224,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
         Developer Tools Directory
       </a>
-      <button class="nav-toggle" aria-label="Toggle navigation">
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="navLinks">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
       </button>
-      <ul class="nav-links">
+      <ul class="nav-links" id="navLinks">
         <li><a href="#tools">Tools</a></li>
         <li><a href="#standards">Standards</a></li>
         <li><a href="#scaffold">Scaffold</a></li>
@@ -241,39 +245,172 @@
 
   <section class="hero">
     <div class="hero-inner">
-      <img class="hero-logo" src="assets/logo.png" alt="Developer Tools Directory logo" />
+      <img class="hero-logo" src="assets/logo-hero.webp" width="80" height="80" alt="Developer Tools Directory logo" />
       <h1>Developer Tools Directory</h1>
       <p>Centralized catalog of TMHSDigital Cursor IDE plugins, MCP servers, and developer tools.</p>
       <div class="stats-bar">
-        <div class="stat-item"><div class="stat-value" id="stat-repos">0</div><div class="stat-label">Repos</div></div>
-        <div class="stat-item"><div class="stat-value" id="stat-skills">0</div><div class="stat-label">Skills</div></div>
-        <div class="stat-item"><div class="stat-value" id="stat-rules">0</div><div class="stat-label">Rules</div></div>
-        <div class="stat-item"><div class="stat-value" id="stat-mcp">0</div><div class="stat-label">MCP Tools</div></div>
+        <div class="stat-item"><div class="stat-value" id="stat-repos">17</div><div class="stat-label">Repos</div></div>
+        <div class="stat-item"><div class="stat-value" id="stat-skills">195</div><div class="stat-label">Skills</div></div>
+        <div class="stat-item"><div class="stat-value" id="stat-rules">80</div><div class="stat-label">Rules</div></div>
+        <div class="stat-item"><div class="stat-value" id="stat-mcp">441</div><div class="stat-label">MCP Tools</div></div>
       </div>
     </div>
   </section>
 
   <div class="search-bar">
     <span class="search-icon"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.5 7a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0zm-.82 4.74a6 6 0 1 1 1.06-1.06l3.04 3.04a.75.75 0 1 1-1.06 1.06l-3.04-3.04z"/></svg></span>
-    <input class="search-input" id="toolSearch" type="text" placeholder="Search tools, skills, rules, MCP tools..." autocomplete="off" />
+    <input class="search-input" id="toolSearch" type="search" placeholder="Search tools, skills, rules, MCP tools..." aria-label="Search tools, skills, rules, and MCP tools" autocomplete="off" />
     <span class="search-shortcut">/</span>
-    <div class="search-meta" id="searchMeta"></div>
+    <div class="search-meta" id="searchMeta" role="status" aria-live="polite"></div>
   </div>
 
-  <div id="filters" class="filters">
-    <button class="filter-btn active" data-filter="all">All</button>
-    <button class="filter-btn" data-filter="cursor-plugin">Plugins</button>
-    <button class="filter-btn" data-filter="mcp-server">MCP Servers</button>
-    <button class="filter-btn" data-filter="game-development">Game Dev</button>
-    <button class="filter-btn" data-filter="docker">Docker</button>
-    <button class="filter-btn" data-filter="infrastructure">Infrastructure</button>
-    <button class="filter-btn" data-filter="mobile-development">Mobile</button>
-    <button class="filter-btn" data-filter="fintech">Fintech</button>
-    <button class="filter-btn" data-filter="project-management">Project Mgmt</button>
+  <div id="filters" class="filters" role="group" aria-label="Filter tools">
+<!-- registry:filters:start -->
+    <button type="button" class="filter-btn active" data-filter="all" aria-pressed="true">All</button>
+    <button type="button" class="filter-btn" data-filter="cursor-plugin" aria-pressed="false">Plugins</button>
+    <button type="button" class="filter-btn" data-filter="mcp-server" aria-pressed="false">MCP Servers</button>
+    <button type="button" class="filter-btn" data-filter="game-dev" aria-pressed="false">Game Dev</button>
+    <button type="button" class="filter-btn" data-filter="3d-media" aria-pressed="false">3D &amp; Media</button>
+    <button type="button" class="filter-btn" data-filter="infrastructure" aria-pressed="false">Infrastructure</button>
+    <button type="button" class="filter-btn" data-filter="ai" aria-pressed="false">Local AI</button>
+    <button type="button" class="filter-btn" data-filter="mobile" aria-pressed="false">Mobile</button>
+    <button type="button" class="filter-btn" data-filter="fintech" aria-pressed="false">Fintech</button>
+    <button type="button" class="filter-btn" data-filter="productivity" aria-pressed="false">Productivity</button>
+    <button type="button" class="filter-btn" data-filter="developer-tooling" aria-pressed="false">Developer Tooling</button>
+    <label class="sr-only" for="statusFilter">Filter by status</label>
+    <select id="statusFilter" class="status-filter">
+      <option value="all">Any status</option>
+      <option value="active">Active</option>
+      <option value="beta">Beta</option>
+      <option value="experimental">Experimental</option>
+    </select>
+<!-- registry:filters:end -->
   </div>
 
   <section id="tools">
-    <div class="card-grid" id="card-grid"></div>
+    <div class="card-grid" id="card-grid">
+<!-- registry:cards:start -->
+      <div class="tool-card" data-type="cursor-plugin" data-category="game-dev" data-status="active" data-slug="cfx-developer-tools">
+        <div class="card-header"><span class="card-title">CFX Developer Tools</span><div class="card-badges"><span class="card-badge badge-plugin">Plugin</span></div></div>
+        <p class="card-description">AI-powered Cursor IDE plugin for FiveM and RedM resource development</p>
+        <div class="card-stats"><span class="card-stat"><strong>9</strong> skills</span><span class="card-stat"><strong>6</strong> rules</span><span class="card-stat"><strong>6</strong> MCP tools</span><span class="card-stat"><strong>24</strong> snippets</span><span class="card-stat"><strong>11</strong> templates</span><span class="card-stat"><strong>12,000</strong> natives</span><span class="card-stat"><strong>101</strong> events</span></div>
+        <div class="card-topics"><span class="topic-tag">fivem</span><span class="topic-tag">redm</span><span class="topic-tag">cfx</span><span class="topic-tag">lua</span><span class="topic-tag">game-development</span></div>
+        <div class="card-links"><a class="card-link" href="https://github.com/TMHSDigital/CFX-Developer-Tools" target="_blank" rel="noopener">Repository</a><a class="card-link" href="https://tmhsdigital.github.io/CFX-Developer-Tools/" target="_blank" rel="noopener">Docs</a></div>
+      </div>
+      <div class="tool-card" data-type="cursor-plugin" data-category="game-dev" data-status="active" data-slug="unity-developer-tools">
+        <div class="card-header"><span class="card-title">Unity Developer Tools</span><div class="card-badges"><span class="card-badge badge-plugin">Plugin</span></div></div>
+        <p class="card-description">Cursor IDE plugin for Unity game development with URP, HDRP, and Built-in render pipeline support</p>
+        <div class="card-stats"><span class="card-stat"><strong>18</strong> skills</span><span class="card-stat"><strong>8</strong> rules</span><span class="card-stat"><strong>4</strong> MCP tools</span><span class="card-stat"><strong>20</strong> snippets</span><span class="card-stat"><strong>5</strong> templates</span></div>
+        <div class="card-topics"><span class="topic-tag">unity</span><span class="topic-tag">game-development</span><span class="topic-tag">csharp</span><span class="topic-tag">urp</span><span class="topic-tag">hdrp</span></div>
+        <div class="card-links"><a class="card-link" href="https://github.com/TMHSDigital/Unity-Developer-Tools" target="_blank" rel="noopener">Repository</a><a class="card-link" href="https://tmhsdigital.github.io/Unity-Developer-Tools/" target="_blank" rel="noopener">Docs</a></div>
+      </div>
+      <div class="tool-card" data-type="cursor-plugin" data-category="infrastructure" data-status="active" data-slug="docker-developer-tools">
+        <div class="card-header"><span class="card-title">Docker Developer Tools</span><div class="card-badges"><span class="card-badge badge-plugin">Plugin</span></div></div>
+        <p class="card-description">Cursor IDE plugin for Docker workflows with container management, Compose, and Dockerfile support</p>
+        <div class="card-stats"><span class="card-stat"><strong>17</strong> skills</span><span class="card-stat"><strong>10</strong> rules</span><span class="card-stat"><strong>150</strong> MCP tools</span></div>
+        <div class="card-topics"><span class="topic-tag">docker</span><span class="topic-tag">containers</span><span class="topic-tag">devops</span><span class="topic-tag">docker-compose</span><span class="topic-tag">dockerfile</span></div>
+        <div class="card-links"><a class="card-link" href="https://github.com/TMHSDigital/Docker-Developer-Tools" target="_blank" rel="noopener">Repository</a><a class="card-link" href="https://tmhsdigital.github.io/Docker-Developer-Tools/" target="_blank" rel="noopener">Docs</a><a class="card-link" href="https://www.npmjs.com/package/@tmhs/docker-mcp" target="_blank" rel="noopener">npm</a></div>
+      </div>
+      <div class="tool-card" data-type="cursor-plugin" data-category="infrastructure" data-status="active" data-slug="home-lab-developer-tools">
+        <div class="card-header"><span class="card-title">Home Lab Developer Tools</span><div class="card-badges"><span class="card-badge badge-plugin">Plugin</span></div></div>
+        <p class="card-description">Home lab and Raspberry Pi workflows for Cursor with Docker Compose, monitoring, DNS, networking, and security</p>
+        <div class="card-stats"><span class="card-stat"><strong>22</strong> skills</span><span class="card-stat"><strong>11</strong> rules</span><span class="card-stat"><strong>50</strong> MCP tools</span></div>
+        <div class="card-topics"><span class="topic-tag">homelab</span><span class="topic-tag">raspberry-pi</span><span class="topic-tag">infrastructure</span><span class="topic-tag">docker-compose</span><span class="topic-tag">monitoring</span></div>
+        <div class="card-links"><a class="card-link" href="https://github.com/TMHSDigital/Home-Lab-Developer-Tools" target="_blank" rel="noopener">Repository</a><a class="card-link" href="https://tmhsdigital.github.io/Home-Lab-Developer-Tools/" target="_blank" rel="noopener">Docs</a><a class="card-link" href="https://www.npmjs.com/package/@tmhs/homelab-mcp" target="_blank" rel="noopener">npm</a></div>
+      </div>
+      <div class="tool-card" data-type="cursor-plugin" data-category="mobile" data-status="active" data-slug="mobile-app-developer-tools">
+        <div class="card-header"><span class="card-title">Mobile App Developer Tools</span><div class="card-badges"><span class="card-badge badge-plugin">Plugin</span></div></div>
+        <p class="card-description">Cursor plugin for mobile app development with React Native, Expo, and Flutter support</p>
+        <div class="card-stats"><span class="card-stat"><strong>43</strong> skills</span><span class="card-stat"><strong>12</strong> rules</span><span class="card-stat"><strong>36</strong> MCP tools</span></div>
+        <div class="card-topics"><span class="topic-tag">react-native</span><span class="topic-tag">expo</span><span class="topic-tag">flutter</span><span class="topic-tag">mobile-development</span><span class="topic-tag">typescript</span></div>
+        <div class="card-links"><a class="card-link" href="https://github.com/TMHSDigital/Mobile-App-Developer-Tools" target="_blank" rel="noopener">Repository</a><a class="card-link" href="https://tmhsdigital.github.io/Mobile-App-Developer-Tools/" target="_blank" rel="noopener">Docs</a><a class="card-link" href="https://www.npmjs.com/package/@tmhs/mobile-mcp" target="_blank" rel="noopener">npm</a></div>
+      </div>
+      <div class="tool-card" data-type="cursor-plugin" data-category="fintech" data-status="active" data-slug="plaid-developer-tools">
+        <div class="card-header"><span class="card-title">Plaid Developer Tools</span><div class="card-badges"><span class="card-badge badge-plugin">Plugin</span></div></div>
+        <p class="card-description">Cursor plugin and MCP companion for building on the Plaid API</p>
+        <div class="card-stats"><span class="card-stat"><strong>17</strong> skills</span><span class="card-stat"><strong>7</strong> rules</span><span class="card-stat"><strong>30</strong> MCP tools</span></div>
+        <div class="card-topics"><span class="topic-tag">plaid</span><span class="topic-tag">fintech</span><span class="topic-tag">banking</span><span class="topic-tag">open-banking</span><span class="topic-tag">plaid-api</span></div>
+        <div class="card-links"><a class="card-link" href="https://github.com/TMHSDigital/Plaid-Developer-Tools" target="_blank" rel="noopener">Repository</a><a class="card-link" href="https://tmhsdigital.github.io/Plaid-Developer-Tools/" target="_blank" rel="noopener">Docs</a></div>
+      </div>
+      <div class="tool-card" data-type="cursor-plugin" data-category="productivity" data-status="active" data-slug="monday-cursor-plugin">
+        <div class="card-header"><span class="card-title">Monday Cursor Plugin</span><div class="card-badges"><span class="card-badge badge-plugin">Plugin</span></div></div>
+        <p class="card-description">Cursor IDE plugin for Monday.com with boards, items, sprints, docs, dashboards, and GraphQL</p>
+        <div class="card-stats"><span class="card-stat"><strong>21</strong> skills</span><span class="card-stat"><strong>8</strong> rules</span><span class="card-stat"><strong>45</strong> MCP tools</span></div>
+        <div class="card-topics"><span class="topic-tag">monday</span><span class="topic-tag">project-management</span><span class="topic-tag">graphql</span><span class="topic-tag">productivity</span><span class="topic-tag">work-management</span></div>
+        <div class="card-links"><a class="card-link" href="https://github.com/TMHSDigital/Monday-Cursor-Plugin" target="_blank" rel="noopener">Repository</a><a class="card-link" href="https://tmhsdigital.github.io/Monday-Cursor-Plugin/" target="_blank" rel="noopener">Docs</a></div>
+      </div>
+      <div class="tool-card" data-type="cursor-plugin" data-category="game-dev" data-status="active" data-slug="steam-cursor-plugin">
+        <div class="card-header"><span class="card-title">Steam Cursor Plugin</span><div class="card-badges"><span class="card-badge badge-plugin">Plugin</span></div></div>
+        <p class="card-description">Steam and Steamworks integration for Cursor IDE for game developers, modders, and power users</p>
+        <div class="card-stats"><span class="card-stat"><strong>30</strong> skills</span><span class="card-stat"><strong>9</strong> rules</span><span class="card-stat"><strong>26</strong> MCP tools</span></div>
+        <div class="card-topics"><span class="topic-tag">steam</span><span class="topic-tag">steamworks</span><span class="topic-tag">game-development</span><span class="topic-tag">modding</span><span class="topic-tag">steam-workshop</span></div>
+        <div class="card-links"><a class="card-link" href="https://github.com/TMHSDigital/Steam-Cursor-Plugin" target="_blank" rel="noopener">Repository</a><a class="card-link" href="https://tmhsdigital.github.io/Steam-Cursor-Plugin/" target="_blank" rel="noopener">Docs</a></div>
+      </div>
+      <div class="tool-card" data-type="mcp-server" data-category="game-dev" data-status="active" data-slug="steam-mcp">
+        <div class="card-header"><span class="card-title">Steam MCP Server</span><div class="card-badges"><span class="card-badge badge-mcp">MCP Server</span></div></div>
+        <p class="card-description">MCP server for Steam and Steamworks APIs with store data, player stats, reviews, achievements, and workshop tools</p>
+        <div class="card-stats"><span class="card-stat"><strong>26</strong> MCP tools</span></div>
+        <div class="card-topics"><span class="topic-tag">steam</span><span class="topic-tag">mcp-server</span><span class="topic-tag">steamworks</span><span class="topic-tag">game-development</span><span class="topic-tag">npm</span></div>
+        <div class="card-links"><a class="card-link" href="https://github.com/TMHSDigital/steam-mcp" target="_blank" rel="noopener">Repository</a><a class="card-link" href="https://www.npmjs.com/package/@tmhs/steam-mcp" target="_blank" rel="noopener">Docs</a><a class="card-link" href="https://www.npmjs.com/package/@tmhs/steam-mcp" target="_blank" rel="noopener">npm</a></div>
+      </div>
+      <div class="tool-card" data-type="mcp-server" data-category="developer-tooling" data-status="active" data-slug="developer-tools-mcp">
+        <div class="card-header"><span class="card-title">Developer Tools MCP</span><div class="card-badges"><span class="card-badge badge-mcp">MCP Server</span></div></div>
+        <p class="card-description">MCP server providing agent-callable read and write access to the TMHSDigital developer-tools ecosystem: registry, fleet status, drift checking, and standards management</p>
+        <div class="card-stats"><span class="card-stat"><strong>7</strong> MCP tools</span></div>
+        <div class="card-topics"><span class="topic-tag">mcp-server</span><span class="topic-tag">developer-tools</span><span class="topic-tag">ecosystem</span><span class="topic-tag">registry</span><span class="topic-tag">typescript</span></div>
+        <div class="card-links"><a class="card-link" href="https://github.com/TMHSDigital/Developer-Tools-MCP" target="_blank" rel="noopener">Repository</a><a class="card-link" href="https://tmhsdigital.github.io/Developer-Tools-MCP/" target="_blank" rel="noopener">Docs</a><a class="card-link" href="https://www.npmjs.com/package/@tmhs/devtools-mcp" target="_blank" rel="noopener">npm</a></div>
+      </div>
+      <div class="tool-card" data-type="mcp-server" data-category="game-dev" data-status="experimental" data-slug="cfx-mcp">
+        <div class="card-header"><span class="card-title">CFX MCP</span><div class="card-badges"><span class="card-badge badge-mcp">MCP Server</span><span class="card-badge badge-status badge-status-experimental">experimental</span></div></div>
+        <p class="card-description">MCP server providing agent-callable tools for CFX/FiveM resource development, server management, and community platform integration.</p>
+        <div class="card-stats"><span class="card-stat"><strong>3</strong> MCP tools</span></div>
+        <div class="card-topics"></div>
+        <div class="card-links"><a class="card-link" href="https://github.com/TMHSDigital/cfx-mcp" target="_blank" rel="noopener">Repository</a><a class="card-link" href="https://tmhsdigital.github.io/cfx-mcp/" target="_blank" rel="noopener">Docs</a></div>
+      </div>
+      <div class="tool-card" data-type="cursor-plugin" data-category="3d-media" data-status="active" data-slug="blender-developer-tools">
+        <div class="card-header"><span class="card-title">Blender Developer Tools</span><div class="card-badges"><span class="card-badge badge-plugin">Plugin</span></div></div>
+        <p class="card-description">Cursor and Claude Code skills, rules, snippets, and templates for Blender Python add-on and scripting development</p>
+        <div class="card-stats"><span class="card-stat"><strong>18</strong> skills</span><span class="card-stat"><strong>9</strong> rules</span><span class="card-stat"><strong>17</strong> snippets</span><span class="card-stat"><strong>2</strong> templates</span></div>
+        <div class="card-topics"><span class="topic-tag">blender</span><span class="topic-tag">python</span><span class="topic-tag">bpy</span><span class="topic-tag">3d</span><span class="topic-tag">addon-development</span></div>
+        <div class="card-links"><a class="card-link" href="https://github.com/TMHSDigital/Blender-Developer-Tools" target="_blank" rel="noopener">Repository</a><a class="card-link" href="https://tmhsdigital.github.io/Blender-Developer-Tools/" target="_blank" rel="noopener">Docs</a></div>
+      </div>
+      <div class="tool-card" data-type="mcp-server" data-category="ai" data-status="experimental" data-slug="local-ai-mcp">
+        <div class="card-header"><span class="card-title">Local AI MCP</span><div class="card-badges"><span class="card-badge badge-mcp">MCP Server</span><span class="card-badge badge-status badge-status-experimental">experimental</span></div></div>
+        <p class="card-description">Unified MCP server for managing local model runtimes (Ollama, LM Studio, and more): provider-agnostic discovery, lifecycle, hardware-fit, and delegated inference.</p>
+        <div class="card-stats"><span class="card-stat"><strong>16</strong> MCP tools</span></div>
+        <div class="card-topics"><span class="topic-tag">mcp</span><span class="topic-tag">model-context-protocol</span><span class="topic-tag">ollama</span><span class="topic-tag">lm-studio</span><span class="topic-tag">local-llm</span></div>
+        <div class="card-links"><a class="card-link" href="https://github.com/TMHSDigital/local-ai-mcp" target="_blank" rel="noopener">Repository</a><a class="card-link" href="https://tmhsdigital.github.io/local-ai-mcp/" target="_blank" rel="noopener">Docs</a><a class="card-link" href="https://www.npmjs.com/package/@tmhs/local-ai-mcp" target="_blank" rel="noopener">npm</a></div>
+      </div>
+      <div class="tool-card" data-type="mcp-server" data-category="3d-media" data-status="beta" data-slug="screencast-mcp">
+        <div class="card-header"><span class="card-title">Screencast MCP</span><div class="card-badges"><span class="card-badge badge-mcp">MCP Server</span><span class="card-badge badge-status badge-status-beta">beta</span></div></div>
+        <p class="card-description">MCP server for Windows screen recording, frame sampling, and minimal ffmpeg edits (capture, watch, trim/concat/convert).</p>
+        <div class="card-stats"><span class="card-stat"><strong>25</strong> MCP tools</span></div>
+        <div class="card-topics"><span class="topic-tag">mcp-server</span><span class="topic-tag">developer-tools</span><span class="topic-tag">screen-recording</span><span class="topic-tag">ffmpeg</span><span class="topic-tag">windows</span></div>
+        <div class="card-links"><a class="card-link" href="https://github.com/TMHSDigital/screencast-mcp" target="_blank" rel="noopener">Repository</a><a class="card-link" href="https://tmhsdigital.github.io/screencast-mcp/" target="_blank" rel="noopener">Docs</a><a class="card-link" href="https://www.npmjs.com/package/@tmhs/screencast-mcp" target="_blank" rel="noopener">npm</a></div>
+      </div>
+      <div class="tool-card" data-type="mcp-server" data-category="infrastructure" data-status="experimental" data-slug="tailscale-mcp">
+        <div class="card-header"><span class="card-title">Tailscale MCP</span><div class="card-badges"><span class="card-badge badge-mcp">MCP Server</span><span class="card-badge badge-status badge-status-experimental">experimental</span></div></div>
+        <p class="card-description">MCP server for safe programmatic access to the local Tailscale daemon: tailnet discovery, SSH config generation, port sharing via Serve/Funnel, and latency matrices.</p>
+        <div class="card-stats"><span class="card-stat"><strong>6</strong> MCP tools</span></div>
+        <div class="card-topics"><span class="topic-tag">mcp</span><span class="topic-tag">model-context-protocol</span><span class="topic-tag">tailscale</span><span class="topic-tag">tailnet</span><span class="topic-tag">ssh</span></div>
+        <div class="card-links"><a class="card-link" href="https://github.com/TMHSDigital/tailscale-mcp" target="_blank" rel="noopener">Repository</a><a class="card-link" href="https://tmhsdigital.github.io/tailscale-mcp/" target="_blank" rel="noopener">Docs</a><a class="card-link" href="https://www.npmjs.com/package/@tmhs/tailscale-mcp" target="_blank" rel="noopener">npm</a></div>
+      </div>
+      <div class="tool-card" data-type="mcp-server" data-category="game-dev" data-status="experimental" data-slug="godot-correctness-mcp">
+        <div class="card-header"><span class="card-title">Godot Correctness MCP</span><div class="card-badges"><span class="card-badge badge-mcp">MCP Server</span><span class="card-badge badge-status badge-status-experimental">experimental</span></div></div>
+        <p class="card-description">Offline static correctness for Godot 4.x GDScript projects: anti-pattern linting via tree-sitter, cross-version API lookup and diff (4.4/4.5), and scene/resource/registry validation. Headless, offline, CI-first.</p>
+        <div class="card-stats"><span class="card-stat"><strong>10</strong> MCP tools</span></div>
+        <div class="card-topics"><span class="topic-tag">mcp</span><span class="topic-tag">model-context-protocol</span><span class="topic-tag">godot</span><span class="topic-tag">gdscript</span><span class="topic-tag">static-analysis</span></div>
+        <div class="card-links"><a class="card-link" href="https://github.com/TMHSDigital/godot-correctness-mcp" target="_blank" rel="noopener">Repository</a><a class="card-link" href="https://tmhsdigital.github.io/godot-correctness-mcp/" target="_blank" rel="noopener">Docs</a><a class="card-link" href="https://www.npmjs.com/package/@tmhs/godot-correctness-mcp" target="_blank" rel="noopener">npm</a></div>
+      </div>
+      <div class="tool-card" data-type="mcp-server" data-category="developer-tooling" data-status="experimental" data-slug="bounty-radar-mcp">
+        <div class="card-header"><span class="card-title">Bounty Radar MCP</span><div class="card-badges"><span class="card-badge badge-mcp">MCP Server</span><span class="card-badge badge-status badge-status-experimental">experimental</span></div></div>
+        <p class="card-description">Paid MCP server exposing a GitHub bounty radar tool. One tool, github_bounty_radar, priced at $0.05 USDC on Base and settled over x402 via the CDP facilitator.</p>
+        <div class="card-stats"><span class="card-stat"><strong>1</strong> MCP tools</span></div>
+        <div class="card-topics"><span class="topic-tag">mcp</span><span class="topic-tag">model-context-protocol</span><span class="topic-tag">x402</span><span class="topic-tag">bounty</span><span class="topic-tag">base</span></div>
+        <div class="card-links"><a class="card-link" href="https://github.com/TMHSDigital/bounty-radar-mcp" target="_blank" rel="noopener">Repository</a><a class="card-link" href="https://tmhsdigital.github.io/bounty-radar-mcp/" target="_blank" rel="noopener">Docs</a></div>
+      </div>
+<!-- registry:cards:end -->
+    </div>
   </section>
 
   <div class="content-area">
@@ -364,7 +501,7 @@
   </button>
 
   <script id="registry-data" type="application/json">
-[{"name":"CFX Developer Tools","repo":"TMHSDigital/CFX-Developer-Tools","slug":"cfx-developer-tools","description":"AI-powered Cursor IDE plugin for FiveM and RedM resource development","type":"cursor-plugin","homepage":"https://tmhsdigital.github.io/CFX-Developer-Tools/","skills":9,"rules":6,"mcpTools":6,"extras":{"snippets":24,"templates":11,"natives":12000,"events":101},"topics":["fivem","redm","cfx","lua","game-development"],"status":"active","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"mkdocs","hasCI":true},{"name":"Unity Developer Tools","repo":"TMHSDigital/Unity-Developer-Tools","slug":"unity-developer-tools","description":"Cursor IDE plugin for Unity game development with URP, HDRP, and Built-in render pipeline support","type":"cursor-plugin","homepage":"https://tmhsdigital.github.io/Unity-Developer-Tools/","skills":18,"rules":8,"mcpTools":4,"extras":{"snippets":20,"templates":5},"topics":["unity","game-development","csharp","urp","hdrp"],"status":"active","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"mkdocs","hasCI":true},{"name":"Docker Developer Tools","repo":"TMHSDigital/Docker-Developer-Tools","slug":"docker-developer-tools","description":"Cursor IDE plugin for Docker workflows with container management, Compose, and Dockerfile support","type":"cursor-plugin","homepage":"https://tmhsdigital.github.io/Docker-Developer-Tools/","skills":17,"rules":10,"mcpTools":150,"extras":{},"npm":"@tmhs/docker-mcp","topics":["docker","containers","devops","docker-compose","dockerfile"],"status":"active","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},{"name":"Home Lab Developer Tools","repo":"TMHSDigital/Home-Lab-Developer-Tools","slug":"home-lab-developer-tools","description":"Home lab and Raspberry Pi workflows for Cursor with Docker Compose, monitoring, DNS, networking, and security","type":"cursor-plugin","homepage":"https://tmhsdigital.github.io/Home-Lab-Developer-Tools/","skills":22,"rules":11,"mcpTools":50,"extras":{},"npm":"@tmhs/homelab-mcp","topics":["homelab","raspberry-pi","infrastructure","docker-compose","monitoring"],"status":"active","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},{"name":"Mobile App Developer Tools","repo":"TMHSDigital/Mobile-App-Developer-Tools","slug":"mobile-app-developer-tools","description":"Cursor plugin for mobile app development with React Native, Expo, and Flutter support","type":"cursor-plugin","homepage":"https://tmhsdigital.github.io/Mobile-App-Developer-Tools/","skills":43,"rules":12,"mcpTools":36,"extras":{},"npm":"@tmhs/mobile-mcp","topics":["react-native","expo","flutter","mobile-development","typescript"],"status":"active","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},{"name":"Plaid Developer Tools","repo":"TMHSDigital/Plaid-Developer-Tools","slug":"plaid-developer-tools","description":"Cursor plugin and MCP companion for building on the Plaid API","type":"cursor-plugin","homepage":"https://tmhsdigital.github.io/Plaid-Developer-Tools/","skills":17,"rules":7,"mcpTools":30,"extras":{},"topics":["plaid","fintech","banking","open-banking","plaid-api"],"status":"active","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},{"name":"Monday Cursor Plugin","repo":"TMHSDigital/Monday-Cursor-Plugin","slug":"monday-cursor-plugin","description":"Cursor IDE plugin for Monday.com with boards, items, sprints, docs, dashboards, and GraphQL","type":"cursor-plugin","homepage":"https://tmhsdigital.github.io/Monday-Cursor-Plugin/","skills":21,"rules":8,"mcpTools":45,"extras":{},"topics":["monday","project-management","graphql","productivity","work-management"],"status":"active","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},{"name":"Steam Cursor Plugin","repo":"TMHSDigital/Steam-Cursor-Plugin","slug":"steam-cursor-plugin","description":"Steam and Steamworks integration for Cursor IDE for game developers, modders, and power users","type":"cursor-plugin","homepage":"https://tmhsdigital.github.io/Steam-Cursor-Plugin/","skills":30,"rules":9,"mcpTools":26,"extras":{},"topics":["steam","steamworks","game-development","modding","steam-workshop"],"status":"active","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},{"name":"Steam MCP Server","repo":"TMHSDigital/steam-mcp","slug":"steam-mcp","description":"MCP server for Steam and Steamworks APIs with store data, player stats, reviews, achievements, and workshop tools","type":"mcp-server","homepage":"https://www.npmjs.com/package/@tmhs/steam-mcp","skills":0,"rules":0,"mcpTools":26,"extras":{},"npm":"@tmhs/steam-mcp","topics":["steam","mcp-server","steamworks","game-development","npm"],"status":"active","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"none","hasCI":true},{"name":"Developer Tools MCP","repo":"TMHSDigital/Developer-Tools-MCP","slug":"developer-tools-mcp","description":"MCP server providing agent-callable read and write access to the TMHSDigital developer-tools ecosystem: registry, fleet status, drift checking, and standards management","type":"mcp-server","homepage":"https://tmhsdigital.github.io/Developer-Tools-MCP/","skills":0,"rules":0,"mcpTools":7,"extras":{},"topics":["mcp-server","developer-tools","ecosystem","registry","typescript"],"status":"active","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true,"npm":"@tmhs/devtools-mcp"},{"name":"CFX MCP","repo":"TMHSDigital/cfx-mcp","slug":"cfx-mcp","description":"MCP server providing agent-callable tools for CFX/FiveM resource development, server management, and community platform integration.","type":"mcp-server","homepage":"https://tmhsdigital.github.io/cfx-mcp/","skills":0,"rules":0,"mcpTools":3,"extras":{},"topics":[],"status":"experimental","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},{"name":"Blender Developer Tools","repo":"TMHSDigital/Blender-Developer-Tools","slug":"blender-developer-tools","description":"Cursor and Claude Code skills, rules, snippets, and templates for Blender Python add-on and scripting development","type":"cursor-plugin","homepage":"https://tmhsdigital.github.io/Blender-Developer-Tools/","skills":18,"rules":9,"mcpTools":0,"extras":{"snippets":17,"templates":2},"topics":["blender","python","bpy","3d","addon-development"],"status":"active","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},{"name":"Local AI MCP","repo":"TMHSDigital/local-ai-mcp","slug":"local-ai-mcp","description":"Unified MCP server for managing local model runtimes (Ollama, LM Studio, and more): provider-agnostic discovery, lifecycle, hardware-fit, and delegated inference.","type":"mcp-server","homepage":"https://tmhsdigital.github.io/local-ai-mcp/","skills":0,"rules":0,"mcpTools":16,"extras":{},"topics":["mcp","model-context-protocol","ollama","lm-studio","local-llm"],"status":"experimental","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true,"npm":"@tmhs/local-ai-mcp"},{"name":"Screencast MCP","repo":"TMHSDigital/screencast-mcp","slug":"screencast-mcp","description":"MCP server for Windows screen recording, frame sampling, and minimal ffmpeg edits (capture, watch, trim/concat/convert).","type":"mcp-server","homepage":"https://tmhsdigital.github.io/screencast-mcp/","skills":0,"rules":0,"mcpTools":25,"extras":{},"topics":["mcp-server","developer-tools","screen-recording","ffmpeg","windows"],"status":"beta","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true,"npm":"@tmhs/screencast-mcp"},{"name":"Tailscale MCP","repo":"TMHSDigital/tailscale-mcp","slug":"tailscale-mcp","description":"MCP server for safe programmatic access to the local Tailscale daemon: tailnet discovery, SSH config generation, port sharing via Serve/Funnel, and latency matrices.","type":"mcp-server","homepage":"https://tmhsdigital.github.io/tailscale-mcp/","skills":0,"rules":0,"mcpTools":6,"extras":{},"topics":["mcp","model-context-protocol","tailscale","tailnet","ssh"],"status":"experimental","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true,"npm":"@tmhs/tailscale-mcp"},{"name":"Godot Correctness MCP","repo":"TMHSDigital/godot-correctness-mcp","slug":"godot-correctness-mcp","description":"Offline static correctness for Godot 4.x GDScript projects: anti-pattern linting via tree-sitter, cross-version API lookup and diff (4.4/4.5), and scene/resource/registry validation. Headless, offline, CI-first.","type":"mcp-server","homepage":"https://tmhsdigital.github.io/godot-correctness-mcp/","skills":0,"rules":0,"mcpTools":10,"extras":{},"topics":["mcp","model-context-protocol","godot","gdscript","static-analysis"],"status":"experimental","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true,"npm":"@tmhs/godot-correctness-mcp"},{"name":"Bounty Radar MCP","repo":"TMHSDigital/bounty-radar-mcp","slug":"bounty-radar-mcp","description":"Paid MCP server exposing a GitHub bounty radar tool. One tool, github_bounty_radar, priced at $0.05 USDC on Base and settled over x402 via the CDP facilitator.","type":"mcp-server","homepage":"https://tmhsdigital.github.io/bounty-radar-mcp/","skills":0,"rules":0,"mcpTools":1,"extras":{},"topics":["mcp","model-context-protocol","x402","bounty","base"],"status":"experimental","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true,"archetype":"deployed-service"}]
+[{"name":"CFX Developer Tools","repo":"TMHSDigital/CFX-Developer-Tools","slug":"cfx-developer-tools","description":"AI-powered Cursor IDE plugin for FiveM and RedM resource development","type":"cursor-plugin","category":"game-dev","homepage":"https://tmhsdigital.github.io/CFX-Developer-Tools/","skills":9,"rules":6,"mcpTools":6,"extras":{"snippets":24,"templates":11,"natives":12000,"events":101},"topics":["fivem","redm","cfx","lua","game-development"],"status":"active","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"mkdocs","hasCI":true},{"name":"Unity Developer Tools","repo":"TMHSDigital/Unity-Developer-Tools","slug":"unity-developer-tools","description":"Cursor IDE plugin for Unity game development with URP, HDRP, and Built-in render pipeline support","type":"cursor-plugin","category":"game-dev","homepage":"https://tmhsdigital.github.io/Unity-Developer-Tools/","skills":18,"rules":8,"mcpTools":4,"extras":{"snippets":20,"templates":5},"topics":["unity","game-development","csharp","urp","hdrp"],"status":"active","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"mkdocs","hasCI":true},{"name":"Docker Developer Tools","repo":"TMHSDigital/Docker-Developer-Tools","slug":"docker-developer-tools","description":"Cursor IDE plugin for Docker workflows with container management, Compose, and Dockerfile support","type":"cursor-plugin","category":"infrastructure","homepage":"https://tmhsdigital.github.io/Docker-Developer-Tools/","skills":17,"rules":10,"mcpTools":150,"extras":{},"npm":"@tmhs/docker-mcp","topics":["docker","containers","devops","docker-compose","dockerfile"],"status":"active","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},{"name":"Home Lab Developer Tools","repo":"TMHSDigital/Home-Lab-Developer-Tools","slug":"home-lab-developer-tools","description":"Home lab and Raspberry Pi workflows for Cursor with Docker Compose, monitoring, DNS, networking, and security","type":"cursor-plugin","category":"infrastructure","homepage":"https://tmhsdigital.github.io/Home-Lab-Developer-Tools/","skills":22,"rules":11,"mcpTools":50,"extras":{},"npm":"@tmhs/homelab-mcp","topics":["homelab","raspberry-pi","infrastructure","docker-compose","monitoring"],"status":"active","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},{"name":"Mobile App Developer Tools","repo":"TMHSDigital/Mobile-App-Developer-Tools","slug":"mobile-app-developer-tools","description":"Cursor plugin for mobile app development with React Native, Expo, and Flutter support","type":"cursor-plugin","category":"mobile","homepage":"https://tmhsdigital.github.io/Mobile-App-Developer-Tools/","skills":43,"rules":12,"mcpTools":36,"extras":{},"npm":"@tmhs/mobile-mcp","topics":["react-native","expo","flutter","mobile-development","typescript"],"status":"active","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},{"name":"Plaid Developer Tools","repo":"TMHSDigital/Plaid-Developer-Tools","slug":"plaid-developer-tools","description":"Cursor plugin and MCP companion for building on the Plaid API","type":"cursor-plugin","category":"fintech","homepage":"https://tmhsdigital.github.io/Plaid-Developer-Tools/","skills":17,"rules":7,"mcpTools":30,"extras":{},"topics":["plaid","fintech","banking","open-banking","plaid-api"],"status":"active","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},{"name":"Monday Cursor Plugin","repo":"TMHSDigital/Monday-Cursor-Plugin","slug":"monday-cursor-plugin","description":"Cursor IDE plugin for Monday.com with boards, items, sprints, docs, dashboards, and GraphQL","type":"cursor-plugin","category":"productivity","homepage":"https://tmhsdigital.github.io/Monday-Cursor-Plugin/","skills":21,"rules":8,"mcpTools":45,"extras":{},"topics":["monday","project-management","graphql","productivity","work-management"],"status":"active","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},{"name":"Steam Cursor Plugin","repo":"TMHSDigital/Steam-Cursor-Plugin","slug":"steam-cursor-plugin","description":"Steam and Steamworks integration for Cursor IDE for game developers, modders, and power users","type":"cursor-plugin","category":"game-dev","homepage":"https://tmhsdigital.github.io/Steam-Cursor-Plugin/","skills":30,"rules":9,"mcpTools":26,"extras":{},"topics":["steam","steamworks","game-development","modding","steam-workshop"],"status":"active","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},{"name":"Steam MCP Server","repo":"TMHSDigital/steam-mcp","slug":"steam-mcp","description":"MCP server for Steam and Steamworks APIs with store data, player stats, reviews, achievements, and workshop tools","type":"mcp-server","category":"game-dev","homepage":"https://www.npmjs.com/package/@tmhs/steam-mcp","skills":0,"rules":0,"mcpTools":26,"extras":{},"npm":"@tmhs/steam-mcp","topics":["steam","mcp-server","steamworks","game-development","npm"],"status":"active","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"none","hasCI":true},{"name":"Developer Tools MCP","repo":"TMHSDigital/Developer-Tools-MCP","slug":"developer-tools-mcp","description":"MCP server providing agent-callable read and write access to the TMHSDigital developer-tools ecosystem: registry, fleet status, drift checking, and standards management","type":"mcp-server","category":"developer-tooling","homepage":"https://tmhsdigital.github.io/Developer-Tools-MCP/","skills":0,"rules":0,"mcpTools":7,"extras":{},"topics":["mcp-server","developer-tools","ecosystem","registry","typescript"],"status":"active","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true,"npm":"@tmhs/devtools-mcp"},{"name":"CFX MCP","repo":"TMHSDigital/cfx-mcp","slug":"cfx-mcp","description":"MCP server providing agent-callable tools for CFX/FiveM resource development, server management, and community platform integration.","type":"mcp-server","category":"game-dev","homepage":"https://tmhsdigital.github.io/cfx-mcp/","skills":0,"rules":0,"mcpTools":3,"extras":{},"topics":[],"status":"experimental","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},{"name":"Blender Developer Tools","repo":"TMHSDigital/Blender-Developer-Tools","slug":"blender-developer-tools","description":"Cursor and Claude Code skills, rules, snippets, and templates for Blender Python add-on and scripting development","type":"cursor-plugin","category":"3d-media","homepage":"https://tmhsdigital.github.io/Blender-Developer-Tools/","skills":18,"rules":9,"mcpTools":0,"extras":{"snippets":17,"templates":2},"topics":["blender","python","bpy","3d","addon-development"],"status":"active","language":"Python","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true},{"name":"Local AI MCP","repo":"TMHSDigital/local-ai-mcp","slug":"local-ai-mcp","description":"Unified MCP server for managing local model runtimes (Ollama, LM Studio, and more): provider-agnostic discovery, lifecycle, hardware-fit, and delegated inference.","type":"mcp-server","category":"ai","homepage":"https://tmhsdigital.github.io/local-ai-mcp/","skills":0,"rules":0,"mcpTools":16,"extras":{},"topics":["mcp","model-context-protocol","ollama","lm-studio","local-llm"],"status":"experimental","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true,"npm":"@tmhs/local-ai-mcp"},{"name":"Screencast MCP","repo":"TMHSDigital/screencast-mcp","slug":"screencast-mcp","description":"MCP server for Windows screen recording, frame sampling, and minimal ffmpeg edits (capture, watch, trim/concat/convert).","type":"mcp-server","category":"3d-media","homepage":"https://tmhsdigital.github.io/screencast-mcp/","skills":0,"rules":0,"mcpTools":25,"extras":{},"topics":["mcp-server","developer-tools","screen-recording","ffmpeg","windows"],"status":"beta","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true,"npm":"@tmhs/screencast-mcp"},{"name":"Tailscale MCP","repo":"TMHSDigital/tailscale-mcp","slug":"tailscale-mcp","description":"MCP server for safe programmatic access to the local Tailscale daemon: tailnet discovery, SSH config generation, port sharing via Serve/Funnel, and latency matrices.","type":"mcp-server","category":"infrastructure","homepage":"https://tmhsdigital.github.io/tailscale-mcp/","skills":0,"rules":0,"mcpTools":6,"extras":{},"topics":["mcp","model-context-protocol","tailscale","tailnet","ssh"],"status":"experimental","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true,"npm":"@tmhs/tailscale-mcp"},{"name":"Godot Correctness MCP","repo":"TMHSDigital/godot-correctness-mcp","slug":"godot-correctness-mcp","description":"Offline static correctness for Godot 4.x GDScript projects: anti-pattern linting via tree-sitter, cross-version API lookup and diff (4.4/4.5), and scene/resource/registry validation. Headless, offline, CI-first.","type":"mcp-server","category":"game-dev","homepage":"https://tmhsdigital.github.io/godot-correctness-mcp/","skills":0,"rules":0,"mcpTools":10,"extras":{},"topics":["mcp","model-context-protocol","godot","gdscript","static-analysis"],"status":"experimental","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true,"npm":"@tmhs/godot-correctness-mcp"},{"name":"Bounty Radar MCP","repo":"TMHSDigital/bounty-radar-mcp","slug":"bounty-radar-mcp","description":"Paid MCP server exposing a GitHub bounty radar tool. One tool, github_bounty_radar, priced at $0.05 USDC on Base and settled over x402 via the CDP facilitator.","type":"mcp-server","category":"developer-tooling","homepage":"https://tmhsdigital.github.io/bounty-radar-mcp/","skills":0,"rules":0,"mcpTools":1,"extras":{},"topics":["mcp","model-context-protocol","x402","bounty","base"],"status":"experimental","language":"TypeScript","license":"CC-BY-NC-ND-4.0","pagesType":"static","hasCI":true,"archetype":"deployed-service"}]
 </script>
 
   <script id="search-index" type="application/json">
@@ -388,7 +525,8 @@
         auto:'<svg xmlns="'+SVG_NS+'"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20V2z"/></svg>'
       };
       var states=['dark','light','auto'];
-      function getState(){return localStorage.getItem('theme')||'auto'}
+      function getState(){try{return localStorage.getItem('theme')||'auto'}catch(e){return memTheme}}
+      var memTheme='auto';
       function setIconChildren(svgString){
         while(icon.firstChild)icon.removeChild(icon.firstChild);
         var doc=new DOMParser().parseFromString(svgString,'image/svg+xml');
@@ -402,7 +540,8 @@
         if(s==='light')document.documentElement.setAttribute('data-theme','light');
         else if(s==='dark')document.documentElement.setAttribute('data-theme','dark');
         else document.documentElement.removeAttribute('data-theme');
-        if(s==='auto')localStorage.removeItem('theme');else localStorage.setItem('theme',s);
+        memTheme=s;
+        try{if(s==='auto')localStorage.removeItem('theme');else localStorage.setItem('theme',s)}catch(e){}
         updateIcon(s);
       }
       function updateIcon(s){
@@ -414,18 +553,12 @@
       updateIcon(getState());
     })();
 
-    /* Build date in footer */
-    (function(){
-      var el=document.getElementById('buildDate');
-      if(el)el.textContent='Built '+new Date().toISOString().slice(0,10);
-    })();
-
     /* Data loading */
     document.addEventListener('DOMContentLoaded',function(){
       fetch('registry.json').then(function(r){if(!r.ok)return fetch('../registry.json');return r}).then(function(r){return r.json()}).then(boot).catch(function(){boot(getEmbeddedRegistry())});
     });
     function getEmbeddedRegistry(){var el=document.getElementById('registry-data');if(el){try{return JSON.parse(el.textContent)}catch(e){}}return[]}
-    function boot(tools){renderStats(tools);renderCards(tools);setupFilters(tools);setupSearch(tools)}
+    function boot(tools){renderStats(tools);renderCards(tools);setupBrowse(tools)}
 
     /* Animated stat counters.
        Counts every non-archived tool, mirroring aggregate_stats in
@@ -466,6 +599,8 @@
       tools.forEach(function(tool){
         var card=el('div','tool-card');
         card.dataset.type=tool.type||'';
+        card.dataset.category=tool.category||'';
+        card.dataset.status=tool.status||'active';
         card.dataset.topics=(tool.topics||[]).join(',');
         card.dataset.name=((tool.name||'')+' '+(tool.description||'')).toLowerCase();
         card.dataset.slug=tool.slug||'';
@@ -505,29 +640,21 @@
       });
     }
 
-    /* Filters */
-    function setupFilters(tools){
-      var btns=document.querySelectorAll('.filter-btn');
-      btns.forEach(function(btn){btn.addEventListener('click',function(){
-        btns.forEach(function(b){b.classList.remove('active')});btn.classList.add('active');
-        var f=btn.dataset.filter;var cards=document.querySelectorAll('.tool-card');
-        cards.forEach(function(c){
-          if(f==='all')c.classList.remove('hidden-card');
-          else if(f==='cursor-plugin'||f==='mcp-server')c.classList.toggle('hidden-card',c.dataset.type!==f);
-          else c.classList.toggle('hidden-card',c.dataset.topics.split(',').indexOf(f)===-1);
-        });
-      })});
-    }
-
-    /* Search (full-aggregate).
-       Index source order: fetched search-index.json, then the inline
-       <script id="search-index"> fallback (offline / file://), then a
-       basic index built from the registry. All three agree because the
-       sync script generates the file and the inline block together. */
-    function setupSearch(tools){
+    /* Browse: category/type chips, status select, and full-aggregate search
+       combine into one filter state, mirrored to the URL (?q=&cat=&status=)
+       so any view can be shared.
+       Search index source order: fetched search-index.json, then the inline
+       <script id="search-index"> fallback (offline / file://), then a basic
+       index built from the registry. All three agree because the sync script
+       generates the file and the inline block together. */
+    function setupBrowse(tools){
       var input=document.getElementById('toolSearch');
       var meta=document.getElementById('searchMeta');
+      var statusSel=document.getElementById('statusFilter');
+      var btns=Array.prototype.slice.call(document.querySelectorAll('.filter-btn'));
+      var state={q:'',cat:'all',status:'all'};
       var indexMap={};
+
       function inlineIndex(){var idxEl=document.getElementById('search-index');if(idxEl){try{return JSON.parse(idxEl.textContent)}catch(e){}}return[]}
       function buildIndex(searchIdx){
         indexMap={};
@@ -542,33 +669,67 @@
             indexMap[t.slug]={text:(t.name+' '+t.description+' '+(t.topics||[]).join(' ')+' '+(t.npm||'')).toLowerCase(),skills:[],rules:[],mcpTools:[]};
           });
         }
+        apply();
       }
-      fetch('search-index.json').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){buildIndex(d&&d.length?d:inlineIndex())}).catch(function(){buildIndex(inlineIndex())});
       function findMatchSource(idx,q){
-        var sk=idx.skills||[];for(var i=0;i<sk.length;i++){if(sk[i].toLowerCase().indexOf(q)!==-1)return'skill: '+sk[i]}
-        var ru=idx.rules||[];for(var i=0;i<ru.length;i++){if(ru[i].toLowerCase().indexOf(q)!==-1)return'rule: '+ru[i]}
-        var mt=idx.mcpTools||[];for(var i=0;i<mt.length;i++){if(mt[i].toLowerCase().indexOf(q)!==-1)return'MCP tool: '+mt[i]}
+        var lists=[['skill',idx.skills||[]],['rule',idx.rules||[]],['MCP tool',idx.mcpTools||[]]];
+        for(var l=0;l<lists.length;l++){var arr=lists[l][1];for(var i=0;i<arr.length;i++){if(arr[i].toLowerCase().indexOf(q)!==-1)return lists[l][0]+': '+arr[i]}}
         return'';
       }
-      input.addEventListener('input',function(){
-        var q=input.value.toLowerCase().trim();var cards=document.querySelectorAll('.tool-card');var shown=0;
+      function matchesCat(c){
+        if(state.cat==='all')return true;
+        if(state.cat==='cursor-plugin'||state.cat==='mcp-server')return c.dataset.type===state.cat;
+        return c.dataset.category===state.cat;
+      }
+      function apply(){
+        var q=state.q.toLowerCase().trim();
+        var cards=document.querySelectorAll('.tool-card');var shown=0;
         cards.forEach(function(c){
           var hint=c.querySelector('.match-hint');if(hint)hint.remove();
-          if(!q){c.classList.remove('hidden-card');shown++;return}
-          var slug=c.dataset.slug;var idx=indexMap[slug];
-          if(idx&&idx.text.indexOf(q)!==-1){
-            c.classList.remove('hidden-card');shown++;
-            var src=findMatchSource(idx,q);
-            if(src){var el=document.createElement('div');el.className='match-hint';el.textContent='Matched: '+src;c.appendChild(el)}
-          }else{c.classList.add('hidden-card')}
+          var ok=matchesCat(c)&&(state.status==='all'||c.dataset.status===state.status);
+          var idx=indexMap[c.dataset.slug];
+          if(ok&&q)ok=!!(idx&&idx.text.indexOf(q)!==-1);
+          c.classList.toggle('hidden-card',!ok);
+          if(!ok)return;
+          shown++;
+          if(q&&idx){var src=findMatchSource(idx,q);if(src){var h=document.createElement('div');h.className='match-hint';h.textContent='Matched: '+src;c.appendChild(h)}}
         });
-        document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active')});
-        if(!q){document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');meta.textContent=''}
-        else{meta.textContent=shown+' of '+cards.length+' tools'}
-      });
+        btns.forEach(function(b){var on=b.dataset.filter===state.cat;b.classList.toggle('active',on);b.setAttribute('aria-pressed',on?'true':'false')});
+        if(statusSel)statusSel.value=state.status;
+        var filtered=q||state.cat!=='all'||state.status!=='all';
+        meta.textContent=filtered?(shown+' of '+cards.length+' tools'):'';
+        writeUrl();
+      }
+      function readUrl(){
+        try{
+          var p=new URLSearchParams(window.location.search);
+          state.q=p.get('q')||'';
+          var cat=p.get('cat');if(cat&&btns.some(function(b){return b.dataset.filter===cat}))state.cat=cat;
+          var st=p.get('status');if(st&&statusSel&&Array.prototype.some.call(statusSel.options,function(o){return o.value===st}))state.status=st;
+        }catch(e){}
+        input.value=state.q;
+      }
+      function writeUrl(){
+        try{
+          var p=new URLSearchParams();
+          if(state.q)p.set('q',state.q);
+          if(state.cat!=='all')p.set('cat',state.cat);
+          if(state.status!=='all')p.set('status',state.status);
+          var qs=p.toString();
+          history.replaceState(null,'',window.location.pathname+(qs?'?'+qs:'')+window.location.hash);
+        }catch(e){}
+      }
+
+      btns.forEach(function(btn){btn.addEventListener('click',function(){state.cat=btn.dataset.filter;apply()})});
+      if(statusSel)statusSel.addEventListener('change',function(){state.status=statusSel.value;apply()});
+      input.addEventListener('input',function(){state.q=input.value;apply()});
       document.addEventListener('keydown',function(e){
-        if(e.key==='/'&&!e.ctrlKey&&!e.metaKey&&document.activeElement.tagName!=='INPUT'&&document.activeElement.tagName!=='TEXTAREA'){e.preventDefault();input.focus()}
+        if(e.key==='/'&&!e.ctrlKey&&!e.metaKey&&document.activeElement.tagName!=='INPUT'&&document.activeElement.tagName!=='TEXTAREA'&&document.activeElement.tagName!=='SELECT'){e.preventDefault();input.focus()}
       });
+
+      readUrl();
+      buildIndex(inlineIndex());
+      fetch('search-index.json').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){if(d&&d.length)buildIndex(d)}).catch(function(){});
     }
 
     /* Section collapse/expand toggles */
@@ -631,9 +792,10 @@
       var toggle=document.querySelector('.nav-toggle');
       var links=document.querySelector('.nav-links');
       if(!toggle||!links)return;
-      toggle.addEventListener('click',function(){links.classList.toggle('open')});
+      function setOpen(open){links.classList.toggle('open',open);toggle.setAttribute('aria-expanded',open?'true':'false')}
+      toggle.addEventListener('click',function(){setOpen(!links.classList.contains('open'))});
       links.querySelectorAll('a').forEach(function(a){
-        a.addEventListener('click',function(){links.classList.remove('open')});
+        a.addEventListener('click',function(){setOpen(false)});
       });
     })();
   </script>
