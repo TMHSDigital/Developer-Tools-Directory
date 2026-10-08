@@ -33,6 +33,8 @@ on:
       - .github/actions/drift-check/**
       - .github/workflows/drift-check.yml
 
+permissions: {}
+
 concurrency:
   # Coalesce queued runs of the same trigger; do NOT cancel an in-flight
   # check (the sticky-issue upsert is non-idempotent during the gh edit
@@ -57,8 +59,8 @@ jobs:
         with:
           mode: all
           format: gh-summary
-          # DRIFT_CHECK_TOKEN provides cross-repo Contents:Read on the 9
-          # tool repos. GITHUB_TOKEN is the fallback for self-only runs
+          # DRIFT_CHECK_TOKEN provides cross-repo Contents:Read on every
+          # live tool repo in registry.json. GITHUB_TOKEN is the fallback for self-only runs
           # where remote sparse-checkout is not needed.
           github-token: ${{ secrets.DRIFT_CHECK_TOKEN || secrets.GITHUB_TOKEN }}
           # GITHUB_TOKEN with the workflow's issues:write permission is
@@ -74,8 +76,13 @@ jobs:
       - name: Report outcome
         if: always()
         shell: bash
+        env:
+          EXIT_CODE: ${{ steps.drift.outputs.exit-code }}
+          ERRORS: ${{ steps.drift.outputs.error-count }}
+          WARNINGS: ${{ steps.drift.outputs.warning-count }}
+          STICKY: ${{ steps.drift.outputs.sticky-issue-action }}
         run: |
-          echo "exit-code: ${{ steps.drift.outputs.exit-code }}"
-          echo "errors:    ${{ steps.drift.outputs.error-count }}"
-          echo "warnings:  ${{ steps.drift.outputs.warning-count }}"
-          echo "sticky:    ${{ steps.drift.outputs.sticky-issue-action }}"
+          echo "exit-code: $EXIT_CODE"
+          echo "errors:    $ERRORS"
+          echo "warnings:  $WARNINGS"
+          echo "sticky:    $STICKY"

@@ -4,7 +4,7 @@
 #
 # Reusable action invoked by:
 #   - the meta-repo's own drift-check.yml workflow (mode: all)
-#   - tool-repo validate.yml workflows (mode: self) — wired up in Session D
+#   - tool-repo validate.yml workflows (mode: self) - wired up in Session D
 #
 # What it does:
 #   1. Checks out THIS action's repo (TMHSDigital/Developer-Tools-Directory),
@@ -87,14 +87,14 @@ runs:
     # a known path. Use a dedicated subdirectory so we don't clobber the
     # caller's own checkout (which lives at GITHUB_WORKSPACE).
     - name: Checkout drift checker
-      uses: actions/checkout@v5
+      uses: actions/checkout@v7
       with:
         repository: TMHSDigital/Developer-Tools-Directory
         ref: ${{ inputs.meta-repo-ref }}
         path: .drift-checker
 
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ inputs.python-version }}
 
@@ -105,7 +105,7 @@ runs:
         if [ -f requirements.txt ]; then
           pip install -r requirements.txt
         else
-          echo "no requirements.txt — drift_check is stdlib-only, skipping"
+          echo "no requirements.txt - drift_check is stdlib-only, skipping"
         fi
 
     - name: Resolve meta-commit
@@ -120,17 +120,23 @@ runs:
       id: run
       shell: bash
       working-directory: .drift-checker
+      # Inputs reach the shell only through env, never through expression
+      # expansion inside run:, per .github/workflows/README.md.
       env:
         DRIFT_CHECK_TOKEN: ${{ inputs.github-token }}
+        INPUT_MODE: ${{ inputs.mode }}
+        INPUT_CALLER_PATH: ${{ inputs.caller-path }}
+        INPUT_FORMAT: ${{ inputs.format }}
+        META_SHA: ${{ steps.meta.outputs.sha }}
       run: |
         set +e
         EXTRA_ARGS=()
-        if [ "${{ inputs.mode }}" = "all" ]; then
+        if [ "$INPUT_MODE" = "all" ]; then
           EXTRA_ARGS+=(--all)
-        elif [ "${{ inputs.mode }}" = "self" ]; then
-          EXTRA_ARGS+=(--local "$GITHUB_WORKSPACE/${{ inputs.caller-path }}")
+        elif [ "$INPUT_MODE" = "self" ]; then
+          EXTRA_ARGS+=(--local "$GITHUB_WORKSPACE/$INPUT_CALLER_PATH")
         else
-          echo "::error::invalid mode: ${{ inputs.mode }} (expected 'self' or 'all')"
+          echo "::error::invalid mode: $INPUT_MODE (expected 'self' or 'all')"
           exit 2
         fi
 
@@ -140,7 +146,7 @@ runs:
           "${EXTRA_ARGS[@]}" \
           --format json \
           --output /tmp/drift-findings.json \
-          --meta-commit "${{ steps.meta.outputs.sha }}"
+          --meta-commit "$META_SHA"
         FINDINGS_RC=$?
 
         # Extract counts (default to 0 if jq missing or file absent).
@@ -155,15 +161,15 @@ runs:
 
         # Now render the user-requested format (which writes to step summary
         # automatically when format=gh-summary).
-        if [ "${{ inputs.format }}" != "json" ]; then
+        if [ "$INPUT_FORMAT" != "json" ]; then
           python scripts/drift_check/cli.py \
             "${EXTRA_ARGS[@]}" \
-            --format "${{ inputs.format }}" \
-            --meta-commit "${{ steps.meta.outputs.sha }}"
+            --format "$INPUT_FORMAT" \
+            --meta-commit "$META_SHA"
         fi
 
         # Tool errors (rc=2) abort immediately and skip the sticky-issue
-        # step — there's nothing meaningful to publish if the checker
+        # step - there's nothing meaningful to publish if the checker
         # itself failed. Drift findings (rc=1) are NOT propagated here so
         # the optional sticky-issue step still runs; the final
         # "Propagate checker exit code" step at the end of this composite
@@ -185,27 +191,32 @@ runs:
         # permissions block is the reliable source. issues-token defaults
         # to github-token for backward compatibility.
         DRIFT_CHECK_TOKEN: ${{ inputs.github-token }}
+        # The CLI writes the sticky issue with DRIFT_CHECK_ISSUES_TOKEN and
+        # clones with DRIFT_CHECK_TOKEN, so each token does one job.
+        DRIFT_CHECK_ISSUES_TOKEN: ${{ inputs.issues-token != '' && inputs.issues-token || inputs.github-token }}
         GH_TOKEN: ${{ inputs.issues-token != '' && inputs.issues-token || inputs.github-token }}
+        INPUT_MODE: ${{ inputs.mode }}
+        INPUT_CALLER_PATH: ${{ inputs.caller-path }}
+        META_SHA: ${{ steps.meta.outputs.sha }}
       run: |
         set +e
-        ISSUES_TOKEN="${{ inputs.issues-token != '' && inputs.issues-token || inputs.github-token }}"
-        if [ -z "$ISSUES_TOKEN" ]; then
+        if [ -z "$DRIFT_CHECK_ISSUES_TOKEN" ]; then
           echo "::warning::update-sticky-issue=true but no issues-token / github-token provided; skipping"
           echo "action=skipped" >> "$GITHUB_OUTPUT"
           exit 0
         fi
         EXTRA_ARGS=()
-        if [ "${{ inputs.mode }}" = "all" ]; then
+        if [ "$INPUT_MODE" = "all" ]; then
           EXTRA_ARGS+=(--all)
         else
-          EXTRA_ARGS+=(--local "$GITHUB_WORKSPACE/${{ inputs.caller-path }}")
+          EXTRA_ARGS+=(--local "$GITHUB_WORKSPACE/$INPUT_CALLER_PATH")
         fi
         OUT=$(python scripts/drift_check/cli.py \
           "${EXTRA_ARGS[@]}" \
           --format json \
           --output /dev/null \
           --update-sticky-issue \
-          --meta-commit "${{ steps.meta.outputs.sha }}" 2>&1)
+          --meta-commit "$META_SHA" 2>&1)
         RC=$?
         echo "$OUT"
         # Parse the "Sticky issue: <action>" line emitted by cli.py.
@@ -228,8 +239,9 @@ runs:
       # don't mask the earlier failure that already failed the action.
       if: always()
       shell: bash
+      env:
+        RC: ${{ steps.run.outputs.exit-code }}
       run: |
-        RC="${{ steps.run.outputs.exit-code }}"
         if [ -z "$RC" ]; then
           echo "drift checker did not run; nothing to propagate"
           exit 0
@@ -237,7 +249,7 @@ runs:
         echo "drift checker exit code: $RC"
         case "$RC" in
           0) echo "no drift detected" ;;
-          1) echo "::error::drift detected — failing job per composite-action contract" ;;
+          1) echo "::error::drift detected - failing job per composite-action contract" ;;
           2) echo "::error::tool error in drift checker" ;;
           *) echo "::warning::unexpected exit code from drift checker: $RC" ;;
         esac

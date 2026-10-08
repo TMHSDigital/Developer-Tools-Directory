@@ -5,8 +5,7 @@ on:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 concurrency:
   group: release-${{ github.workflow }}
@@ -14,6 +13,8 @@ concurrency:
 
 jobs:
   check-version:
+    permissions:
+      contents: read
     name: Check VERSION vs latest tag
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip ci]')"

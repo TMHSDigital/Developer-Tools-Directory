@@ -9,9 +9,7 @@ on:
       - "registry.json"
   workflow_dispatch:
 
-permissions:
-  pages: write
-  id-token: write
+permissions: {}
 
 concurrency:
   group: pages
@@ -19,6 +17,9 @@ concurrency:
 
 jobs:
   deploy:
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

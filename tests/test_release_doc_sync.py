@@ -799,9 +799,11 @@ class TestCompositeAction:
         )
 
         cleanup_run = cleanup_step["run"]
-        assert "github.workspace" in cleanup_run, (
-            f"Cleanup must reference ${{{{ github.workspace }}}} to scope the "
-            f"rm -rf to the caller's workspace explicitly. Got: {cleanup_run!r}."
+        # $GITHUB_WORKSPACE (the runner env var, not an expression expanded
+        # into shell source) scopes the rm -rf to the caller's workspace.
+        assert '"$GITHUB_WORKSPACE/.release-doc-sync"' in cleanup_run, (
+            f"Cleanup must scope the rm -rf to $GITHUB_WORKSPACE explicitly. "
+            f"Got: {cleanup_run!r}."
         )
 
     def test_action_does_not_request_github_token(self, action_doc):

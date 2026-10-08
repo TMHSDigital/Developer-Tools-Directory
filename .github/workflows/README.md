@@ -115,5 +115,6 @@ When a third-party action releases a new version:
 
 ## Known follow-ups
 
-- `release-drafter/release-drafter@v6` in `release-drafter.yml` is still pinned by major tag. It runs under `pull_request_target` but does not check out PR code, so the fork-RCE vector does not apply. SHA-pinning tracked for v1.7.
+- `release-drafter/release-drafter` in `release-drafter.yml` is SHA-pinned (v7.10.0). It runs under `pull_request_target` but never checks out PR code. Dependabot proposes SHA bumps.
+- Both conventions above are enforced by `tests/test_workflow_hygiene.py` (workflows) and `tests/test_composite_action_shape.py` (composite actions).
 - `peter-evans/create-pull-request` in `sync.yml` is SHA-pinned. Update as releases land.

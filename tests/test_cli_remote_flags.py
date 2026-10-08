@@ -167,6 +167,38 @@ def test_update_sticky_issue_invokes_upsert(capsys, meta_repo: Path):
     assert "Sticky issue: no_op" in out
 
 
+@pytest.mark.parametrize(
+    "extra_args, env, expected",
+    [
+        ([], {}, "clone-tok"),
+        (["--issues-token", "flag-tok"], {}, "flag-tok"),
+        ([], {"DRIFT_CHECK_ISSUES_TOKEN": "env-tok"}, "env-tok"),
+    ],
+)
+def test_sticky_issue_token_precedence(meta_repo: Path, monkeypatch, extra_args, env, expected):
+    """Sticky writes use --issues-token, then $DRIFT_CHECK_ISSUES_TOKEN, then
+    the clone token, so the composite action can keep a PAT for clones and
+    the workflow GITHUB_TOKEN for issue edits."""
+    monkeypatch.delenv("DRIFT_CHECK_ISSUES_TOKEN", raising=False)
+    for k, v in env.items():
+        monkeypatch.setenv(k, v)
+    seen = {}
+
+    def fake_upsert(snapshots, findings, meta_commit, **kw):
+        seen["token"] = kw.get("gh_token")
+        return ("no_op", None)
+
+    with patch("scripts.drift_check.cli.issue.upsert_sticky_issue", side_effect=fake_upsert):
+        cli.main([
+            "--local", str(FIXTURES / "clean_repo"),
+            "--update-sticky-issue",
+            "--gh-token", "clone-tok",
+            *extra_args,
+            *_base(meta_repo),
+        ])
+    assert seen["token"] == expected
+
+
 def test_update_sticky_issue_without_token_errors(capsys, meta_repo: Path, monkeypatch):
     monkeypatch.delenv("DRIFT_CHECK_TOKEN", raising=False)
     monkeypatch.delenv("GITHUB_TOKEN", raising=False)

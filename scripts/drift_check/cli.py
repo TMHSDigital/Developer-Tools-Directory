@@ -29,6 +29,7 @@ if _sys.path and _sys.path[0].rstrip("/\\").endswith("drift_check"):
     _sys.path.pop(0)
 
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -147,6 +148,16 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "after running checks, upsert the sticky drift-report issue "
             "on the meta-repo. Requires --gh-token."
+        ),
+    )
+    p.add_argument(
+        "--issues-token",
+        default=None,
+        help=(
+            "token for the sticky-issue writes when it differs from the "
+            "clone token (e.g. the workflow GITHUB_TOKEN with issues:write). "
+            "Falls back to $DRIFT_CHECK_ISSUES_TOKEN, then the --gh-token "
+            "resolution."
         ),
     )
     p.add_argument(
@@ -435,7 +446,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 findings,
                 meta_commit=args.meta_commit,
                 repo=args.sticky_issue_repo,
-                gh_token=gh_token,
+                gh_token=(
+                    args.issues_token
+                    or os.environ.get("DRIFT_CHECK_ISSUES_TOKEN")
+                    or gh_token
+                ),
             )
         except RuntimeError as exc:
             print(f"error: sticky-issue upsert failed: {exc}", file=sys.stderr)

@@ -112,9 +112,11 @@ def test_action_propagates_checker_exit_code(action_doc):
         f"propagate step must use if: always(); got {propagate.get('if')!r}"
     )
     body = propagate.get("run", "")
-    assert "steps.run.outputs.exit-code" in body, (
-        "propagate step must read exit-code from the run step output"
+    # The rc reaches the shell through env (no expressions inside run:).
+    assert "steps.run.outputs.exit-code" in (propagate.get("env") or {}).get("RC", ""), (
+        "propagate step must read exit-code from the run step output via env RC"
     )
+    assert "${{" not in body, "propagate step must not expand expressions inside run:"
     assert 'exit "$RC"' in body, (
         "propagate step must exit with the recorded rc, not a hard-coded value"
     )
@@ -166,3 +168,18 @@ def test_meta_repo_ref_default_is_floating_major(action_doc):
         f"meta-repo-ref default must be a floating major tag (v1, v2, ...) "
         f"per DTD#14 to avoid stale references; got {meta_ref_default!r}"
     )
+
+
+def test_no_expressions_inside_run_blocks():
+    """Every composite step passes inputs and step outputs through env, so
+    no ${{ }} expression is ever expanded into shell source
+    (.github/workflows/README.md, DTD#117)."""
+    import yaml
+    actions_dir = Path(__file__).resolve().parent.parent / ".github" / "actions"
+    offenders = []
+    for action in sorted(actions_dir.glob("*/action.yml")):
+        doc = yaml.safe_load(action.read_text(encoding="utf-8"))
+        for step in doc.get("runs", {}).get("steps", []):
+            if "${{" in (step.get("run") or ""):
+                offenders.append(f"{action.parent.name}: {step.get('name')}")
+    assert not offenders, offenders
