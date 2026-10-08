@@ -3,8 +3,9 @@
 Usage: python add_comment_marker.py <file_path> <new_version>
 
 Finds a line matching ``<!-- standards-version: X.Y.Z -->`` (anywhere in the
-file, though convention is the first line) and replaces the version.  Exits 0
-on success, 1 if the marker is absent.
+file, though convention is the first line) and replaces the version. When
+no marker exists one is inserted as the first line. Exits 0 on success, 1 if
+the file cannot be read.
 """
 from __future__ import annotations
 
@@ -16,11 +17,14 @@ from pathlib import Path
 _MARKER_RE = re.compile(r"<!--\s*standards-version\s*:\s*[^\s>]+\s*-->")
 
 
-def _update(text: str, new_version: str) -> str | None:
-    """Return updated text, or None if no marker is found."""
+def _update(text: str, new_version: str) -> str:
+    """Return *text* with the marker set to *new_version*, inserting the
+    marker as the first line when it is absent."""
     new_marker = f"<!-- standards-version: {new_version} -->"
-    updated, count = _MARKER_RE.subn(new_marker, text, count=1)
-    return updated if count else None
+    updated, count = _MARKER_RE.subn(lambda _m: new_marker, text, count=1)
+    if count:
+        return updated
+    return new_marker + "\n" + text
 
 
 def main(argv: list[str]) -> int:
@@ -38,10 +42,6 @@ def main(argv: list[str]) -> int:
         return 1
 
     updated = _update(text, new_version)
-    if updated is None:
-        print(f"error: standards-version marker not found in {path}", file=sys.stderr)
-        return 1
-
     path.write_text(updated, encoding="utf-8", newline="\n")
     print(f"updated {path}")
     return 0

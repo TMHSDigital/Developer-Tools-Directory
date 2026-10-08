@@ -11,6 +11,7 @@ the repos can be cloned (e.g. a fleet job that checks out each repo).
 """
 
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -30,6 +31,13 @@ def _sibling_checkout(repo_field: str) -> Path | None:
     return candidate if candidate.is_dir() else None
 
 
+@pytest.mark.skipif(
+    os.environ.get("DTD_SIBLING_REPOS") != "1",
+    reason=(
+        "set DTD_SIBLING_REPOS=1 to compare against sibling tool checkouts; "
+        "off by default so a stale local clone cannot fail the suite"
+    ),
+)
 def test_registry_mcptools_matches_local_manifests():
     mismatches = []
     checked = []
@@ -57,7 +65,10 @@ def test_registry_mcptools_matches_local_manifests():
             "validation runs CI-side where repos can be cloned"
         )
 
-    assert not mismatches, "registry mcpTools != manifest length: " + ", ".join(
+    assert not mismatches, (
+        "registry mcpTools != manifest length (run `git pull` in each sibling "
+        "checkout first; a stale clone reports false drift): "
+    ) + ", ".join(
         f"{slug}: registry={declared} manifest={actual}"
         for slug, declared, actual in mismatches
     )
