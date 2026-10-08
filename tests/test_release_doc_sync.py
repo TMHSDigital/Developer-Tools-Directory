@@ -260,6 +260,52 @@ class TestChangelog:
         assert result.changed is False
         assert not path.exists()
 
+    def test_inserts_below_unreleased_section(self, tmp_path: Path):
+        path = tmp_path / "CHANGELOG.md"
+        path.write_text(
+            "# Changelog\n\n"
+            "## [Unreleased]\n\n- pending change\n\n"
+            "## [1.0.0] - 2026-01-01\n\n- first\n",
+            encoding="utf-8",
+        )
+        result = sync_changelog(
+            path,
+            plugin_version="1.1.0",
+            repository="TMHSDigital/X",
+            release_date="2026-04-25",
+        )
+        assert result.action == "inserted"
+        text = path.read_text(encoding="utf-8")
+        assert text.index("## [Unreleased]") < text.index("## [1.1.0]") < text.index("## [1.0.0]")
+
+    def test_prose_and_link_refs_do_not_count_as_present(self, tmp_path: Path):
+        path = tmp_path / "CHANGELOG.md"
+        path.write_text(
+            "# Changelog\n\nUpgrading to [2.0.0] soon.\n\n"
+            "## [1.0.0] - 2026-01-01\n\n- first\n\n"
+            "[2.0.0]: https://example.invalid/v2.0.0\n",
+            encoding="utf-8",
+        )
+        result = sync_changelog(
+            path,
+            plugin_version="2.0.0",
+            repository="TMHSDigital/X",
+            release_date="2026-04-25",
+        )
+        assert result.action == "inserted"
+        assert "## [2.0.0] - 2026-04-25" in path.read_text(encoding="utf-8")
+
+    def test_writes_lf_line_endings(self, tmp_path: Path):
+        path = tmp_path / "CHANGELOG.md"
+        path.write_bytes(b"# Changelog\n\n## [1.0.0] - 2026-01-01\n")
+        sync_changelog(
+            path,
+            plugin_version="1.0.1",
+            repository="TMHSDigital/X",
+            release_date="2026-04-25",
+        )
+        assert b"\r\n" not in path.read_bytes()
+
 
 # ---------------------------------------------------------------------------
 # CLAUDE tests

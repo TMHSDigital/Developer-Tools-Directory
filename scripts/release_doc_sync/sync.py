@@ -85,8 +85,16 @@ class SyncResult:
 # ---------------------------------------------------------------------------
 
 
-_CHANGELOG_VERSION_RE = re.compile(r"^##\s*\[(\d+\.\d+\.\d+)\]", re.MULTILINE)
-_CHANGELOG_FIRST_RELEASE_RE = re.compile(r"^##\s*\[", re.MULTILINE)
+# First versioned release heading. ``## [Unreleased]`` is deliberately not
+# matched: in Keep a Changelog order it stays above every release.
+_CHANGELOG_FIRST_RELEASE_RE = re.compile(r"^##\s*\[\d", re.MULTILINE)
+
+
+def _has_release_heading(text: str, version: str) -> bool:
+    """True only when ``## [version]`` exists as a heading. Mentions in
+    prose or footer link refs (``[X.Y.Z]: url``) do not count."""
+    pattern = re.compile(r"^##\s*\[" + re.escape(version) + r"\]", re.MULTILINE)
+    return pattern.search(text) is not None
 
 
 def sync_changelog(
@@ -109,12 +117,14 @@ def sync_changelog(
 
         See [release notes](https://github.com/<repo>/releases/tag/vX.Y.Z) for details.
 
-    Idempotency: if ``## [X.Y.Z]`` already appears anywhere in the file,
-    the function returns ``idempotent`` without touching the file.
+    Idempotency: if a ``## [X.Y.Z]`` heading already exists, the function
+    returns ``idempotent`` without touching the file. Prose mentions and
+    footer link refs are ignored.
 
-    Insertion point: immediately before the first existing ``## [`` release
-    section. If no release sections exist yet, append after the file's
-    existing content (one trailing blank line is normalized).
+    Insertion point: immediately before the first existing versioned
+    ``## [N...`` release section, which keeps ``## [Unreleased]`` on top.
+    If no release sections exist yet, append after the file's existing
+    content (one trailing blank line is normalized).
 
     Footer link refs (``[X.Y.Z]: <url>``) are intentionally NOT auto-added.
     Steam's Keep-a-Changelog format uses them, but maintaining the link
@@ -128,7 +138,7 @@ def sync_changelog(
 
     text = path.read_text(encoding="utf-8")
 
-    if f"[{plugin_version}]" in text:
+    if _has_release_heading(text, plugin_version):
         return FileResult(
             path=path,
             action="idempotent",
@@ -154,7 +164,7 @@ def sync_changelog(
             text = text + "\n"
         new_text = text + stub
 
-    path.write_text(new_text, encoding="utf-8")
+    path.write_text(new_text, encoding="utf-8", newline="\n")
     return FileResult(
         path=path,
         action="inserted",
@@ -237,7 +247,7 @@ def sync_claude(
             detail="no version patterns matched or already aligned",
         )
 
-    path.write_text(text, encoding="utf-8")
+    path.write_text(text, encoding="utf-8", newline="\n")
     return FileResult(
         path=path,
         action="updated",
@@ -301,7 +311,7 @@ def sync_roadmap(path: Path, *, plugin_version: str) -> FileResult:
         + f"{match.group(1)}v{plugin_version}"
         + text[match.end() :]
     )
-    path.write_text(new_text, encoding="utf-8")
+    path.write_text(new_text, encoding="utf-8", newline="\n")
     return FileResult(
         path=path,
         action="updated",
