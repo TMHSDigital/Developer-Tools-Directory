@@ -64,7 +64,7 @@ Current rules:
 | Force pushes | Blocked (`non_fast_forward` rule) |
 | Branch deletion | Blocked (`deletion` rule) |
 
-Required status checks (a PR cannot merge until all 7 pass):
+Required status checks (a PR cannot merge until all 8 pass):
 
 - `Validate registry.json`
 - `Validate docs site`
@@ -73,6 +73,7 @@ Required status checks (a PR cannot merge until all 7 pass):
 - `Public-repo safety scan`
 - `feat/fix commits require VERSION bump`
 - `CodeQL`
+- `Run drift_check tests` (the full pytest suite)
 
 Post-merge guard (not in required-contexts): `release.yml`'s `Check VERSION vs latest tag` job runs on every push to `main` and fails the release if `VERSION` is behind the latest tag. It is intentionally excluded from the PR-required list because it cannot run on a PR (`release.yml` only triggers on push), and including it would permanently block every PR.
 

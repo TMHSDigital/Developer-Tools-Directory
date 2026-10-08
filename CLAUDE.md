@@ -118,7 +118,7 @@ gh pr checks <number> --watch
 gh pr merge <number> --squash --delete-branch
 ```
 
-A PR cannot be merged until all 7 required status checks pass: `Validate registry.json`, `Validate docs site`, `Validate scaffold`, `Registry sync check`, `Public-repo safety scan`, `feat/fix commits require VERSION bump`, `CodeQL`. Required approvals are 0 (solo maintainer). `release.yml`'s `Check VERSION vs latest tag` is a post-merge guard, not a PR gate.
+A PR cannot be merged until all 8 required status checks pass: `Validate registry.json`, `Validate docs site`, `Validate scaffold`, `Registry sync check`, `Public-repo safety scan`, `feat/fix commits require VERSION bump`, `CodeQL`, `Run drift_check tests`. Required approvals are 0 (solo maintainer). `release.yml`'s `Check VERSION vs latest tag` is a post-merge guard, not a PR gate.
 
 ### Prerequisites
 
@@ -151,7 +151,8 @@ Open `docs/index.html` in a browser. The script falls back to embedded registry 
 - Scaffold dry-run test (generates repo, verifies key files exist, scans for leaked business email)
 - `sync-check` job: runs `python scripts/sync_from_registry.py --check` and fails on drift
 - `safety-scan` job: blocks leaked business emails, drive-letter paths, unsafe DOM sinks (`innerHTML`/`eval` in `docs/`), and committed credential files
-- `version-bump-check` job (PR only): requires a `VERSION` bump when the PR contains any `feat:` or `fix:` commit; opt out per commit with `[skip version]`
+- `version-bump-check` job (PR only): requires a `VERSION` bump when the PR title or any commit is `feat:` or `fix:` (the title matters because squash merges use it as the commit subject); opt out with `[skip version]`
+- `test-drift-check` job: runs the full pytest suite (required check `Run drift_check tests`)
 
 ### Release workflow
 

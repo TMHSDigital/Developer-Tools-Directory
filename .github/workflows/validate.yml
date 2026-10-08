@@ -3,6 +3,8 @@ name: Validate
 on:
   pull_request:
     branches: [main]
+    # edited: re-check when the PR title changes (version-bump-check).
+    types: [opened, synchronize, reopened, edited]
   push:
     branches: [main]
 
@@ -270,6 +272,9 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          # Squash merges use the PR title as the commit subject on main,
+          # so the title is checked like a commit (DTD#119).
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           set -euo pipefail
 
@@ -281,12 +286,21 @@ jobs:
           # record separator (\x1e Record Separator) was already safe.
           COMMITS="$(git log "${BASE_SHA}..${HEAD_SHA}" --pretty=format:'%H%x1f%s%x1f%b%x1e')"
 
-          if [ -z "$COMMITS" ]; then
+          NEEDS_BUMP="false"
+          if echo "$PR_TITLE" | grep -qF '[skip version]'; then
+            echo "skip  | PR title | $PR_TITLE  (opted out with [skip version])"
+          elif echo "$PR_TITLE" | grep -qiE '^(feat|fix)(\([^)]*\))?!?:'; then
+            echo "need  | PR title | $PR_TITLE"
+            NEEDS_BUMP="true"
+          else
+            echo "ok    | PR title | $PR_TITLE"
+          fi
+
+          if [ -z "$COMMITS" ] && [ "$NEEDS_BUMP" = "false" ]; then
             echo "No new commits to check."
             exit 0
           fi
 
-          NEEDS_BUMP="false"
           while IFS= read -r -d $'\x1e' record; do
             [ -z "$record" ] && continue
             SHA="$(echo "$record" | awk -F $'\x1f' '{print $1}')"
