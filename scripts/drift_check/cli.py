@@ -430,13 +430,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 findings,
                 meta_commit=args.meta_commit,
                 repo=args.sticky_issue_repo,
+                gh_token=gh_token,
             )
         except RuntimeError as exc:
             print(f"error: sticky-issue upsert failed: {exc}", file=sys.stderr)
             return 2
         sys.stdout.write(
             f"Sticky issue: {action}"
-            + (f" — {url}" if url else "")
+            + (f" - {url}" if url else "")
             + "\n"
         )
 
@@ -472,7 +473,7 @@ def _apply_fixes_live(
 
     Fixable = ``version-signal`` error findings (missing or malformed
     signal, or MAJOR.MINOR/patch drift). Pragma-skipped and tool_newer
-    findings are left alone — those require human review.
+    findings are left alone; those require human review.
     """
     fm = scripts_dir / "add_frontmatter.py"
     cm = scripts_dir / "add_comment_marker.py"

@@ -55,10 +55,12 @@ class _ScriptedRunner:
         self.queue = list(queue or [])
         self.handlers = handlers or {}
         self.calls = []
+        self.stdins = []
 
-    def __call__(self, args: Sequence[str]):
+    def __call__(self, args: Sequence[str], stdin=None):
         args = list(args)
         self.calls.append(args)
+        self.stdins.append(stdin)
         for key, handler in self.handlers.items():
             if args[: len(key)] == list(key):
                 return handler(args)
@@ -92,8 +94,8 @@ def test_create_when_no_existing_and_drift():
     create_args = runner.calls[1]
     assert create_args[0] == "issue"
     assert create_args[1] == "create"
-    body_idx = create_args.index("--body") + 1
-    body = create_args[body_idx]
+    assert create_args[create_args.index("--body-file") + 1] == "-"
+    body = runner.stdins[1]
     assert STICKY_MARKER in body
     assert "abc123" in body  # meta commit appears in body
     assert STICKY_TITLE in create_args
@@ -107,6 +109,7 @@ def test_update_when_existing_open_and_drift():
         "number": 7,
         "state": "OPEN",
         "title": STICKY_TITLE,
+        "body": STICKY_MARKER,
         "url": "https://github.com/.../issues/7",
     }])
     runner = _ScriptedRunner(queue=[
@@ -130,6 +133,7 @@ def test_reopen_when_existing_closed_and_drift():
         "number": 11,
         "state": "CLOSED",
         "title": STICKY_TITLE,
+        "body": STICKY_MARKER,
         "url": "https://github.com/.../issues/11",
     }])
     runner = _ScriptedRunner(queue=[
@@ -149,8 +153,8 @@ def test_reopen_when_existing_closed_and_drift():
     # Verify comment includes "re-detected"
     comment_calls = [c for c in runner.calls if c[:3] == ["issue", "comment", "11"]]
     assert len(comment_calls) == 1
-    body_idx = comment_calls[0].index("--body") + 1
-    assert "re-detected" in comment_calls[0][body_idx]
+    comment_idx = runner.calls.index(comment_calls[0])
+    assert "re-detected" in runner.stdins[comment_idx]
 
 
 # ------------------------------- close ------------------------------------
@@ -161,6 +165,7 @@ def test_close_when_existing_open_and_clean():
         "number": 9,
         "state": "OPEN",
         "title": STICKY_TITLE,
+        "body": STICKY_MARKER,
         "url": "https://github.com/.../issues/9",
     }])
     runner = _ScriptedRunner(queue=[
@@ -197,6 +202,7 @@ def test_no_op_when_clean_and_existing_closed():
         "number": 9,
         "state": "CLOSED",
         "title": STICKY_TITLE,
+        "body": STICKY_MARKER,
         "url": "https://github.com/.../issues/9",
     }])
     runner = _ScriptedRunner(queue=[(0, existing, "")])
@@ -253,8 +259,56 @@ def test_body_includes_marker_and_metadata():
         [_snap()], [_err()], meta_commit="cafef00d",
         runner=runner, now=fixed,
     )
-    body = runner.calls[1][runner.calls[1].index("--body") + 1]
+    body = runner.stdins[1]
     assert STICKY_MARKER in body
     assert "cafef00d" in body
     assert "2026-04-24T22:00:00+00:00" in body
     assert "1 errors, 0 warnings" in body
+
+
+# ------------------------------- lookup / auth / size ----------------------
+
+
+def test_search_hit_without_exact_marker_is_ignored():
+    near_miss = json.dumps([{
+        "number": 3,
+        "state": "OPEN",
+        "title": "Unrelated issue mentioning drift-check",
+        "body": "drift check sticky issue v1 discussion",
+        "url": "https://github.com/.../issues/3",
+    }])
+    runner = _ScriptedRunner(queue=[(0, near_miss, ""), (0, "https://x/issues/50", "")])
+    action, url = upsert_sticky_issue(
+        [_snap()], [_err()], meta_commit="abc", runner=runner,
+    )
+    assert action == "created"
+    assert runner.calls[1][:2] == ["issue", "create"]
+    assert "body" in runner.calls[0][runner.calls[0].index("--json") + 1]
+
+
+def test_oversized_body_is_truncated():
+    runner = _ScriptedRunner(queue=[(0, "[]", ""), (0, "u", "")])
+    many = [_err(msg="x" * 500) for _ in range(400)]
+    upsert_sticky_issue([_snap()], many, meta_commit="abc", runner=runner)
+    body = runner.stdins[1]
+    assert len(body) <= issue.MAX_BODY_CHARS
+    assert "truncated" in body
+
+
+def test_gh_token_is_exported_to_default_runner(monkeypatch):
+    seen = {}
+
+    class _Result:
+        returncode = 0
+        stdout = "[]"
+        stderr = ""
+
+    def fake_run(args, **kwargs):
+        seen["env"] = kwargs["env"]
+        seen["timeout"] = kwargs.get("timeout")
+        return _Result()
+
+    monkeypatch.setattr(issue.subprocess, "run", fake_run)
+    upsert_sticky_issue([_snap()], [], meta_commit="abc", gh_token="tok_123")
+    assert seen["env"]["GH_TOKEN"] == "tok_123"
+    assert seen["timeout"]
