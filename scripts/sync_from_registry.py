@@ -211,8 +211,18 @@ def render_claude_stats(entries: list[dict[str, Any]]) -> str:
     )
 
 
+def script_safe_json(data: Any) -> str:
+    """Serialize *data* for embedding inside a ``<script>`` element.
+
+    ``<``, ``>`` and ``&`` are emitted as JSON unicode escapes so a registry
+    string can never close the script block or open an HTML comment. The
+    output is still valid JSON and parses back to the same value."""
+    raw = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
+    return raw.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+
+
 def render_embedded_registry(entries: list[dict[str, Any]]) -> str:
-    return json.dumps(entries, separators=(",", ":"), ensure_ascii=False)
+    return script_safe_json(entries)
 
 
 def list_standards(standards_dir: Path = STANDARDS_DIR) -> list[str]:
@@ -293,7 +303,7 @@ def build_search_index(
 
 
 def render_search_index(index: list[dict[str, Any]]) -> str:
-    return json.dumps(index, separators=(",", ":"), ensure_ascii=False)
+    return script_safe_json(index)
 
 
 def load_existing_search_index(
@@ -320,7 +330,8 @@ def replace_between(
             f"Markers not found in {path}: '{start_marker}' / '{end_marker}'"
         )
     replacement = f"{start_marker}\n{new_body.rstrip()}\n{end_marker}"
-    return pattern.sub(replacement, text, count=1)
+    # A callable replacement keeps backslashes in generated content literal.
+    return pattern.sub(lambda _m: replacement, text, count=1)
 
 
 def replace_script_block(text: str, new_body: str, block_id: str = "registry-data") -> str:
@@ -464,7 +475,7 @@ def write_if_changed(
     if check:
         print(f"DRIFT: {rel} is out of sync with registry.json", file=sys.stderr)
         return True
-    path.write_text(new, encoding="utf-8")
+    path.write_text(new, encoding="utf-8", newline="\n")
     print(f"updated: {rel}")
     return True
 
