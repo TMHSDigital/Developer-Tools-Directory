@@ -43,6 +43,13 @@ jobs:
         if: steps.drift.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
+          # PRs opened with the default GITHUB_TOKEN do not trigger
+          # pull_request workflows, so the required checks would never run.
+          # SYNC_PR_TOKEN (a fine-grained PAT or GitHub App token with
+          # contents and pull-requests write) avoids that. Without it the
+          # PR still opens; close and reopen it to start the checks.
+          token: ${{ secrets.SYNC_PR_TOKEN || github.token }}
+          signoff: true
           branch: chore/registry-sync
           delete-branch: true
           commit-message: "chore: sync derived artifacts from registry"
@@ -53,7 +60,8 @@ jobs:
             Regenerated:
             - `README.md` tools table, descriptions, and stats
             - `CLAUDE.md` cataloged tools table and totals
-            - `docs/index.html` embedded registry block
+            - `docs/index.html` embedded registry, cards, filters, and stats
+            - `docs/search-index.json`, `docs/sitemap.xml`, `docs/robots.txt`
 
             Review the diff for accuracy. About section on GitHub is not updated by this workflow; the maintainer runs `python scripts/sync_from_registry.py --about` locally and pipes to `gh repo edit`.
           labels: registry,automated

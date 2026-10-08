@@ -119,3 +119,4 @@ When a third-party action releases a new version:
 - `release-drafter/release-drafter` in `release-drafter.yml` is SHA-pinned (v7.10.0). It runs under `pull_request_target` but never checks out PR code. Dependabot proposes SHA bumps.
 - Both conventions above are enforced by `tests/test_workflow_hygiene.py` (workflows) and `tests/test_composite_action_shape.py` (composite actions).
 - `peter-evans/create-pull-request` in `sync.yml` is SHA-pinned. Update as releases land.
+- `sync.yml` opens its PR with `secrets.SYNC_PR_TOKEN` when set. GitHub does not start `pull_request` workflows for PRs created with the default `GITHUB_TOKEN`, so without that secret the required checks never run on the sync PR. Fallback: close and reopen the PR (or push an empty commit to `chore/registry-sync`) to trigger them. To enable, add a fine-grained PAT scoped to this repo with Contents and Pull requests read/write as the `SYNC_PR_TOKEN` Actions secret.
