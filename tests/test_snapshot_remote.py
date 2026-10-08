@@ -22,7 +22,6 @@ from scripts.drift_check.semver import parse_version
 from scripts.drift_check.snapshot import (
     SPARSE_PATHS,
     RemoteSnapshotError,
-    _scrub_token_from_remote,
     build_remote_snapshot,
 )
 
@@ -64,7 +63,6 @@ class _FakeRun:
 def test_remote_snapshot_issues_correct_git_commands(tmp_path: Path):
     fake = _FakeRun([
         (0, "", ""),  # clone
-        (0, "", ""),  # remote set-url (token scrub)
         (0, "", ""),  # sparse-checkout set
     ])
     # Patch tempfile so we know exactly which tempdir gets used.
@@ -93,20 +91,19 @@ def test_remote_snapshot_issues_correct_git_commands(tmp_path: Path):
     assert "--filter=blob:none" in clone_args
     assert "--sparse" in clone_args
     assert "--depth" in clone_args
-    # Token must be in the clone URL
+    # Token must never be in argv; it travels in the env-config header.
+    assert "ghp_test" not in " ".join(clone_args)
     url = [a for a in clone_args if a.startswith("https://")]
-    assert url and "ghp_test" in url[0]
-    assert "github.com/TMHSDigital/CFX-Developer-Tools.git" in url[0]
-
-    # Verify token scrub is the second call
-    scrub_args = fake.calls[1][0]
-    assert scrub_args[1] == "remote"
-    assert scrub_args[2] == "set-url"
-    assert "ghp_test" not in " ".join(scrub_args)
+    assert url == ["https://github.com/TMHSDigital/CFX-Developer-Tools.git"]
+    clone_env = fake.calls[0][1]["env"]
+    assert clone_env["GIT_CONFIG_KEY_0"] == "http.https://github.com/.extraheader"
+    assert clone_env["GIT_CONFIG_VALUE_0"].startswith("AUTHORIZATION: basic ")
+    assert "ghp_test" not in clone_env["GIT_CONFIG_VALUE_0"]
+    assert fake.calls[0][1]["timeout"] > 0
 
     # Verify sparse-checkout uses --no-cone (required for file-level
     # patterns like AGENTS.md) and includes all SPARSE_PATHS
-    sparse_args = fake.calls[2][0]
+    sparse_args = fake.calls[1][0]
     assert sparse_args[1] == "sparse-checkout"
     assert sparse_args[2] == "set"
     assert "--no-cone" in sparse_args
@@ -136,7 +133,6 @@ def test_remote_snapshot_cleans_up_on_clone_failure(tmp_path: Path):
 def test_remote_snapshot_cleans_up_on_sparse_failure(tmp_path: Path):
     fake = _FakeRun([
         (0, "", ""),         # clone OK
-        (0, "", ""),         # scrub OK
         (1, "", "bad path"),  # sparse-checkout FAIL
     ])
     sparse_dir = tmp_path / "sparse"
@@ -169,13 +165,24 @@ def test_remote_snapshot_rejects_empty_token(tmp_path: Path):
     assert not sparse_dir.exists()
 
 
-def test_scrub_does_not_raise_on_failure(tmp_path: Path):
-    """Scrub is best-effort. If git remote set-url fails for some reason
-    (e.g., the clone partially succeeded), the snapshot still completes."""
-    fake = _FakeRun([(1, "", "no remote")])
-    with patch("scripts.drift_check.snapshot.subprocess.run", fake):
-        # Should not raise
-        _scrub_token_from_remote(tmp_path, "TMHSDigital", "x")
+def test_clone_failure_message_never_contains_token(tmp_path: Path):
+    """git can echo the remote or auth details on failure; the raised
+    error must mask the token either way."""
+    fake = _FakeRun([(128, "", "fatal: auth failed for ghp_secret_value")])
+    sparse_dir = tmp_path / "sparse"
+    sparse_dir.mkdir()
+    with patch("scripts.drift_check.snapshot.subprocess.run", fake), \
+         patch("scripts.drift_check.snapshot.tempfile.mkdtemp", return_value=str(sparse_dir)):
+        with pytest.raises(RemoteSnapshotError) as exc_info:
+            build_remote_snapshot(
+                repo_slug="x",
+                meta_version=META,
+                meta_commit="sha",
+                config=_cfg(),
+                gh_token="ghp_secret_value",
+            )
+    assert "ghp_secret_value" not in str(exc_info.value)
+    assert "***" in str(exc_info.value)
 
 
 @pytest.mark.skipif(

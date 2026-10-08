@@ -21,10 +21,12 @@ inspection.
 """
 from __future__ import annotations
 
+import base64
 import contextlib
 import json
 import os
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -266,40 +268,84 @@ def build_local_snapshot(
 # ---------------------------------------------------------------------------
 
 
+GIT_TIMEOUT_SECONDS = 300
+
+
+def _git_auth_env(token: str) -> dict[str, str]:
+    """Credentials for github.com passed through git's environment-config
+    channel (``GIT_CONFIG_COUNT``/``KEY``/``VALUE``) instead of the clone URL,
+    so the token never appears in argv, the process list, ``.git/config`` or
+    error messages."""
+    basic = base64.b64encode(f"x-access-token:{token}".encode()).decode()
+    return {
+        "GIT_CONFIG_COUNT": "1",
+        "GIT_CONFIG_KEY_0": "http.https://github.com/.extraheader",
+        "GIT_CONFIG_VALUE_0": f"AUTHORIZATION: basic {basic}",
+    }
+
+
+def _redact(text: str, secrets: tuple[str, ...]) -> str:
+    for secret in secrets:
+        if secret:
+            text = text.replace(secret, "***")
+    return text
+
+
 def _run_git(
     args: list[str],
     *,
     cwd: Path | None = None,
     env: dict[str, str] | None = None,
     check: bool = True,
+    redact: tuple[str, ...] = (),
 ) -> subprocess.CompletedProcess:
     """Thin wrapper around git subprocess for testability and uniform
     error handling. Uses ``GIT_TERMINAL_PROMPT=0`` to fail fast on auth
-    issues instead of hanging for input."""
+    issues instead of hanging for input, and a timeout so a stalled
+    network clone cannot block the job indefinitely. Any value in
+    *redact* is masked in error messages."""
     full_env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
     if env:
         full_env.update(env)
-    result = subprocess.run(
-        ["git", *args],
-        cwd=str(cwd) if cwd else None,
-        env=full_env,
-        capture_output=True,
-        text=True,
-    )
+    try:
+        result = subprocess.run(
+            ["git", *args],
+            cwd=str(cwd) if cwd else None,
+            env=full_env,
+            capture_output=True,
+            text=True,
+            timeout=GIT_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        raise RemoteSnapshotError(
+            _redact(f"git {' '.join(args)} timed out after {GIT_TIMEOUT_SECONDS}s", redact)
+        ) from None
     if check and result.returncode != 0:
         raise RemoteSnapshotError(
-            f"git {' '.join(args)} failed (rc={result.returncode}): "
-            f"{result.stderr.strip() or result.stdout.strip()}"
+            _redact(
+                f"git {' '.join(args)} failed (rc={result.returncode}): "
+                f"{result.stderr.strip() or result.stdout.strip()}",
+                redact,
+            )
         )
     return result
 
 
-def _scrub_token_from_remote(repo_dir: Path, owner: str, slug: str) -> None:
-    """After clone, replace the token-bearing remote URL with a clean one.
-    Defense-in-depth: prevents the token from leaking via subsequent ``git
-    remote -v`` calls or accidental ``.git/config`` exposure."""
-    clean_url = f"https://github.com/{owner}/{slug}.git"
-    _run_git(["remote", "set-url", "origin", clean_url], cwd=repo_dir, check=False)
+def _force_remove_readonly(func, path, _exc) -> None:
+    """rmtree error hook: git pack files are read-only on Windows, so clear
+    the bit and retry once."""
+    try:
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+    except OSError:
+        pass
+
+
+def _rmtree(path: Path) -> None:
+    if sys.version_info >= (3, 12):
+        shutil.rmtree(path, onexc=_force_remove_readonly)
+    else:  # pragma: no cover - older interpreters
+        shutil.rmtree(path, onerror=_force_remove_readonly)
 
 
 @contextlib.contextmanager
@@ -317,7 +363,7 @@ def _sparse_clone(
         token = gh_token.strip()
         if not token:
             raise RemoteSnapshotError(f"gh_token is empty for {owner}/{slug}")
-        clone_url = f"https://x-access-token:{token}@github.com/{owner}/{slug}.git"
+        clone_url = f"https://github.com/{owner}/{slug}.git"
         clone_args = [
             "clone",
             "--filter=blob:none",
@@ -327,8 +373,7 @@ def _sparse_clone(
         if branch:
             clone_args += ["--branch", branch]
         clone_args += [clone_url, str(tmp)]
-        _run_git(clone_args)
-        _scrub_token_from_remote(tmp, owner, slug)
+        _run_git(clone_args, env=_git_auth_env(token), redact=(token,))
         # `--no-cone` lets us mix file-level patterns (AGENTS.md, CLAUDE.md)
         # with directory patterns (skills, rules). Cone-mode is the default
         # since git 2.35 and rejects file patterns. The deprecation warning
@@ -340,7 +385,7 @@ def _sparse_clone(
         )
         yield tmp
     finally:
-        shutil.rmtree(tmp, ignore_errors=True)
+        _rmtree(tmp)
 
 
 def build_remote_snapshot(
