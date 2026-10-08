@@ -7,11 +7,57 @@ build_site.py. Outputs a JSON search index to docs/search-index.json.
 """
 
 import argparse
+import contextlib
 import json
+import shutil
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 from build_site import load_json, load_mcp_tools, parse_rules, parse_skills
+
+import re
+
+BACKSLASH = chr(92)
+
+# Fallback extraction for repos that ship no mcp-tools.json manifest: read
+# tool names straight from the server source. Python FastMCP servers use
+# ``@mcp.tool()`` on a function; TypeScript servers call
+# ``server.tool("name", ...)`` or ``server.registerTool("name", ...)``.
+_PY_TOOL_RE = re.compile(
+    r"@\w+\.tool\((?P<args>[^)]*)\)\s*(?:async\s+)?def\s+(?P<fn>\w+)"
+)
+_PY_NAME_ARG_RE = re.compile(r"name\s*=\s*['\"]([^'\"]+)['\"]")
+_TS_TOOL_RE = re.compile(r"\.(?:registerTool|tool)\(\s*['\"]([A-Za-z0-9_.-]+)['\"]")
+_SKIP_DIRS = {"node_modules", "dist", "build", ".git", "tests", "test", "__tests__"}
+
+
+def _iter_sources(root: Path, suffix: str):
+    for path in root.rglob(f"*{suffix}"):
+        if _SKIP_DIRS.intersection(part.lower() for part in path.relative_to(root).parts):
+            continue
+        if path.name.endswith((".test.ts", ".spec.ts", ".d.ts")):
+            continue
+        yield path
+
+
+def scan_source_tool_names(repo_root: Path) -> list[str]:
+    """Best-effort tool names from server source, sorted and de-duplicated."""
+    names: set[str] = set()
+    py_root = repo_root / "mcp-server"
+    if py_root.is_dir():
+        for path in _iter_sources(py_root, ".py"):
+            text = path.read_text(encoding="utf-8", errors="replace")
+            for m in _PY_TOOL_RE.finditer(text):
+                explicit = _PY_NAME_ARG_RE.search(m.group("args"))
+                names.add(explicit.group(1) if explicit else m.group("fn"))
+    for ts_root in (repo_root / "src", repo_root / "mcp-server" / "src"):
+        if ts_root.is_dir():
+            for path in _iter_sources(ts_root, ".ts"):
+                text = path.read_text(encoding="utf-8", errors="replace")
+                names.update(_TS_TOOL_RE.findall(text))
+    return sorted(names)
 
 
 def build_index(
@@ -57,7 +103,10 @@ def build_index(
             entry["rules"] = [r["name"] for r in rules]
 
             mcp_tools = load_mcp_tools(repo_root)
-            entry["mcpTools"] = [t["name"] for t in mcp_tools]
+            if mcp_tools:
+                entry["mcpTools"] = [t["name"] for t in mcp_tools]
+            else:
+                entry["mcpTools"] = scan_source_tool_names(repo_root)
 
         index.append(entry)
 
@@ -90,7 +139,36 @@ def main():
         type=Path,
         help="Parent directory to auto-discover repo checkouts (siblings of the directory repo)",
     )
+    parser.add_argument(
+        "--clone",
+        action="store_true",
+        help=(
+            "Shallow-clone every registry repo not found via --repo-dir/--scan "
+            "into a temp directory (public repos, no token). Gives a complete, "
+            "current index without a local fleet checkout."
+        ),
+    )
     args = parser.parse_args()
+    with contextlib.ExitStack() as stack:
+        _run(args, stack)
+
+
+def _shallow_clone(repo: str, dest: Path) -> bool:
+    """Clone ``owner/name`` at depth 1. Returns False (with a warning) on
+    failure so one unreachable repo does not abort the whole index."""
+    result = subprocess.run(
+        ["git", "clone", "--quiet", "--depth", "1", f"https://github.com/{repo}.git", str(dest)],
+        capture_output=True,
+        text=True,
+        timeout=300,
+    )
+    if result.returncode != 0:
+        print(f"warning: clone failed for {repo}: {result.stderr.strip()}", file=sys.stderr)
+        return False
+    return True
+
+
+def _run(args: argparse.Namespace, stack: contextlib.ExitStack) -> None:
 
     repo_dirs: dict[str, Path] = {}
 
@@ -113,6 +191,17 @@ def main():
                 if slug and slug not in repo_dirs:
                     repo_dirs[slug] = child
 
+    if args.clone:
+        tmp_root = Path(tempfile.mkdtemp(prefix="dtd-search-"))
+        stack.callback(shutil.rmtree, tmp_root, True)
+        for tool in load_json(args.registry):
+            slug = tool["slug"]
+            if slug in repo_dirs:
+                continue
+            dest = tmp_root / slug
+            if _shallow_clone(tool["repo"], dest):
+                repo_dirs[slug] = dest
+
     existing: dict[str, dict] = {}
     if args.out.is_file():
         try:
@@ -125,8 +214,12 @@ def main():
     index = build_index(args.registry, repo_dirs, existing)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    with open(args.out, "w", encoding="utf-8") as f:
-        json.dump(index, f, separators=(",", ":"))
+    # Same serialization as scripts/sync_from_registry.py (script-safe JSON
+    # plus a trailing newline) so a refresh does not trip the sync check.
+    raw = json.dumps(index, separators=(",", ":"), ensure_ascii=False)
+    for ch, esc in (("<", "u003c"), (">", "u003e"), ("&", "u0026")):
+        raw = raw.replace(ch, BACKSLASH + esc)
+    args.out.write_text(raw + "\n", encoding="utf-8", newline="\n")
 
     total_skills = sum(len(e["skills"]) for e in index)
     total_rules = sum(len(e["rules"]) for e in index)

@@ -86,8 +86,8 @@ Static HTML/CSS/JS. No build step. No external CDN. The `pages.yml` workflow cop
 | Steam Cursor Plugin | Plugin | 30 | 9 | 26 |
 | Steam MCP Server | MCP Server | 0 | 0 | 26 |
 | Developer Tools MCP | MCP Server | 0 | 0 | 7 |
-| CFX MCP | MCP Server | 0 | 0 | 0 |
-| Blender Developer Tools | Plugin | 12 | 6 | 0 |
+| CFX MCP | MCP Server | 0 | 0 | 3 |
+| Blender Developer Tools | Plugin | 18 | 9 | 0 |
 | Local AI MCP | MCP Server | 0 | 0 | 16 |
 | Screencast MCP | MCP Server | 0 | 0 | 25 |
 | Tailscale MCP | MCP Server | 0 | 0 | 6 |
@@ -96,7 +96,7 @@ Static HTML/CSS/JS. No build step. No external CDN. The `pages.yml` workflow cop
 <!-- registry:tools:end -->
 
 <!-- registry:stats:start -->
-**Totals:** 189 skills, 77 rules, 438 MCP tools across 17 repos
+**Totals:** 195 skills, 80 rules, 441 MCP tools across 17 repos
 <!-- registry:stats:end -->
 
 ## Development Workflow

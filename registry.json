@@ -258,18 +258,17 @@
     "slug": "cfx-mcp",
     "description": "MCP server providing agent-callable tools for CFX/FiveM resource development, server management, and community platform integration.",
     "type": "mcp-server",
-    "homepage": "",
+    "homepage": "https://tmhsdigital.github.io/cfx-mcp/",
     "skills": 0,
     "rules": 0,
-    "mcpTools": 0,
+    "mcpTools": 3,
     "extras": {},
     "topics": [],
     "status": "experimental",
     "language": "TypeScript",
     "license": "CC-BY-NC-ND-4.0",
-    "pagesType": "none",
-    "hasCI": true,
-    "npm": "@tmhsdigital/cfx-mcp"
+    "pagesType": "static",
+    "hasCI": true
   },
   {
     "name": "Blender Developer Tools",
@@ -277,9 +276,9 @@
     "slug": "blender-developer-tools",
     "description": "Cursor and Claude Code skills, rules, snippets, and templates for Blender Python add-on and scripting development",
     "type": "cursor-plugin",
-    "homepage": "",
-    "skills": 12,
-    "rules": 6,
+    "homepage": "https://tmhsdigital.github.io/Blender-Developer-Tools/",
+    "skills": 18,
+    "rules": 9,
     "mcpTools": 0,
     "extras": {
       "snippets": 17,
@@ -295,7 +294,7 @@
     "status": "active",
     "language": "Python",
     "license": "CC-BY-NC-ND-4.0",
-    "pagesType": "none",
+    "pagesType": "static",
     "hasCI": true
   },
   {

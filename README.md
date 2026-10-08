@@ -31,7 +31,7 @@
 
 <!-- registry:stats:start -->
 <p align="center">
- 17 repos &nbsp;&bull;&nbsp; 189 skills &nbsp;&bull;&nbsp; 77 rules &nbsp;&bull;&nbsp; 438 MCP tools
+ 17 repos &nbsp;&bull;&nbsp; 195 skills &nbsp;&bull;&nbsp; 80 rules &nbsp;&bull;&nbsp; 441 MCP tools
 </p>
 <!-- registry:stats:end -->
 
@@ -63,8 +63,8 @@ flowchart LR
 | **Steam Cursor Plugin** | Plugin | 30 | 9 | 26 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Steam-Cursor-Plugin) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Steam-Cursor-Plugin/) |
 | **Steam MCP Server** | MCP Server | - | - | 26 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/steam-mcp) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/steam-mcp) |
 | **Developer Tools MCP** | MCP Server | - | - | 7 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Developer-Tools-MCP) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Developer-Tools-MCP/) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/devtools-mcp) |
-| **CFX MCP** | MCP Server | - | - | 0 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/cfx-mcp) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhsdigital/cfx-mcp) |
-| **Blender Developer Tools** | Plugin | 12 | 6 | 0 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Blender-Developer-Tools) |
+| **CFX MCP** | MCP Server | - | - | 3 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/cfx-mcp) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/cfx-mcp/) |
+| **Blender Developer Tools** | Plugin | 18 | 9 | 0 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/Blender-Developer-Tools) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/Blender-Developer-Tools/) |
 | **Local AI MCP** | MCP Server | - | - | 16 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/local-ai-mcp) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/local-ai-mcp/) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/local-ai-mcp) |
 | **Screencast MCP** | MCP Server | - | - | 25 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/screencast-mcp) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/screencast-mcp/) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/screencast-mcp) |
 | **Tailscale MCP** | MCP Server | - | - | 6 | [![Repo](https://img.shields.io/badge/repo-blue?logo=github)](https://github.com/TMHSDigital/tailscale-mcp) [![Docs](https://img.shields.io/badge/docs-7c3aed)](https://tmhsdigital.github.io/tailscale-mcp/) [![npm](https://img.shields.io/badge/npm-cb3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/@tmhs/tailscale-mcp) |
