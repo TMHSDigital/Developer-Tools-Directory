@@ -1,6 +1,24 @@
 version: 2
 updates:
+  # Workflows plus the composite actions every tool repo consumes, so
+  # fleet-facing action pins do not fall behind the meta-repo's own.
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directories:
+      - "/"
+      - "/.github/actions/*"
     schedule:
       interval: "weekly"
+    groups:
+      actions-minor-patch:
+        update-types: ["minor", "patch"]
+
+  # Scaffold (Jinja2), test, and site-template requirements.
+  - package-ecosystem: "pip"
+    directories:
+      - "/"
+      - "/site-template"
+    schedule:
+      interval: "weekly"
+    groups:
+      pip-minor-patch:
+        update-types: ["minor", "patch"]
