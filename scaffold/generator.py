@@ -111,7 +111,7 @@ def render_template(env: Environment, template_name: str, context: dict) -> str:
 def write_file(base: Path, rel_path: str, content: str, *, verbose: bool = True) -> None:
     full = base / rel_path
     full.parent.mkdir(parents=True, exist_ok=True)
-    full.write_text(content, encoding="utf-8")
+    full.write_text(content, encoding="utf-8", newline="\n")
     if verbose:
         print(f"  created {rel_path}")
 
@@ -361,7 +361,9 @@ def register_in_registry(
 
     entries.append(entry)
     registry_path.write_text(
-        json.dumps(entries, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        json.dumps(entries, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
     if verbose:
         print(f"  registered {entry['slug']} in {registry_path}")

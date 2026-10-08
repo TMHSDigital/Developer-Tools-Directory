@@ -56,7 +56,7 @@ def main(argv: list[str]) -> int:
         print(f"error: standards-version not found in frontmatter of {path}", file=sys.stderr)
         return 1
 
-    path.write_text(updated, encoding="utf-8")
+    path.write_text(updated, encoding="utf-8", newline="\n")
     print(f"updated {path}")
     return 0
 

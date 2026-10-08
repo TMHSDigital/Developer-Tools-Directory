@@ -414,7 +414,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if args.output == "-":
             sys.stdout.write(out_text)
         else:
-            Path(args.output).write_text(out_text, encoding="utf-8")
+            Path(args.output).write_text(out_text, encoding="utf-8", newline="\n")
 
     if args.update_sticky_issue:
         if not gh_token:

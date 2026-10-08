@@ -366,7 +366,7 @@ def main():
     html = template.render(**context)
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "index.html").write_text(html, encoding="utf-8")
+    (out_dir / "index.html").write_text(html, encoding="utf-8", newline="\n")
     print(f"Wrote {out_dir / 'index.html'}")
 
     fonts_src = template_dir / "fonts"

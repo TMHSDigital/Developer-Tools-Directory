@@ -1,5 +1,19 @@
+# Normalize every text file to LF in the repo and the working tree, so
+# scripts run on Windows produce byte-identical output to Linux CI.
+* text=auto eol=lf
+
 VERSION text eol=lf
 *.sh text eol=lf
 *.py text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
