@@ -20,9 +20,9 @@ This is a Cursor IDE plugin for {{ name | replace(' Developer Tools', '') | repl
 {% else %}
 This is an MCP server. It contains:
 
-- **`src/`** -- TypeScript source code
-- **`src/providers/`** -- provider adapters implementing the `Provider` interface, wired into `ProviderManager`
-- **`src/tools/`** -- the registered MCP tools (stdio transport only)
+- **`src/index.ts`** -- entry point (stdio transport)
+- **`src/server.ts`** -- `createServer()`, where every MCP tool is registered
+- **`src/__tests__/`** -- vitest tests (offline)
 - **`package.json`** -- npm package manifest (version source of truth)
 - **`mcp-tools.json`** -- enumerates the MCP tools this server exposes
 - **`docs/`** -- documentation and GitHub Pages site
@@ -38,7 +38,7 @@ This is an MCP server. It contains:
   - `feat!:` or `BREAKING CHANGE` -- triggers a **major** version bump
   - Everything else (`fix:`, `chore:`, `docs:`, etc.) -- triggers a **patch** bump
 {% else %}
-- **Conventional commits** are required. Use them to decide your version bump, then apply it in your PR (`npm version <patch|minor|major> --no-git-tag-version`); `release.yml` tags and publishes that version on merge, and CI never writes to `main`:
+- **Conventional commits** are required. Use them to decide your version bump, then apply it in your PR (`npm version <patch|minor|major> --no-git-tag-version`); `release.yml` tags{% if not deployed_service %} and publishes{% endif %} that version on merge, and CI never writes to `main`:
   - `feat:` or `feat(scope):` -- bump the **minor** version
   - `feat!:` or a `BREAKING CHANGE` trailer -- bump the **major** version
   - everything else (`fix:`, `chore:`, `docs:`, etc.) -- bump the **patch** version
@@ -60,7 +60,7 @@ Checks:
 - Python syntax for MCP server modules
 {% endif %}
 
-### `release.yml` (runs on push to main, ignores docs/md changes)
+### `release.yml` (runs on push to main)
 
 Automatic flow:
 1. Reads current version from `plugin.json`
@@ -79,17 +79,23 @@ Marks issues/PRs as stale after 30 days of inactivity.
 {% else %}
 ### `ci.yml` (runs on PR and push to main)
 
-Builds and runs the test suite on Node 20 and 22:
-- TypeScript build (`npm run build`)
-- Test suite (`npm test`, vitest, offline)
+Builds and runs the test suite on Node 22 and 24:
+- Install (`npm ci` once `package-lock.json` is committed, `npm install` before that)
+- TypeScript build (`npm run build`, `tsc` from `src/` to `dist/`)
+- Test suite (`npm test`, vitest, offline; tests live in `src/__tests__/`)
 
 ### `release.yml` (runs on push to main)
 
-Reads the version from `package.json` and, if there is no matching tag yet, pushes the `v<version>` tag (plus the floating `vMAJOR` and `vMAJOR.MINOR` tags), creates a GitHub Release, and dispatches `publish.yml`. It only pushes tags and never writes to `main`; bump the version in your PR.
+Reads the version from `package.json` and, if there is no matching tag yet, pushes the `v<version>` tag (plus the floating `vMAJOR` and `vMAJOR.MINOR` tags), creates a GitHub Release{% if not deployed_service %}, and dispatches `publish.yml`{% endif %}. It only pushes tags and never writes to `main`; bump the version in your PR.
+{% if deployed_service %}
+
+This is a deployed-service archetype: there is no npm package and no `publish.yml`. Deploy the tagged release with your hosting pipeline.
+{% else %}
 
 ### `publish.yml` (runs on release published or workflow_dispatch)
 
 Publishes the package to npm.
+{% endif %}
 
 ### `drift-check.yml`
 
@@ -117,7 +123,7 @@ Keeps repository labels in sync.
 {% else %}
 - The **source of truth** for the current version is `package.json`.
 - Bump it in your PR with `npm version <patch|minor|major> --no-git-tag-version` (keeps the lockfile in sync) and update the README badge, following conventional-commit intent.
-- On merge, `release.yml` tags that version and publishes it. `main` is protected and is never written to by CI.
+- On merge, `release.yml` tags that version{% if not deployed_service %} and publishes it{% endif %}. `main` is protected and is never written to by CI.
 {% endif %}
 
 ## Code conventions
@@ -128,8 +134,8 @@ Keeps repository labels in sync.
 - Rules use `.mdc` extension with frontmatter.
 {% else %}
 - No hardcoded credentials -- CI scans for password/token/api_key patterns.
-- Conventional commits; bump the version deliberately in your PR (CI tags and publishes it).
-- Keep `mcp-tools.json` in sync with the tools registered in `src/tools/`.
+- Conventional commits; bump the version deliberately in your PR (CI tags{% if not deployed_service %} and publishes{% endif %} it).
+- Keep `mcp-tools.json` in sync with the tools registered in `src/server.ts` (and any `src/tools/` modules).
 {% endif %}
 
 ## Adding content
@@ -148,15 +154,9 @@ Keeps repository labels in sync.
 2. Add the path to `plugin.json` under `"rules"`
 3. Use `feat:` commit prefix
 {% else %}
-### New provider adapter
-
-1. Implement the `Provider` interface in `src/providers/`
-2. Register the adapter in `ProviderManager`
-3. Use `feat:` commit prefix
-
 ### New tool
 
-1. Register the tool in `src/tools/`
+1. Register the tool in `createServer()` in `src/server.ts` (larger tools can live in `src/tools/` and be registered from there)
 2. Add it to `mcp-tools.json`
 3. Add vitest tests
 4. Use `feat:` commit prefix

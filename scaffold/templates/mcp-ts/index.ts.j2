@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+import { readFileSync } from "node:fs";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { SERVER_NAME, createServer } from "./server.js";
+
+function readVersion(): string {
+  try {
+    const pkg = JSON.parse(
+      readFileSync(new URL("../package.json", import.meta.url), "utf-8"),
+    ) as { version?: string };
+    return pkg.version ?? "0.0.0";
+  } catch {
+    return "0.0.0";
+  }
+}
+
+async function main(): Promise<void> {
+  const version = readVersion();
+  const server = createServer(version);
+{% if deployed_service %}
+  // Deployed-service archetype: stdio keeps local development simple.
+  // Swap in StreamableHTTPServerTransport (served at /mcp) for deployment.
+{% endif %}
+  await server.connect(new StdioServerTransport());
+  // stdout is the MCP channel; all logging goes to stderr.
+  console.error(`${SERVER_NAME} ${version} listening on stdio`);
+}
+
+main().catch((err) => {
+  console.error(err instanceof Error ? (err.stack ?? err.message) : String(err));
+  process.exit(1);
+});

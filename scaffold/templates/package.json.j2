@@ -6,23 +6,35 @@
   "name": "@tmhs/{{ slug }}",
   {% endif %}
   "version": "0.1.0",
-  "description": "{{ description }}",
+  "description": {{ description|json_str }},
   "type": "module",
   "main": "dist/index.js",
   {% if not deployed_service %}
   "bin": {"{{ slug }}": "dist/index.js"},
   "files": ["dist", "README.md", "LICENSE"],
+  "publishConfig": {"access": "public"},
   {% endif %}
   "scripts": {
-    "build": "echo 'No build target yet'",
-    "test": "echo 'No tests yet' && exit 0"{% if not deployed_service %},
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"{% if not deployed_service %},
     "prepublishOnly": "npm run build"{% endif %}
+
   },
-  "author": "{{ author_name }}",
+  "author": {{ author_name|json_str }},
   "license": "{{ license_spdx }}",
   "repository": {"type": "git", "url": "git+https://github.com/{{ repo_owner }}/{{ slug }}.git"},
   "homepage": "https://github.com/{{ repo_owner }}/{{ slug }}#readme",
   "bugs": {"url": "https://github.com/{{ repo_owner }}/{{ slug }}/issues"},
   "keywords": ["mcp", "model-context-protocol", "developer-tools"],
-  "engines": {"node": ">=20.0.0"}
+  "engines": {"node": ">=22.0.0"},
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.2.0"
+  }
 }

@@ -27,8 +27,8 @@ Third-party actions are pinned by full commit SHA, with the version tag in a com
 First-party GitHub actions (`actions/`, `github/`) may use a major-version tag:
 
 ```yaml
-- uses: actions/checkout@v6
-- uses: actions/setup-python@v5
+- uses: actions/checkout@v7
+- uses: actions/setup-python@v6
 ```
 
 Rationale: tags are mutable and can be retargeted to a malicious commit. SHAs are immutable. GitHub-owned actions are exempt because GitHub's own security model protects them.

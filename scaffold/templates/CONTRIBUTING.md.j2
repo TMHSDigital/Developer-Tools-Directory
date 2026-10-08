@@ -46,18 +46,13 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 - `chore:` -- maintenance, dependency updates
 - `refactor:` -- code restructuring
 
-### Provider adapters
-
-- Implement the `Provider` interface in `src/providers/`
-- Register the adapter in `ProviderManager`
-
 ### Tools
 
-- Register the tool in `src/tools/`
+- Register the tool in `createServer()` in `src/server.ts`
 - Add it to `mcp-tools.json`
 - Add vitest tests
 
-Bump the version in `package.json` in your PR (e.g. `npm version <patch|minor|major> --no-git-tag-version`); CI tags and publishes it on merge.
+Bump the version in `package.json` in your PR (e.g. `npm version <patch|minor|major> --no-git-tag-version`); CI tags{% if not deployed_service %} and publishes{% endif %} it on merge.
 
 ## Pull Request Process
 

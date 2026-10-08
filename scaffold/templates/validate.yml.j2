@@ -16,7 +16,7 @@ jobs:
     name: Validate JSON files
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Validate plugin.json
         run: python3 -c "import json; json.load(open('.cursor-plugin/plugin.json'))"
@@ -30,7 +30,7 @@ jobs:
     name: Validate plugin manifest
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Check required manifest fields
         run: |
@@ -68,7 +68,7 @@ jobs:
     name: Validate content quality
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Check for hardcoded credentials
         run: |
@@ -109,7 +109,7 @@ jobs:
     name: Validate content counts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Check content counts match README
         run: |
@@ -148,9 +148,9 @@ jobs:
     name: Validate MCP server
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 

@@ -9,7 +9,7 @@
   "installSteps": [
 {% if type == 'cursor-plugin' %}
     "Open Cursor IDE and go to <code>Settings</code> > <code>Extensions</code>",
-    "Search for <code>{{ name }}</code>",
+    "Search for <code>{{ name|e|json_inner }}</code>",
     "Click <code>Install</code> and reload"
 {% else %}
 {% if deployed_service %}

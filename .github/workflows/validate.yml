@@ -96,6 +96,27 @@ jobs:
           grep -qv 'gh workflow run publish.yml' /tmp/scaffold-service/ci-deployed-service/.github/workflows/release.yml
           echo "Deployed-service scaffold test passed"
 
+          python3 scaffold/create-tool.py \
+            --name "CI Npm Server" \
+            --description "Automated npm mcp-server test" \
+            --type mcp-server \
+            --no-register \
+            --output /tmp/scaffold-npm
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      # Born-green clause C7: the generated repo's own CI commands pass on
+      # the untouched generated tree.
+      - name: Generated mcp-server builds and tests green
+        working-directory: /tmp/scaffold-npm/ci-npm-server
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          npm test
+          test -f dist/index.js
+
       - name: Scaffold YAML well-formed
         run: |
           # Catches Jinja2 trim_blocks bugs that collapse adjacent expression lines.

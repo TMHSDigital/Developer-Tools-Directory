@@ -28,7 +28,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 try:
-    from jinja2 import Environment, FileSystemLoader
+    from jinja2 import Environment, FileSystemLoader, select_autoescape
 except ImportError:  # pragma: no cover - environment guard
     raise SystemExit("Error: Jinja2 is required. Install it with: pip install Jinja2")
 
@@ -46,6 +46,32 @@ LICENSE_FILES = {
 }
 
 SPDX = dict(LICENSE_FILES)
+
+# Single source of truth for GitHub Action majors in generated workflows,
+# matching the meta-repo's own .github/workflows. Rendered workflow files are
+# normalized to these pins, and tests assert the template literals agree
+# (DTD#122). Bump here when the meta-repo moves to a new major.
+ACTION_PINS = {
+    "actions/checkout": "v7",
+    "actions/setup-node": "v6",
+    "actions/setup-python": "v6",
+    "actions/configure-pages": "v6",
+    "actions/upload-pages-artifact": "v5",
+    "actions/deploy-pages": "v5",
+    "actions/stale": "v10",
+}
+NODE_MATRIX = (22, 24)
+NODE_ENGINES = ">=22.0.0"
+
+_USES_RE = re.compile(r"(uses:\s*)(actions/[A-Za-z0-9_.-]+)@v\d+(?=\s|$)", re.MULTILINE)
+
+
+def apply_action_pins(content: str) -> str:
+    """Rewrite ``uses: actions/<name>@vN`` to the pinned major."""
+    def _sub(m: "re.Match[str]") -> str:
+        pin = ACTION_PINS.get(m.group(2))
+        return f"{m.group(1)}{m.group(2)}@{pin}" if pin else m.group(0)
+    return _USES_RE.sub(_sub, content)
 
 DEFAULT_AUTHOR_NAME = "TMHSDigital"
 DEFAULT_AUTHOR_EMAIL = "contact@users.noreply.github.com"
@@ -95,17 +121,37 @@ def read_meta_version() -> tuple[int, int, int]:
     return major, minor, patch
 
 
+def _json_str(value: Any) -> str:
+    """A complete JSON (and Python) string literal, quotes included."""
+    return json.dumps(str(value), ensure_ascii=False)
+
+
+def _json_inner(value: Any) -> str:
+    """JSON string escaping without the surrounding quotes, for values
+    interpolated inside a larger string literal."""
+    return json.dumps(str(value), ensure_ascii=False)[1:-1]
+
+
 def _env() -> Environment:
-    return Environment(
+    env = Environment(
         loader=FileSystemLoader(str(TEMPLATES_DIR)),
         keep_trailing_newline=True,
         lstrip_blocks=True,
         trim_blocks=True,
+        # HTML templates escape every value; other formats use the explicit
+        # json_str / json_inner filters below (DTD#103).
+        autoescape=select_autoescape(enabled_extensions=("html.j2",), default=False),
     )
+    env.filters["json_str"] = _json_str
+    env.filters["json_inner"] = _json_inner
+    return env
 
 
 def render_template(env: Environment, template_name: str, context: dict) -> str:
-    return env.get_template(template_name).render(**context)
+    content = env.get_template(template_name).render(**context)
+    if template_name.endswith((".yml.j2", ".yaml.j2")):
+        content = apply_action_pins(content)
+    return content
 
 
 def write_file(base: Path, rel_path: str, content: str, *, verbose: bool = True) -> None:
@@ -239,6 +285,15 @@ def _render_repo(output_dir: Path, ctx: dict, *, verbose: bool) -> None:
     if repo_type == "mcp-server":
         write_file(output_dir, "package.json", render_template(env, "package.json.j2", ctx), verbose=verbose)
         write_file(output_dir, "docs/index.html", render_template(env, "docs/index.mcp.html.j2", ctx), verbose=verbose)
+        # A minimal TypeScript server that builds and tests green, so the
+        # generated ci.yml passes on first push (born-green clause C7).
+        for rel, tmpl in (
+            ("tsconfig.json", "mcp-ts/tsconfig.json.j2"),
+            ("src/index.ts", "mcp-ts/index.ts.j2"),
+            ("src/server.ts", "mcp-ts/server.ts.j2"),
+            ("src/__tests__/server.test.ts", "mcp-ts/server.test.ts.j2"),
+        ):
+            write_file(output_dir, rel, render_template(env, tmpl, ctx), verbose=verbose)
 
     standards_version = ctx["standards_version"]
     for skill in ctx["skills"]:
@@ -304,6 +359,9 @@ def build_registry_entry(
         "slug": slug,
         "description": description,
         "type": repo_type,
+        # Catalog filter chip; adjust in registry.json to a better fit
+        # (allowed values: CATEGORIES in scripts/validate_registry.py).
+        "category": "developer-tooling",
         "homepage": homepage,
         "skills": skill_count,
         "rules": rule_count,
@@ -324,6 +382,66 @@ def build_registry_entry(
     return entry
 
 
+def _check_not_registered(entries: list, slug: str, repo: str) -> None:
+    for existing in entries:
+        if existing.get("slug") == slug:
+            raise ScaffoldError(
+                f"registry already contains slug {slug!r}; refusing to "
+                f"duplicate. Use --no-register or remove the existing entry."
+            )
+        if existing.get("repo") == repo:
+            raise ScaffoldError(
+                f"registry already contains repo {repo!r}; refusing to "
+                f"duplicate."
+            )
+
+
+def _load_registry_entries(registry_root: Path) -> list:
+    registry_path = registry_root / "registry.json"
+    if not registry_path.is_file():
+        raise ScaffoldError(f"registry.json not found at {registry_path}")
+    try:
+        entries = json.loads(registry_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ScaffoldError(f"registry.json is not valid JSON: {exc}") from exc
+    if not isinstance(entries, list):
+        raise ScaffoldError("registry.json must be a JSON array")
+    return entries
+
+
+# Free-text inputs are escaped per output format, but these characters have
+# no legitimate use in a display name and break YAML front matter, Markdown
+# headings, or shell snippets in generated docs.
+_NAME_FORBIDDEN = set('"<>`') | {chr(92)}  # chr(92) is a backslash
+MAX_NAME_LEN = 80
+MAX_DESCRIPTION_LEN = 300
+
+
+def validate_inputs(*, name: str, description: str, author_name: str,
+                    author_email: str, skills: int, rules: int) -> None:
+    """Reject inputs that would produce broken or unsafe output (DTD#103)."""
+    def _no_control(label: str, value: str) -> None:
+        if any(ord(ch) < 32 or ord(ch) == 127 for ch in value):
+            raise ScaffoldError(f"{label} must not contain control characters or newlines")
+
+    for label, value in (("name", name), ("description", description),
+                         ("author name", author_name), ("author email", author_email)):
+        _no_control(label, value)
+    if not name.strip():
+        raise ScaffoldError("name must not be empty")
+    if len(name) > MAX_NAME_LEN:
+        raise ScaffoldError(f"name must be at most {MAX_NAME_LEN} characters")
+    bad = sorted(set(name) & _NAME_FORBIDDEN)
+    if bad:
+        raise ScaffoldError(f"name must not contain {' '.join(bad)}")
+    if not description.strip():
+        raise ScaffoldError("description must not be empty")
+    if len(description) > MAX_DESCRIPTION_LEN:
+        raise ScaffoldError(f"description must be at most {MAX_DESCRIPTION_LEN} characters")
+    if skills < 0 or rules < 0:
+        raise ScaffoldError("--skills and --rules must be zero or greater")
+
+
 def register_in_registry(
     registry_root: Path,
     entry: dict[str, Any],
@@ -338,26 +456,9 @@ def register_in_registry(
     guard: a re-run must not silently duplicate or clobber a catalog entry).
     """
     registry_path = registry_root / "registry.json"
-    if not registry_path.is_file():
-        raise ScaffoldError(f"registry.json not found at {registry_path}")
-    try:
-        entries = json.loads(registry_path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        raise ScaffoldError(f"registry.json is not valid JSON: {exc}") from exc
-    if not isinstance(entries, list):
-        raise ScaffoldError("registry.json must be a JSON array")
+    entries = _load_registry_entries(registry_root)
 
-    for existing in entries:
-        if existing.get("slug") == entry["slug"]:
-            raise ScaffoldError(
-                f"registry already contains slug {entry['slug']!r}; refusing to "
-                f"duplicate. Use --no-register or remove the existing entry."
-            )
-        if existing.get("repo") == entry["repo"]:
-            raise ScaffoldError(
-                f"registry already contains repo {entry['repo']!r}; refusing to "
-                f"duplicate."
-            )
+    _check_not_registered(entries, entry["slug"], entry["repo"])
 
     entries.append(entry)
     registry_path.write_text(
@@ -409,6 +510,18 @@ def generate_repo(
         raise ScaffoldError("--deployed-service requires --type mcp-server")
     if license_key not in LICENSE_FILES:
         raise ScaffoldError(f"unknown license: {license_key!r}")
+    if mcp_server and repo_type == "mcp-server":
+        # An mcp-server repo is already a TypeScript server; adding the
+        # Python plugin-style server would mix runtimes (standards/mcp-server.md).
+        raise ScaffoldError(
+            "--mcp-server adds a Python MCP server to a cursor-plugin; it cannot "
+            "be combined with --type mcp-server, which already generates a "
+            "TypeScript server"
+        )
+    validate_inputs(
+        name=name, description=description, author_name=author_name,
+        author_email=author_email, skills=skills, rules=rules,
+    )
 
     slug = slug or slugify(name)
     if not re.match(r"^[a-z0-9]+(-[a-z0-9]+)*$", slug):
@@ -417,6 +530,14 @@ def generate_repo(
     output_dir = Path(output) / slug
     if output_dir.exists():
         raise ScaffoldError(f"output directory already exists: {output_dir}")
+
+    # Check the catalog before writing anything, so a duplicate does not
+    # leave a fully rendered repo behind (DTD#123).
+    if register:
+        root = registry_root if registry_root is not None else META_ROOT
+        _check_not_registered(
+            _load_registry_entries(Path(root)), slug, f"{REPO_OWNER}/{slug}"
+        )
 
     skill_names = [f"skill-{i + 1}" for i in range(skills)]
     rule_names = [f"rule-{i + 1}" for i in range(rules)]

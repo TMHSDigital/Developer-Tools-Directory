@@ -20,11 +20,11 @@ python scaffold/create-tool.py \
   --mcp-server \
   --skills 6 \
   --rules 4 \
-  --license CC-BY-NC-ND-4.0 \
+  --license cc-by-nc-nd-4.0 \
   --output ../
 ```
 
-This produces `../Cloudflare-Developer-Tools/` with the full standards-compliant layout.
+This produces `../cloudflare-developer-tools/` with the full standards-compliant layout, and (because registration is on by default) adds a schema-valid entry to `registry.json` and regenerates the README, CLAUDE.md, and docs site. Pass `--no-register` only for a throwaway trial run.
 
 ## Step 2: Push the new repo
 

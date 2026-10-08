@@ -59,9 +59,11 @@ Pure-stdlib Python script that regenerates README tables and stats, CLAUDE.md ca
 
 ### scaffold/create-tool.py
 
-CLI args: `--name`, `--slug`, `--description`, `--type`, `--mcp-server`, `--skills N`, `--rules N`, `--license`, `--output`, `--author-name`, `--author-email`.
+Thin CLI over `scaffold/generator.py` (`generate_repo`). CLI args: `--name`, `--slug`, `--description`, `--type` (cursor-plugin | mcp-server), `--mcp-server` (cursor-plugin only: adds a Python MCP server), `--deployed-service` (mcp-server archetype without npm), `--skills N`, `--rules N`, `--license`, `--output`, `--author-name`, `--author-email`, `--no-register`, `--registry-root`. Run `python scaffold/create-tool.py --help` for the authoritative list.
 
-Templates in `scaffold/templates/` produce: plugin.json, GitHub Actions workflows, README.md, AGENTS.md, CLAUDE.md, CONTRIBUTING.md, CHANGELOG.md, CODE_OF_CONDUCT.md, SECURITY.md, ROADMAP.md, LICENSE, .cursorrules, .gitignore, docs/index.html, and optional mcp-server/ scaffold.
+**Registration is on by default:** without `--no-register`, the scaffold appends the new repo to `registry.json` and regenerates README, CLAUDE.md, and the docs site. Always pass `--no-register` for throwaway or test runs.
+
+Templates in `scaffold/templates/` produce: GitHub Actions workflows, README.md, AGENTS.md, CLAUDE.md, CONTRIBUTING.md, CHANGELOG.md, CODE_OF_CONDUCT.md, SECURITY.md, ROADMAP.md, LICENSE, .cursorrules, .gitignore, .gitattributes, site.json, mcp-tools.json, and dependabot.yml. Cursor plugins also get `.cursor-plugin/plugin.json` (plus an optional Python `mcp-server/`); mcp-servers get `package.json`, a buildable TypeScript skeleton (`src/`, `tsconfig.json`, vitest test), and `docs/index.html`. Generated output must meet [`standards/born-green-contract.md`](standards/born-green-contract.md).
 
 ### docs/ (catalog site)
 
@@ -135,8 +137,11 @@ python scaffold/create-tool.py \
   --mcp-server \
   --skills 2 \
   --rules 1 \
+  --no-register \
   --output /tmp/test
 ```
+
+`--no-register` keeps the throwaway repo out of `registry.json`.
 
 ### Testing the docs site locally
 

@@ -1,0 +1,27 @@
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
+
+export const SERVER_NAME = "{{ slug }}";
+
+/** Placeholder tool logic, kept separate from MCP wiring so it is easy to test. */
+export function hello(name: string): string {
+  return `Hello, ${name}! The ${SERVER_NAME} MCP server is running.`;
+}
+
+/** Build the server and register every tool. Replace `hello` with real tools. */
+export function createServer(version: string): McpServer {
+  const server = new McpServer({ name: SERVER_NAME, version });
+
+  server.registerTool(
+    "hello",
+    {
+      description: "A placeholder tool. Replace this with real tools.",
+      inputSchema: { name: z.string().default("world").describe("Who to greet") },
+    },
+    async ({ name }) => ({
+      content: [{ type: "text", text: hello(name) }],
+    }),
+  );
+
+  return server;
+}

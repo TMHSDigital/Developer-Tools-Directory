@@ -1,0 +1,13 @@
+import { describe, expect, it } from "vitest";
+import { SERVER_NAME, createServer, hello } from "../server.js";
+
+describe("{{ slug }}", () => {
+  it("hello greets by name", () => {
+    expect(hello("tester")).toContain("Hello, tester!");
+    expect(hello("tester")).toContain(SERVER_NAME);
+  });
+
+  it("builds a server without connecting a transport", () => {
+    expect(createServer("0.0.0-test")).toBeDefined();
+  });
+});

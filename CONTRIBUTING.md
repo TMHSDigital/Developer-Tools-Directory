@@ -157,15 +157,17 @@ python scripts/drift_check/cli.py --local /path/to/tool-repo
      --mcp-server \
      --skills 2 \
      --rules 1 \
+     --no-register \
      --output /tmp/scaffold-test
    ```
+   `--no-register` keeps the test repo out of `registry.json`.
 3. Verify the generated files look correct
 4. Commit with `fix:` or `chore:` prefix
 
 ### Adding a new template
 
 1. Create the `.j2` file in `scaffold/templates/`
-2. Update `scaffold/create-tool.py` to render it via `write_file()`
+2. Render it from `_render_repo()` in `scaffold/generator.py` via `write_file()`
 3. Run a test generation and verify the new file appears
 4. Update `README.md` "What it generates" section if visible to users
 5. Commit with `feat: add <template-name> scaffold template`

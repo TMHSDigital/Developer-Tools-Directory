@@ -41,6 +41,7 @@ Running the drift checker against the generated tree yields zero error-severity 
 
 - Every `standards-version` marker equals the meta `STANDARDS_VERSION` at generation time.
 - Every workflow action pin is DERIVED from the meta `VERSION` at generation time (for example `drift-check@vMAJOR.MINOR`, `release-doc-sync@vMAJOR`, `meta-repo-ref: vMAJOR.MINOR.PATCH`). No pin, year, or version is a hardcoded literal in a template.
+- Third-party `actions/*` majors come from the single `ACTION_PINS` table in `scaffold/generator.py`, which matches the meta-repo's own workflows; rendered workflows are normalized to it.
 
 ### C5. Consistent README counts
 
@@ -49,6 +50,10 @@ The generated README's aggregate counts (`N skills`, `N rules`, ...) match the g
 ### C6. Registered in the catalog
 
 Generation registers the repo in `registry.json` with a complete, schema-valid entry (the schema in [`../AGENTS.md`](../AGENTS.md) and enforced by `validate.yml`), and regenerates the derived artifacts (`README.md`, `CLAUDE.md`, `docs/index.html`) via the single `sync_from_registry.sync_all` code path so `python scripts/sync_from_registry.py --check` is clean. The entry's `type` is resolved from the same positive-marker detector as C1. The entry carries no `version` field (removed in PR #73). Registration is the default; an explicit escape hatch (`--no-register`) exists for the rare deliberate case.
+
+### C7. Runnable and well-formed
+
+The generated repo's own CI commands succeed on the untouched generated tree. For an npm mcp-server that means `npm install && npm run build && npm test` pass and `dist/index.js` exists, from the generated TypeScript skeleton (`src/index.ts`, `src/server.ts`, `src/__tests__/`). CI uses `npm ci` with the npm cache once `package-lock.json` is committed and `npm install` before that, so the first push is green. Every generated JSON, YAML, Python, and HTML file parses, and user-supplied text (name, description, author) is escaped for each format, so special characters cannot break the output.
 
 ## Canonical entrypoint
 
@@ -72,4 +77,4 @@ generate_repo(
 
 ## Verification
 
-`tests/test_scaffold_born_green.py` renders a repo for each supported type, including the previously-breaking shapes (an mcp-server with `skills/`, and an empty cursor-plugin), and asserts C1-C5 against the generated tree plus a C6 registration round-trip against a temporary registry root. "Born wrong, born unknown, or born unregistered" are all CI failures.
+`tests/test_scaffold_born_green.py` renders a repo for each supported type, including the previously-breaking shapes (an mcp-server with `skills/`, and an empty cursor-plugin), and asserts C1-C5 against the generated tree plus a C6 registration round-trip against a temporary registry root. `tests/test_scaffold_output.py` asserts C7's well-formedness and escaping, and the `Validate scaffold` CI job builds and tests a generated npm mcp-server. "Born wrong, born unknown, or born unregistered" are all CI failures.

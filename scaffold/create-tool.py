@@ -33,6 +33,16 @@ except ImportError:  # pragma: no cover - package-context fallback
     )
 
 
+def _non_negative_int(value: str) -> int:
+    try:
+        number = int(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"{value!r} is not an integer") from None
+    if number < 0:
+        raise argparse.ArgumentTypeError("must be zero or greater")
+    return number
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Scaffold a new TMHSDigital developer tool repository",
@@ -40,9 +50,9 @@ def parse_args():
         epilog="""
 Examples:
   python create-tool.py --name "Unreal Developer Tools" --description "Cursor plugin for Unreal Engine"
-  python create-tool.py --name "AWS MCP Server" --type mcp-server --mcp-server
-  python create-tool.py --name "Hosted Radar" --type mcp-server --deployed-service
-  python create-tool.py --name "K8s Developer Tools" --mcp-server --skills 5 --rules 3
+  python create-tool.py --name "AWS MCP Server" --description "MCP server for AWS" --type mcp-server
+  python create-tool.py --name "Hosted Radar" --description "Hosted MCP service" --type mcp-server --deployed-service
+  python create-tool.py --name "K8s Developer Tools" --description "Cursor plugin for Kubernetes" --mcp-server --skills 5 --rules 3
   python create-tool.py --name "Throwaway" --description test --no-register
         """,
     )
@@ -55,7 +65,14 @@ Examples:
         default="cursor-plugin",
         help="Repository type (default: cursor-plugin)",
     )
-    parser.add_argument("--mcp-server", action="store_true", help="Include MCP server scaffold")
+    parser.add_argument(
+        "--mcp-server",
+        action="store_true",
+        help=(
+            "cursor-plugin only: include a Python MCP server under mcp-server/. "
+            "--type mcp-server already generates a TypeScript server."
+        ),
+    )
     parser.add_argument(
         "--deployed-service",
         action="store_true",
@@ -64,8 +81,8 @@ Examples:
             "the registry npm field; writes .drift-check.json. Requires --type mcp-server."
         ),
     )
-    parser.add_argument("--skills", type=int, default=0, help="Number of placeholder skill directories to create")
-    parser.add_argument("--rules", type=int, default=0, help="Number of placeholder rule files to create")
+    parser.add_argument("--skills", type=_non_negative_int, default=0, help="Number of placeholder skill directories to create")
+    parser.add_argument("--rules", type=_non_negative_int, default=0, help="Number of placeholder rule files to create")
     parser.add_argument(
         "--license",
         choices=list(LICENSE_FILES.keys()),
@@ -134,7 +151,7 @@ def main() -> int:
     print(f"\nDone! Repository scaffolded at: {output_dir}")
     print("\nNext steps:")
     print(f"  1. cd {output_dir}")
-    print("  2. git init && git add -A && git commit -m 'feat: initial scaffold'")
+    print('  2. git init && git add -A && git commit -s -m "feat: initial scaffold"')
     print(f"  3. Create GitHub repo: gh repo create TMHSDigital/{slug} --public --source .")
     print("  4. Enable GitHub Pages in Settings > Pages > Source: GitHub Actions")
     if args.no_register:

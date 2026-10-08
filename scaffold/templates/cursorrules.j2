@@ -26,7 +26,7 @@ This is a {{ type }} repository for {{ name | replace(' Developer Tools', '') | 
 - Rules need frontmatter: description, globs, alwaysApply
 {% else %}
 - Use conventional commits (feat:, fix:, chore:, docs:)
-- Bump the version in package.json in your PR; CI tags and publishes it
+- Bump the version in package.json in your PR; CI tags{% if not deployed_service %} and publishes{% endif %} it
 - Keep mcp-tools.json in sync with the registered tools
-- Provider adapters live in src/providers/; tools live in src/tools/
+- Register tools in createServer() in src/server.ts; log to stderr only
 {% endif %}

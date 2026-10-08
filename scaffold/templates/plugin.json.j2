@@ -1,11 +1,11 @@
 {
   "name": "{{ slug }}",
-  "displayName": "{{ name }}",
-  "description": "{{ description }}",
+  "displayName": {{ name|json_str }},
+  "description": {{ description|json_str }},
   "version": "0.1.0",
   "author": {
-    "name": "{{ author_name }}",
-    "email": "{{ author_email }}"
+    "name": {{ author_name|json_str }},
+    "email": {{ author_email|json_str }}
   },
   "license": "{{ license_spdx }}",
   "keywords": [
