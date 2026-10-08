@@ -1,24 +1,38 @@
 # Roadmap
 
-> Developer Tools Directory roadmap. Versions follow semantic versioning.
+> Developer Tools Directory roadmap. Versions follow semantic versioning. Release notes for every tag live in [GitHub Releases](https://github.com/TMHSDigital/Developer-Tools-Directory/releases); this file summarizes themes and what comes next.
 
 ## Current Status
 
-**v1.9.5** - Patch release. Removes `paths-ignore` from the meta-repo `release.yml` so content-only changes still gate releases on commit prefix. Companion fix removes `paths-ignore` from the scaffold `release.yml.j2` template so generated repos get the same behavior.
+**Current:** v1.20.0
 
-Prior milestones in this line:
+v1.20.0 is a hardening and catalog-quality release driven by a full repository review (issues #101 to #127):
 
-- **v1.9.4** - docs: update release-doc-sync header comment to reflect the @v1 / @v1.X floating-tag convention.
-- **v1.9.3** - fix: align scaffold output with current ecosystem patterns (ref #45).
-- **v1.9.2** - fix: release-doc-sync default meta-repo-ref changed to `v1` (floating major tag).
-- **v1.9.1** - fix: stale-counts policy correction; example sections and dialogue lines added to aggregate-scan skip list (DTD#37).
-- **v1.9.0** - CI maintenance. Node 24-compatible GitHub Actions versions, dependabot coverage extended to github-actions ecosystem, Sponsor button and FUNDING.yml, stale-counts DTD#12 skip for AGENTS.md and CLAUDE.md.
-- **v1.8.x** - release-doc-sync composite action (v1.8.0) plus fixes for checkout pollution, workspace cleanup, label-sync self-healing, floating-tag automation in `release.yml`, and version-bump-check parser.
-- **v1.7.x** - drift checker in two phases: Phase 1 (agents-template standard, scaffold updates, workflow docs); Phase 2 (core library, additional checks, CI integration, token separation, exit-code propagation).
-- **v1.6.3** - Drafter-body fix and branch-protection ruleset. `release.yml` treats a drafter body of `## What's Changed / * No changes` as empty. `main protection` ruleset established with 7 required checks.
-- **v1.6.2** - Release-drafter decoupling. Release-drafter no longer computes its own version; change-note aggregation only. Versioning is fully driven by the `VERSION` file and `release.yml`.
-- **v1.6.1** - `VERSION`-file-driven releases. Replaces conventional-commit auto-bump with an authoritative `VERSION` file; `feat:`/`fix:` commits require a VERSION bump enforced by CI.
-- **v1.6.0** - Standards and Governance. Nine new standards docs, registry-to-artifact sync automation, DCO + inbound license grant, scope and lifecycle principles, public-repo safety hardening.
+- **Catalog site:** search covers every tool's skills and MCP tools, generated category and status filters with shareable URLs, cards and stats pre-rendered for no-JS visitors and crawlers, a real deploy-date footer, absolute social-preview URLs, small favicons, `robots.txt` and `sitemap.xml`, and accessibility fixes.
+- **Scaffold:** generated mcp-servers ship a buildable TypeScript skeleton and pass their own CI on first push (born-green clause C7); all user text is escaped per output format; one action-pin table; Node 22/24.
+- **Registry:** validation moved to a tested `scripts/validate_registry.py` (unique slugs and repos, npm scope, homepage rules, categories); corrected CFX MCP and Blender entries.
+- **Drift checker and release-doc-sync:** clone tokens never reach argv or error text, `--gh-token` and a separate issues token are honored, `--all` covers every live repo, CHANGELOG stubs land below `[Unreleased]`.
+- **CI:** least-privilege permissions everywhere, env-only inputs, SHA-pinned release-drafter, Dependabot for pip and composite actions, the test suite as a required check, and PR-title-aware VERSION enforcement.
+
+## Shipped since v1.9
+
+- **v1.10 to v1.15 (May 2026)** - Required-workflows drift check; `STANDARDS_VERSION` decoupled from the meta `VERSION`; `--fix` stamper scripts; the mcp-server repo type in the scaffold with a tag-only, PAT-free release and publish chain; the per-tool `version` field removed from the registry; positive-marker repo detection and scaffold auto-registration (the born-green contract).
+- **v1.16 to v1.17 (June to July 2026)** - Catalog search index, footer version, and standards grid generated from source; one counting rule across every surface; site-template builds for mcp-server repos with no `innerHTML`; shared design tokens and WCAG AA fixes; new catalog entries (Local AI MCP, Screencast MCP, Tailscale MCP, Godot Correctness MCP).
+- **v1.18 to v1.19 (August 2026)** - Deployed-service archetype for mcp-servers without npm; Bounty Radar MCP registered; scaffold emits `.gitattributes`, defaults to the `@tmhs` npm scope, and holds risky dependency majors.
+- **v1.20 (October 2026)** - See Current Status above.
+
+## Next
+
+Tracked as GitHub issues; contributions welcome.
+
+- One-click install: "Add to Cursor" deeplinks and copy-config snippets on every card ([#128](https://github.com/TMHSDigital/Developer-Tools-Directory/issues/128))
+- List the `@tmhs` MCP servers on the official MCP Registry and major directories ([#129](https://github.com/TMHSDigital/Developer-Tools-Directory/issues/129))
+- Sharper positioning and a quick start in the README and site hero ([#130](https://github.com/TMHSDigital/Developer-Tools-Directory/issues/130))
+- Per-tool landing pages, structured data, and an RSS feed ([#131](https://github.com/TMHSDigital/Developer-Tools-Directory/issues/131))
+- Scaffold for outside authors: `--owner`, `--npm-scope`, `--dry-run`, language choice ([#132](https://github.com/TMHSDigital/Developer-Tools-Directory/issues/132))
+- Trust signals on cards and a public fleet health page ([#133](https://github.com/TMHSDigital/Developer-Tools-Directory/issues/133))
+- A Claude Code plugin marketplace and multi-client install docs ([#134](https://github.com/TMHSDigital/Developer-Tools-Directory/issues/134))
+- A documented licensing decision for code versus docs ([#135](https://github.com/TMHSDigital/Developer-Tools-Directory/issues/135))
 
 ## Release Plan
 
@@ -40,6 +54,11 @@ Prior milestones in this line:
 | v1.8.1 - v1.8.5 | Release Doc Sync Fixes | Released |
 | v1.9.0 | CI Maintenance | Released |
 | v1.9.1 - v1.9.5 | Scaffold and Pipeline Fixes | Released |
+| v1.10.0 - v1.15.1 | Required Workflows, Stampers, MCP-Server Scaffold, Born-Green Registration | Released |
+| v1.16.0 - v1.17.2 | Generated Catalog Data, Site Accessibility, New Catalog Entries | Released |
+| v1.18.0 - v1.19.2 | Deployed-Service Archetype and Scaffold Hardening | Released |
+| v1.20.0 | Review-Driven Hardening and Catalog Quality | Released |
+| Next | Distribution, One-Click Install, Multi-Client | Planned |
 
 ---
 

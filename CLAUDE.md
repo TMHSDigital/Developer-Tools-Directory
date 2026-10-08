@@ -21,7 +21,9 @@ Developer-Tools-Directory/
     create-tool.py           # Python repo generator (Jinja2)
     templates/               # Jinja2 templates for new repos
   scripts/
-    sync_from_registry.py    # Regenerates README, CLAUDE.md, and docs embedded registry
+    sync_from_registry.py    # Regenerates README, CLAUDE.md, and the docs site from the registry
+    validate_registry.py     # registry.json schema and consistency checks (CI + tests)
+    check_fleet_about.py     # Report-only: GitHub About drift vs registry across the fleet
   site-template/
     build_site.py            # Builds GitHub Pages for tool repos from their metadata
     template.html.j2         # Shared HTML template with configurable branding
