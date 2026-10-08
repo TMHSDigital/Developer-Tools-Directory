@@ -297,8 +297,10 @@ def _resolve_gh_token(args_token: Optional[str]) -> Optional[str]:
 
 
 def _expand_all_repos(meta_repo_path: Path) -> List[str]:
-    """Read registry.json from the meta-repo and return active repo slugs
-    (owner/name)."""
+    """Read registry.json from the meta-repo and return every live repo
+    slug (owner/name): all statuses except ``deprecated`` and ``archived``.
+    Experimental and beta repos are included because new tools are the
+    ones most likely to drift."""
     import json
     reg_path = meta_repo_path / "registry.json"
     if not reg_path.is_file():
@@ -308,7 +310,10 @@ def _expand_all_repos(meta_repo_path: Path) -> List[str]:
         )
         raise SystemExit(2)
     data = json.loads(reg_path.read_text(encoding="utf-8"))
-    return [r["repo"] for r in data if r.get("status") == "active"]
+    return [r["repo"] for r in data if r.get("status") not in RETIRED_STATUSES]
+
+
+RETIRED_STATUSES = frozenset({"deprecated", "archived"})
 
 
 def _run_checks(snapshots: Sequence[RepoSnapshot]) -> List[Finding]:

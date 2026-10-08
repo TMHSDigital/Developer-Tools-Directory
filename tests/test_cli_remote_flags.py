@@ -27,6 +27,8 @@ def meta_repo(tmp_path: Path) -> Path:
             {"repo": "TMHSDigital/Alpha", "status": "active"},
             {"repo": "TMHSDigital/Beta", "status": "active"},
             {"repo": "TMHSDigital/Stale", "status": "archived"},
+            {"repo": "TMHSDigital/Fresh", "status": "experimental"},
+            {"repo": "TMHSDigital/Old", "status": "deprecated"},
         ]),
         encoding="utf-8",
     )
@@ -59,7 +61,7 @@ def test_all_without_registry_errors(capsys, tmp_path: Path):
     assert "registry.json" in capsys.readouterr().err
 
 
-def test_all_expands_active_repos(capsys, meta_repo: Path):
+def test_all_expands_live_repos(capsys, meta_repo: Path):
     """--all without a working network would normally fail at sparse-checkout.
     We patch build_remote_snapshot to verify the expansion logic only."""
     seen = []
@@ -79,7 +81,8 @@ def test_all_expands_active_repos(capsys, meta_repo: Path):
     with patch("scripts.drift_check.cli.build_remote_snapshot", side_effect=fake_remote):
         rc = cli.main(["--all", "--gh-token", "x", *_base(meta_repo)])
     # 2 active entries; archived is skipped
-    assert {s for s, _ in seen} == {"Alpha", "Beta"}
+    # Every live repo, including experimental; retired statuses excluded.
+    assert {s for s, _ in seen} == {"Alpha", "Beta", "Fresh"}
     assert all(o == "TMHSDigital" for _, o in seen)
     # Empty snapshots have no findings -> exit 0
     assert rc == 0

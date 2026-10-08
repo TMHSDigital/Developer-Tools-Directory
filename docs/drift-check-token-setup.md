@@ -1,7 +1,9 @@
 # `DRIFT_CHECK_TOKEN` setup
 
-The drift checker's `--all` / `--remote` mode sparse-checks every active
-tool repo from the registry. This requires cross-repo read access that
+The drift checker's `--all` / `--remote` mode sparse-checks every live
+tool repo from the registry (every status except `deprecated` and
+`archived`). If the token is scoped to selected repositories, add each new
+registry entry to its repository list. This requires cross-repo read access that
 the workflow's auto-issued `GITHUB_TOKEN` does not have. `DRIFT_CHECK_TOKEN`
 is the dedicated fine-grained PAT that fills that gap.
 
