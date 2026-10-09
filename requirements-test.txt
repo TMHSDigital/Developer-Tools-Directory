@@ -1,4 +1,4 @@
-pytest>=8.0,<9.0
+pytest>=9.1.1,<10.0
 # PyYAML is required by the YAML-validating tests (test_release_doc_sync.py,
 # test_composite_action_shape.py). Without it those tests pytest.importorskip
 # and silently skip in CI, hiding real coverage.
