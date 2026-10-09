@@ -18,7 +18,9 @@ TEXT_SUFFIXES = {".md", ".py", ".yml", ".yaml", ".j2", ".html", ".json", ".txt",
 # gh_summary renders status icons into the Actions step summary; they are
 # functional output, not prose.
 EMOJI_ALLOWLIST = {"scripts/drift_check/report/gh_summary.py"}
-EMOJI_RE = re.compile("[\U0001F300-\U0001FAFF☀-➿]")
+# Built from code points so this file stays pure ASCII and passes its own check.
+EM_DASH, EN_DASH = chr(0x2014), chr(0x2013)
+EMOJI_RE = re.compile("[%s-%s%s-%s]" % (chr(0x1F300), chr(0x1FAFF), chr(0x2600), chr(0x27BF)))
 
 
 def _tracked_text_files() -> list[Path]:
@@ -41,7 +43,7 @@ def test_no_em_or_en_dashes_or_emoji():
         rel = path.relative_to(REPO_ROOT).as_posix()
         text = path.read_text(encoding="utf-8", errors="replace")
         for lineno, line in enumerate(text.splitlines(), 1):
-            if "—" in line or "–" in line:
+            if EM_DASH in line or EN_DASH in line:
                 offenders.append(f"{rel}:{lineno}: dash")
             if rel not in EMOJI_ALLOWLIST and EMOJI_RE.search(line):
                 offenders.append(f"{rel}:{lineno}: emoji")
