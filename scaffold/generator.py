@@ -54,11 +54,11 @@ SPDX = dict(LICENSE_FILES)
 ACTION_PINS = {
     "actions/checkout": "v7",
     "actions/setup-node": "v6",
-    "actions/setup-python": "v6",
+    "actions/setup-python": "v7",
     "actions/configure-pages": "v6",
     "actions/upload-pages-artifact": "v5",
     "actions/deploy-pages": "v5",
-    "actions/stale": "v10",
+    "actions/stale": "v11",
 }
 NODE_MATRIX = (22, 24)
 NODE_ENGINES = ">=22.0.0"
