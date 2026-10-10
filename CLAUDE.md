@@ -179,6 +179,6 @@ Open `docs/index.html` in a browser. The script falls back to embedded registry 
 
 | Dependency | Purpose | Where |
 |------------|---------|-------|
-| Jinja2 >=3.1,<4.0 | Scaffold template rendering | `requirements.txt` |
+| Jinja2 >=3.1.6,<4.0 | Scaffold template rendering | `requirements.txt` |
 
 The docs site has zero runtime dependencies. The sync script is pure stdlib.
